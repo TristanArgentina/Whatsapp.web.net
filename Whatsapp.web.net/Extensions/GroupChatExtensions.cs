@@ -37,7 +37,7 @@ public static class GroupChatExtensions
     {
         var success = await client.SetDescription(groupChat.Id, description);
         if (!success) return false;
-        groupChat.GroupMetadata.Desc = description;
+        groupChat.Description = description;
         return true;
     }
 
@@ -46,7 +46,7 @@ public static class GroupChatExtensions
         var success = await client.SetMessagesAdminsOnly(groupChat.Id, adminsOnly);
         if (!success) return false;
 
-        groupChat.GroupMetadata.Announce = adminsOnly;
+        groupChat.Announce = adminsOnly;
 
         return true;
     }
@@ -56,7 +56,7 @@ public static class GroupChatExtensions
         var success = await client.SetInfoAdminsOnly(groupChat.Id, adminsOnly);
         if (!success) return false;
 
-        groupChat.GroupMetadata.Restrict = adminsOnly;
+        groupChat.Restrict = adminsOnly;
 
         return true;
     }

@@ -1008,3 +1008,104 @@ function registerEventListeners() {
     }
 
 }
+
+
+function rejectCall(peerJid, id) {
+    return window.WWebJS.rejectCall(peerJid, id);
+}
+
+
+async function createGroup(title, participants, options) {
+    const { messageTimer = 0, parentGroupId, autoSendInviteV4 = true, comment = '' } = options;
+    const participantData = {};
+    const participantWids = [];
+    const failedParticipants = [];
+    let createGroupResult, parentGroupWid;
+
+    const addParticipantResultCodes = {
+        default: 'An unknown error occupied while adding a participant',
+        200: 'The participant was added successfully',
+        403: 'The participant can be added by sending private invitation only',
+        404: 'The phone number is not registered on WhatsApp'
+    };
+
+    for (const participant of participants) {
+        const pWid = window.Store.WidFactory.createWid(participant);
+        if ((await window.Store.QueryExist(pWid))?.wid) {
+            participantWids.push(pWid);
+        } else {
+            failedParticipants.push(participant);
+        }
+    }
+
+    if (parentGroupId) {
+        parentGroupWid = window.Store.WidFactory.createWid(parentGroupId);
+    }
+
+    try {
+        createGroupResult = await window.Store.GroupUtils.createGroup(
+            title,
+            participantWids,
+            messageTimer,
+            parentGroupWid
+        );
+    } catch (err) {
+        return 'CreateGroupError: An unknown error occupied while creating a group';
+    }
+
+    for (const participant of createGroupResult.participants) {
+        let isInviteV4Sent = false;
+        const participantId = participant.wid._serialized;
+        const statusCode = participant.error ?? 200;
+
+        if (autoSendInviteV4 && statusCode === 403) {
+            window.Store.ContactCollection.gadd(participant.wid, { silent: true });
+            const addParticipantResult = await window.Store.GroupInviteV4.sendGroupInviteMessage(
+                await window.Store.Chat.find(participant.wid),
+                createGroupResult.wid._serialized,
+                createGroupResult.subject,
+                participant.invite_code,
+                participant.invite_code_exp,
+                comment,
+                await window.WWebJS.getProfilePicThumbToBase64(createGroupResult.wid)
+            );
+            isInviteV4Sent = window.compareWwebVersions(window.Debug.VERSION, '<', '2.2335.6') ?
+                addParticipantResult === 'OK' :
+                addParticipantResult.messageSendResult === 'OK';
+        }
+
+        participantData[participantId] = {
+            statusCode: statusCode,
+            message: addParticipantResultCodes[statusCode] || addParticipantResultCodes.default,
+            isGroupCreator: participant.type === 'superadmin',
+            isInviteV4Sent: isInviteV4Sent
+        };
+    }
+
+    for (const f of failedParticipants) {
+        participantData[f] = {
+            statusCode: 404,
+            message: addParticipantResultCodes[404],
+            isGroupCreator: false,
+            isInviteV4Sent: false
+        };
+    }
+
+    return { title: title, gid: createGroupResult.wid, participants: participantData };
+}
+async function getChats() {
+    return await window.WWebJS.getChats();
+}
+
+
+function approveMembershipRequestAction(groupId, options = {}) {
+    return this.pupPage.evaluate((groupId, options) => {
+        const { requesterIds = null, sleep = [250, 500] } = options;
+        return window.WWebJS.membershipRequestAction(groupId, 'Approve', requesterIds, sleep);
+    }, groupId, options);
+}
+
+function rejectMembershipRequestAction(groupId, options) {
+    const { requesterIds = null, sleep = [250, 500] } = options;
+    return window.WWebJS.membershipRequestAction(groupId, 'Reject', requesterIds, sleep);
+}

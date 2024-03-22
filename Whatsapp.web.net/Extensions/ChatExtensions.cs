@@ -94,12 +94,4 @@ public static class ChatExtensions
     {
         await client.AddOrRemoveLabels(labelIds, [chat.Id]);
     }
-
-    public static Chat? Create(dynamic data)
-    {
-        if (data == null) return null;
-        return data.isGroup
-            ? new GroupChat(data)
-            : new PrivateChat(data);
-    }
 }

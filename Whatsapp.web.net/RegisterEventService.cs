@@ -349,6 +349,6 @@ public class RegisterEventService : IRegisterEventService
     public Chat GetChatById(string chatId)
     {
         dynamic dataChat = PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getChatById"), chatId).Result;
-        return ChatExtensions.Create(dataChat);
+        return Chat.Create(dataChat);
     }
 }

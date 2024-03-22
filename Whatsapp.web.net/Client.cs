@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using FFMpegCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
@@ -677,9 +679,9 @@ public class Client : IDisposable, IAsyncDisposable
         return resultLabels;
     }
 
-    public async Task<dynamic> AddParticipants(string groupChatId, dynamic participantIds, dynamic options = null)
+    public async Task<dynamic> AddParticipants(string groupChatId, dynamic participantIds, GroupChatOptions chatOptions = null)
     {
-        return await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("addParticipantsToGroup"), groupChatId, participantIds, options);
+        return await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("addParticipantsToGroup"), groupChatId, participantIds, chatOptions);
     }
 
     public async Task<dynamic> RemoveParticipants(string groupChatId, List<string> participantIds)
@@ -846,8 +848,60 @@ public class Client : IDisposable, IAsyncDisposable
     public Chat GetChatById(string chatId)
     {
         dynamic dataChat = _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getChatById"), chatId).Result;
-        return ChatExtensions.Create(dataChat);
+        return Chat.Create(dataChat);
     }
 
-    
+
+    public async Task Reject(string peerJid, string callId)
+    {
+         await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectCall"), peerJid, callId);
+    }
+
+    public async Task<GroupChat> CreateGroup(string title, object? participants = null, GroupChatOptions options = null)
+    {
+        // Convierte participants a una lista si no lo es
+        if (!(participants is IEnumerable<object>))
+        {
+            participants = new List<object> {participants};
+        }
+
+        dynamic data = _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("createGroup"), title, participants, options).Result;
+        return new GroupChat(data);
+    }
+
+    public async Task<Chat[]> GetChats()
+    {
+        dynamic data = _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getChats")).Result;
+
+        var dataList = new List<dynamic>(data);
+
+        return (Chat[]) dataList.Select(d=> Chat.Create(d));
+    }
+
+    public async Task ApproveGroupMembershipRequests(string chatId, string requesterId)
+    {
+        var options = new MembershipRequestActionOptions
+        {
+            RequesterIds = [requesterId]
+        };
+        ApproveGroupMembershipRequests(chatId, options);
+    }
+
+    public async Task ApproveGroupMembershipRequests(string chatId, MembershipRequestActionOptions options)
+    {
+        _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("approveMembershipRequestAction"), chatId, options);
+    }
+
+    public async Task RejectGroupMembershipRequests(string chatId, string requesterId)
+    {
+        var options = new MembershipRequestActionOptions
+        {
+            RequesterIds = [requesterId]
+        };
+        RejectGroupMembershipRequests(chatId, options);
+    }
+    public async Task RejectGroupMembershipRequests(string chatId, MembershipRequestActionOptions options)
+    {
+        _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectMembershipRequestAction"), chatId, options);
+    }
 }

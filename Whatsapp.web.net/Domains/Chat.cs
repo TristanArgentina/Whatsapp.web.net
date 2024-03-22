@@ -30,7 +30,7 @@ public class Chat
         if (data is null) return;
 
         Id = data.id;
-        Name = data.formattedTitle;
+        Name = data.formattedTitle || data.title;
         IsGroup = data.isGroup;
         IsReadOnly = data.isReadOnly;
         UnreadCount = data.unreadCount;
@@ -56,4 +56,13 @@ public class Chat
                $"MuteExpiration: {MuteExpiration}\n" +
                $"LastMessage: {LastMessage?.ToString() ?? "No messages yet"}";
     }
+
+    public static Chat? Create(dynamic data)
+    {
+        if (data == null) return null;
+        return data.isGroup
+            ? new GroupChat(data)
+            : new PrivateChat(data);
+    }
+
 }

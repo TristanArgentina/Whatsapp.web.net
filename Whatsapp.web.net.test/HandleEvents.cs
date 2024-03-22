@@ -70,8 +70,8 @@ namespace Whatsapp.web.net.test
                  */
                 Console.WriteLine(args.Notification);
                 /** You can approve or reject the newly appeared membership request: */
-                await client.ApproveGroupMembershipRequests(args.Notification.ChatId, args.Notification.Author);
-                await client.RejectGroupMembershipRequests(args.Notification.ChatId, args.Notification.Author);
+                await client.ApproveGroupMembershipRequests(args.Notification.ChatId.Id, args.Notification.Author.Id);
+                await client.RejectGroupMembershipRequests(args.Notification.ChatId.Id, args.Notification.Author.Id);
             };
         }
 
@@ -155,7 +155,7 @@ namespace Whatsapp.web.net.test
             return async (sender, args) =>
             {
                 Console.WriteLine("Call received, rejecting. GOTO Line 261 to disable " + args.Call);
-                if (rejectCalls) await args.Call.Reject();
+                if (rejectCalls)  args.Call.Reject(client);
                 await client.SendMessage(args.Call.From, $"[{(args.Call.FromMe ? "Outgoing" : "Incoming")}] Phone call from {args.Call.From}, type {(args.Call.IsGroup ? "group" : "")} {(args.Call.IsVideo ? "video" : "audio")} call. {(rejectCalls ? "This call was automatically rejected by the script." : "")}");
             };
         }
@@ -383,7 +383,7 @@ namespace Whatsapp.web.net.test
                             *Group Details*
                             Name: {chat.Name}
                             Description: {groupChat.Description}
-                            Created At: {groupChat.CreatedAt}
+                            Created At: {groupChat.Creation}
                             Created By: {groupChat.Owner.User}
                             Participant count: {groupChat.Participants.Count}
                         ");
@@ -395,7 +395,7 @@ namespace Whatsapp.web.net.test
                 }
                 else if (msg.Body == "!chats")
                 {
-                    var chats = await client.DispatchEvent.GetChats();
+                    var chats = await client.GetChats();
                     await client.SendMessage(msg.From, $"The bot has {chats.Length} chats open.");
                 }
                 else if (msg.Body == "!info")
