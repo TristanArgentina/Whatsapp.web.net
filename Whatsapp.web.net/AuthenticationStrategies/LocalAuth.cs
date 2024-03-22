@@ -31,24 +31,19 @@ public class LocalAuth : BaseAuthStrategy
         }
         var puppeteerOpts = Options.Puppeteer;
         var sessionDirName = string.IsNullOrEmpty(_clientId) ? "session" : $"session-{_clientId}";
-        var dirPath = Path.Combine(_dataPath, sessionDirName);
+        _userDataDir = Path.Combine(_dataPath, sessionDirName);
 
-        if (!string.IsNullOrEmpty(puppeteerOpts.UserDataDir) && puppeteerOpts.UserDataDir != dirPath)
+        if (!string.IsNullOrEmpty(puppeteerOpts.UserDataDir) && puppeteerOpts.UserDataDir != _userDataDir)
         {
             throw new InvalidOperationException("LocalAuth is not compatible with a user-supplied userDataDir.");
         }
 
-        if (!Directory.Exists(dirPath))
+        if (!Directory.Exists(_userDataDir))
         {
-            Directory.CreateDirectory(dirPath);
+            Directory.CreateDirectory(_userDataDir);
         }
 
-        Options.Puppeteer = new PuppeteerOptions
-        {
-            UserDataDir = dirPath
-        };
-
-        _userDataDir = dirPath;
+        Options.Puppeteer.UserDataDir = _userDataDir;
     }
 
     public override async Task Logout()

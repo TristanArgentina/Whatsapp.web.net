@@ -31,6 +31,8 @@ public class EventDispatcher : IEventDispatcher
     public event EventHandler<MessageCreateEventArgs>? MessageCreateEvent;
     public event EventHandler<MessageReceivedEventArgs>? MessageReceivedEvent;
     public event EventHandler<DispatcherEventArg>? RemoteSessionSavedEvent;
+    public event EventHandler<ReadyEventArgs>? ReadyEvent;
+
 
     public event EventHandler<RevokedMeEventArg>? RevokedMeEvent;
     public void EmitAuthenticated(ClientInfo info, object? @object = null)
@@ -38,6 +40,13 @@ public class EventDispatcher : IEventDispatcher
         var eventArg = new AuthenticatedEventArg(info, @object);
         DispatchEventGeneric?.Invoke(this, eventArg);
         AuthenticatedEvent?.Invoke(this, eventArg);
+    }
+
+    public void EmitReady()
+    {
+        var eventArg = new ReadyEventArgs();
+        DispatchEventGeneric?.Invoke(this, eventArg);
+        ReadyEvent?.Invoke(this, eventArg);
     }
 
     public void EmitLoadingScreen(int percent, string message)

@@ -33,6 +33,7 @@ public interface IEventDispatcher
     event EventHandler<MessageReceivedEventArgs>? MessageReceivedEvent;
     event EventHandler<DispatcherEventArg>? RemoteSessionSavedEvent;
     event EventHandler<RevokedMeEventArg>? RevokedMeEvent;
+    event EventHandler<ReadyEventArgs>? ReadyEvent;
 
     void EmitAuthenticated(ClientInfo info, object? @object = null);
 
@@ -86,4 +87,6 @@ public interface IEventDispatcher
     void EmitMessageReceived(Message message);
 
     void EmitRemoteSessionSaved();
+
+    void EmitReady();
 }

@@ -127,70 +127,6 @@ function serializeConnectionAndUser() {
     };
 }
 
-function onAddMessageEvent() {
-    if (msg.type === 'gp2') {
-        const notification = new GroupNotification(this, msg);
-        if (['add', 'invite', 'linked_group_join'].includes(msg.subtype)) {
-            /**
-             * Emitted when a user joins the chat via invite link or is added by an admin.
-             * @event Client#group_join
-             * @param {GroupNotification} notification GroupNotification with more information about the action
-             */
-            this.emit(Events.GROUP_JOIN, notification);
-        } else if (msg.subtype === 'remove' || msg.subtype === 'leave') {
-            /**
-             * Emitted when a user leaves the chat or is removed by an admin.
-             * @event Client#group_leave
-             * @param {GroupNotification} notification GroupNotification with more information about the action
-             */
-            this.emit(Events.GROUP_LEAVE, notification);
-        } else if (msg.subtype === 'promote' || msg.subtype === 'demote') {
-            /**
-             * Emitted when a current user is promoted to an admin or demoted to a regular user.
-             * @event Client#group_admin_changed
-             * @param {GroupNotification} notification GroupNotification with more information about the action
-             */
-            this.emit(Events.GROUP_ADMIN_CHANGED, notification);
-        } else if (msg.subtype === 'created_membership_requests') {
-            /**
-             * Emitted when some user requested to join the group
-             * that has the membership approval mode turned on
-             * @event Client#group_membership_request
-             * @param {GroupNotification} notification GroupNotification with more information about the action
-             * @param {string} notification.chatId The group ID the request was made for
-             * @param {string} notification.author The user ID that made a request
-             * @param {number} notification.timestamp The timestamp the request was made at
-             */
-            this.emit(Events.GROUP_MEMBERSHIP_REQUEST, notification);
-        } else {
-            /**
-             * Emitted when group settings are updated, such as subject, description or picture.
-             * @event Client#group_update
-             * @param {GroupNotification} notification GroupNotification with more information about the action
-             */
-            this.emit(Events.GROUP_UPDATE, notification);
-        }
-        return;
-    }
-
-    const message = new Message(this, msg);
-
-    /**
-     * Emitted when a new message is created, which may include the current user's own messages.
-     * @event Client#message_create
-     * @param {Message} message The message that was created
-     */
-    this.emit(Events.MESSAGE_CREATE, message);
-
-    if (msg.id.fromMe) return;
-
-    /**
-     * Emitted when a new message is received.
-     * @event Client#message
-     * @param {Message} message The message that was received
-     */
-    this.emit(Events.MESSAGE_RECEIVED, message);
-}
 function sendMessageAsyncToChat(chatId, message, options, sendSeen) {
     const chatWid = window.Store.WidFactory.createWid(chatId);
 
@@ -959,6 +895,7 @@ function registerEventListeners() {
     window.Store.Msg.on('change:body change:caption', (msg, newBody, prevBody) => { window.onEditMessageEvent(window.WWebJS.getMessageModel(msg), newBody, prevBody); });
     window.Store.Msg.on('add', (msg) => {
         if (msg.isNewMsg) {
+            console.log('New message');
             if (msg.type === 'ciphertext') {
                 // defer message event until ciphertext is resolved (type changed)
                 msg.once('change:type', (_msg) => window.onAddMessageEvent(window.WWebJS.getMessageModel(_msg)));
@@ -1006,7 +943,6 @@ function registerEventListeners() {
             return ogMethod(...args);
         }).bind(module);
     }
-
 }
 
 

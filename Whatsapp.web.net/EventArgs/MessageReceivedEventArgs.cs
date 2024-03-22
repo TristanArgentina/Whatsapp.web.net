@@ -9,7 +9,8 @@ public class MessageReceivedEventArgs : DispatcherEventArg
     /// </summary>
     public Message Message { get; }
 
-    public MessageReceivedEventArgs(Message message):base(DispatcherEventsType.MESSAGE_RECEIVED)
+    public MessageReceivedEventArgs(Message message) 
+        : base(DispatcherEventsType.MESSAGE_RECEIVED)
     {
         Message = message;
     }

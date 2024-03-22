@@ -1,9 +1,7 @@
-﻿using System.Drawing;
-using ConsoleApp2;
-using Whatsapp.web.net;
+﻿using Whatsapp.web.net;
 using Whatsapp.web.net.AuthenticationStrategies;
 using Whatsapp.web.net.EventArgs;
-using Whatsapp.web.net.Extensions;
+using Whatsapp.web.net.test;
 
 Console.WriteLine("Hello, World!");
 
@@ -27,82 +25,11 @@ var parserFunctions = new JavaScriptParser(@".\scripts\functions.js");
 var parserInjected = new JavaScriptParser(@".\scripts\injected.js");
 var eventDispatcher = new EventDispatcher();
 var registerEventService = new RegisterEventService(eventDispatcher, parserFunctions, options);
-
-var qr = new GenerateQR();
 var client = new Client(parserFunctions, parserInjected, eventDispatcher, registerEventService, options);
 
-EventHandler<DispatcherEventArg> emit = (sender, eventArg) =>
-{
-    Console.Write($"{eventArg.DispatcherEventsType}: ");
-    switch (eventArg.DispatcherEventsType)
-    {
-        case DispatcherEventsType.AUTHENTICATED:
-            {
-                var args = (AuthenticatedEventArg)eventArg;
-                Console.WriteLine($"User: {args.Info}");
-                break;
-            }
-        case DispatcherEventsType.QR_RECEIVED:
-            try
-            {
-                Console.WriteLine($"Evento: {eventArg.DispatcherEventsType}");
-                var args = (QRReceivedEventArgs)eventArg;
-                var ms = qr.Generate(args.Qr.ToString());
-                var sw = Image.FromStream(ms.Result);
-                sw.Save("testQR.png");
-            }
-            catch (Exception e)
-            {
-
-            }
-
-            break;
-        case DispatcherEventsType.READY:
-            Console.WriteLine($"Evento: {eventArg.DispatcherEventsType}");
-            break;
-        case DispatcherEventsType.MESSAGE_RECEIVED:
-            {
-                var args = (MessageReceivedEventArgs)eventArg;
-                Console.WriteLine($"{args.Message.From.Id} : {args.Message.Body}");
-                if (args.Message.Body == "Ping!")
-                {
-                    args.Message.Reply(client, "Pong!");
-                }
-                break;
-            }
-        case DispatcherEventsType.MESSAGE_CREATE:
-            {
-                var args = (MessageCreateEventArgs)eventArg;
-                Console.WriteLine($"{args.Message.From.Id} : {args.Message.Body}");
-                break;
-            }
-        case DispatcherEventsType.UNREAD_COUNT:
-            {
-                var args = (UnreadCountEventArg)eventArg;
-                Console.WriteLine(args.Chat.ToString());
-                break;
-            }
-        case DispatcherEventsType.MESSAGE_ACK:
-            {
-                var args = (MessageACKEventArg)eventArg;
-                Console.WriteLine($"ASK: {args.MessageAsk}");
-                break;
-            }
-        case DispatcherEventsType.CONTACT_CHANGED:
-            {
-                var args = (ContactChangedEventArg)eventArg;
-                Console.WriteLine($" {args.OldId} to {args.NewId}");
-                break;
-            }
-        default:
-            Console.WriteLine("");
-            break;
-    }
-};
-
-eventDispatcher.DispatchEventGeneric += emit;
-
+var handleEvents = new HandleEvents(client, eventDispatcher);
 await client.Initialize();
+handleEvents.SetHandle();
 
 Console.ReadLine();
 

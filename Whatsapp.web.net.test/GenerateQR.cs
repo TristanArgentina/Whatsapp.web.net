@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using ZXing;
 
-namespace ConsoleApp2;
+namespace Whatsapp.web.net.test;
 
 public class GenerateQR
 {

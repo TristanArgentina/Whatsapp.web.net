@@ -1,6 +1,5 @@
 ﻿using PuppeteerSharp;
 using Whatsapp.web.net.Domains;
-using Whatsapp.web.net.Extensions;
 
 namespace Whatsapp.web.net;
 

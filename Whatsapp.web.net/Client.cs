@@ -1,13 +1,10 @@
 ﻿using System.Net;
-using FFMpegCore;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
 using Whatsapp.web.net.AuthenticationStrategies;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.Elements;
-using Whatsapp.web.net.Extensions;
 
 namespace Whatsapp.web.net;
 
@@ -102,6 +99,7 @@ public class Client : IDisposable, IAsyncDisposable
 
         await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("registerEventListeners"));
 
+        _eventDispatcher.EmitReady();
         return Task.CompletedTask;
     }
 
