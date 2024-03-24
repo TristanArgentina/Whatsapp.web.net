@@ -80,8 +80,8 @@ public class HandleEvents
              */
             Console.WriteLine(args.Notification);
             /** You can approve or reject the newly appeared membership request: */
-            await _client.ApproveGroupMembershipRequests(args.Notification.ChatId.Id, args.Notification.Author.Id);
-            await _client.RejectGroupMembershipRequests(args.Notification.ChatId.Id, args.Notification.Author.Id);
+            await _client.Chat.ApproveMembership(args.Notification.ChatId.Id, args.Notification.Author.Id);
+            await _client.Chat.RejectMembership(args.Notification.ChatId.Id, args.Notification.Author.Id);
         };
     }
 
@@ -115,13 +115,13 @@ public class HandleEvents
             var isContact = args.IsContact;
 
             // The time the event occurred.
-            var eventTime = DateTimeOffset.FromUnixTimeSeconds(message.Timestamp.Value).ToLocalTime();
+            var eventTime = message.Timestamp.Value;
 
             var fromId = message.To?.Id ?? message.From?.Id;
             Console.WriteLine(
                 $"The contact {oldId.Substring(0, oldId.Length - 5)}" +
                 $"{(!isContact ? " that participates in group " +
-                                 $"{_client.GetChatById(fromId).Name} " : " ")}" +
+                                 $"{_client.Chat.Get(fromId).Result.Name} " : " ")}" +
                 $"changed their phone number\nat {eventTime}.\n" +
                 $"Their new phone number is {newId.Substring(0, newId.Length - 5)}.\n");
 
@@ -166,7 +166,7 @@ public class HandleEvents
         {
             Console.WriteLine("Call received, rejecting. GOTO Line 261 to disable " + args.Call);
             if (rejectCalls)  args.Call.Reject(_client);
-            await _client.SendMessage(args.Call.From, $"[{(args.Call.FromMe ? "Outgoing" : "Incoming")}] Phone call from {args.Call.From}, type {(args.Call.IsGroup ? "group" : "")} {(args.Call.IsVideo ? "video" : "audio")} call. {(rejectCalls ? "This call was automatically rejected by the script." : "")}");
+            await _client.Message.Send(args.Call.From, $"[{(args.Call.FromMe ? "Outgoing" : "Incoming")}] Phone call from {args.Call.From}, type {(args.Call.IsGroup ? "group" : "")} {(args.Call.IsVideo ? "video" : "audio")} call. {(rejectCalls ? "This call was automatically rejected by the script." : "")}");
         };
     }
 
@@ -258,10 +258,12 @@ public class HandleEvents
         return async (sender, args) =>
         {
             var msg = args.Message;
+
+            Console.WriteLine($"MESSAGE CREATE: {msg}");
+
             // Fired on all message creations, including your own
             if (msg.Id.FromMe)
             {
-                // do stuff here
             }
 
             // Unpins a message
@@ -299,7 +301,7 @@ public class HandleEvents
             }
             else if (msg.Body == "!ping")
             {
-                await _client.SendMessage(msg.From, "pong");
+                await _client.Message.Send(msg.From, "pong");
             }
             else if (msg.Body.StartsWith("!sendto "))
             {
@@ -310,7 +312,7 @@ public class HandleEvents
                 number = number.Contains("@c.us") ? number : $"{number}@c.us";
                 var chat = await msg.GetChat(_client);
                 chat.SendSeen(_client);
-                await _client.SendMessage(number, message);
+                await _client.Message.Send(number, message);
             }
             else if (msg.Body.StartsWith("!subject "))
             {
@@ -364,7 +366,7 @@ public class HandleEvents
                 var inviteCode = msg.Body.Split(' ')[1];
                 try
                 {
-                    await _client.AcceptGroupV4InviteAsync(new InviteV4(inviteCode));
+                    await _client.Group.AcceptInvite(new InviteV4(inviteCode));
                     await msg.Reply(_client, "Joined the group!");
                 }
                 catch (Exception e)
@@ -381,7 +383,7 @@ public class HandleEvents
             else if (msg.Body == "!creategroup")
             {
                 string[] participantsToAdd = { "number1@c.us", "number2@c.us", "number3@c.us" };
-                var result = await _client.CreateGroup("Group Title", participantsToAdd);
+                var result = await _client.Group.CreateGroup("Group Title", participantsToAdd);
                 Console.WriteLine(result);
             }
             else if (msg.Body == "!groupinfo")
@@ -405,13 +407,13 @@ public class HandleEvents
             }
             else if (msg.Body == "!chats")
             {
-                var chats = await _client.GetChats();
-                await _client.SendMessage(msg.From, $"The bot has {chats.Length} chats open.");
+                var chats = await _client.Chat.Get();
+                await _client.Message.Send(msg.From, $"The bot has {chats.Length} chats open.");
             }
             else if (msg.Body == "!info")
             {
                 var info = _client.ClientInfo;
-                await _client.SendMessage(msg.From, $@"
+                await _client.Message.Send(msg.From, $@"
                         *Connection info*
                         User name: {info.PushName}
                         My number: {info.Wid.User}
@@ -445,13 +447,13 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var attachmentData = await quotedMsg.DownloadMedia(_client);
-                    await _client.SendMessage(msg.From, attachmentData, new ReplayOptions { Caption = "Here's your requested media." });
+                    await _client.Message.Send(msg.From, attachmentData, new ReplayOptions { Caption = "Here's your requested media." });
                 }
 
                 if (quotedMsg.HasMedia && quotedMsg.Type == "audio")
                 {
                     var audio = await quotedMsg.DownloadMedia(_client);
-                    await _client.SendMessage(msg.From, audio, new ReplayOptions { SendAudioAsVoice = true });
+                    await _client.Message.Send(msg.From, audio, new ReplayOptions { SendAudioAsVoice = true });
                 }
             }
             else if (msg.Body == "!isviewonce" && msg.HasQuotedMsg)
@@ -460,8 +462,7 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var media = await quotedMsg.DownloadMedia(_client);
-                    await _client.SendMessage(msg.From, media,
-                        new ReplayOptions { IsViewOnce = true });
+                    await _client.Message.Send(msg.From, media, new ReplayOptions { IsViewOnce = true });
                 }
             }
             else if (msg.Body == "!location")

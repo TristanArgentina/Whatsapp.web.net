@@ -4,11 +4,11 @@ namespace Whatsapp.web.net.EventArgs;
 
 public class ChatRemovedEventArgs : DispatcherEventArg
 {
-    public Chat Chat { get; }
+    public string ChatId { get; }
 
-    public ChatRemovedEventArgs(Chat chat)
+    public ChatRemovedEventArgs(string chatId)
         : base(DispatcherEventsType.CHAT_REMOVED)
     {
-        Chat = chat;
+        ChatId = chatId;
     }
 }

@@ -7,12 +7,12 @@ public static class GroupNotifacationExtensions
 
     public static async Task<Chat> GetChat(this GroupNotification groupNotification, Client client)
     {
-        return client.GetChatById(groupNotification.ChatId.Id);
+        return client.Chat.Get(groupNotification.ChatId.Id).Result;
     }
 
     public static async Task<Contact> GetContact(this GroupNotification groupNotification, Client client)
     {
-        return await client.GetContactById(groupNotification.Author.Id);
+        return await client.Contact.GetContactById(groupNotification.Author.Id);
     }
 
     public static async Task<List<Contact>> GetRecipients(this GroupNotification groupNotification, Client client)
@@ -20,7 +20,7 @@ public static class GroupNotifacationExtensions
         var recipients = new List<Contact>();
         foreach (var recipientId in groupNotification.RecipientIds)
         {
-            var contact = await client.GetContactById(recipientId);
+            var contact = await client.Contact.GetContactById(recipientId);
             recipients.Add(contact);
         }
         return recipients;
@@ -28,6 +28,6 @@ public static class GroupNotifacationExtensions
 
     public static async Task<Message> Reply(this GroupNotification groupNotification, Client client,dynamic content, ReplayOptions? options = null)
     {
-        return await client.SendMessage(groupNotification.ChatId.Id, content, options);
+        return await client.Message.Send(groupNotification.ChatId.Id, content, options);
     }
 }

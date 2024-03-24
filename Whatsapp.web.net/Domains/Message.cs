@@ -37,7 +37,7 @@ public class Message
     /// <summary>
     /// Unix timestamp for when the message was created
     /// </summary>
-    public long? Timestamp { get; private set; }
+    public DateTime? Timestamp { get; private set; }
 
     /// <summary>
     /// ID for the Chat that this message was sent to, except if the message was sent by the current user.
@@ -178,7 +178,7 @@ public class Message
         HasMedia = data.mediaKey != null && data.directPath != null;
         Body = HasMedia ? data.caption ?? string.Empty : data.body ?? data.pollName ?? string.Empty;
         Type = data.type;
-        Timestamp = data.t;
+        Timestamp = DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime; 
         From = UserId.Create(data.from);
         To = UserId.Create(data.to);
         Author = UserId.Create(data.author);
@@ -241,5 +241,10 @@ public class Message
                 IsSentCagPollCreation = data.isSentCagPollCreation
             });
         }
+    }
+
+    public override string ToString()
+    {
+        return $"{From} : {Body}";
     }
 }

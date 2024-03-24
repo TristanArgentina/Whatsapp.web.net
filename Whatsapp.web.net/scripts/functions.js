@@ -128,12 +128,12 @@ function serializeConnectionAndUser() {
 }
 
 function sendMessageAsyncToChat(chatId, message, options, sendSeen) {
-    const chatWid = window.Store.WidFactory.createWid(chatId);
-
     console.log(`chatid: ${chatId}`);
     console.log(`message: ${message}`);
     console.log(`options: ${options} -> '${JSON.stringify(options)}'`);
     console.log(`sendSeen: ${sendSeen}`);
+
+    const chatWid = window.Store.WidFactory.createWid(chatId);
 
     return window.Store.Chat.find(chatWid)
         .then(chat => {
@@ -150,6 +150,7 @@ function sendMessageAsyncToChat(chatId, message, options, sendSeen) {
             console.error("Error:", JSON.stringify(err));
             throw err;
         });
+    return null;
 }
 
 
@@ -184,7 +185,13 @@ function clearMessagesById(chatId) {
 }
 
 function getChatById(chatId) {
-    return window.WWebJS.getChat(chatId);
+    return window.WWebJS.getChat(chatId)
+        .then(model => {
+            return model;
+        })
+        .catch((err) => {
+            console.log(`Error: ${err}`);
+        });
 }
 
 function sendClearChatById(chatId) {

@@ -47,11 +47,12 @@ public interface IEventDispatcher
 
     void EmitMessageACK(Message message, MessageAck messageAsk);
 
-    void EmitUnreadCount(Chat chat);
+    void EmitUnreadCount(string chatId);
 
     void EmitMediaUploaded(Message message);
 
     void EmitStateChanged(dynamic state);
+
     void EmitDisconnected(dynamic state);
 
     void EmitBatteryChanged(int battery, bool plugged);
@@ -60,9 +61,9 @@ public interface IEventDispatcher
 
     void EmitMessageReaction(Reaction reaction);
 
-    void EmitChatRemoved(Chat chat);
+    void EmitChatRemoved(string chatId);
 
-    void EmitChatArchived(Chat chat, bool currState, bool prevState);
+    void EmitChatArchived(string chatId, bool currState, bool prevState);
 
     void EmitMessageEdit(Message message, string newBody, string prevBody);
 

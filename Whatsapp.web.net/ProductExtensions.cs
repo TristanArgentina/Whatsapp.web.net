@@ -6,6 +6,6 @@ public static class ProductExtensions
 {
     public static async Task<ProductMetadata?> GetData(this Product product, Client client)
     {
-        return await client.GetProductMetadataById(product.Id);
+        return await client.Commerce.GetProductMetadataById(product.Id);
     }
 }

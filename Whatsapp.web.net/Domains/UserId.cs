@@ -40,8 +40,7 @@ public class UserId
 
     public override string ToString()
     {
-        return $"User: {User}\n" +
-               $"Server: {Server}\n";
+        return $"User: {Id}";
     }
 
     public static UserId? Create(dynamic? data)
@@ -81,4 +80,5 @@ public class UserId
         return new UserId(data);
 
     }
+
 }

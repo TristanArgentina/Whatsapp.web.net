@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using FFMpegCore;
 using FFMpegCore.Arguments;
 using FFMpegCore.Pipes;
@@ -83,7 +84,7 @@ public class Util
             var categories = metadata.Categories ?? [""];
             var json = new { sticker_pack_id = stickerPackId, sticker_pack_name = packname, sticker_pack_publisher = author, emojis = categories };
             var exifAttr = new byte[] { 0x49, 0x49, 0x2A, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00 };
-            var jsonBuffer = Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(json));
+            var jsonBuffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json));
             var exif = new byte[exifAttr.Length + jsonBuffer.Length];
             Buffer.BlockCopy(exifAttr, 0, exif, 0, exifAttr.Length);
             Buffer.BlockCopy(jsonBuffer, 0, exif, exifAttr.Length, jsonBuffer.Length);

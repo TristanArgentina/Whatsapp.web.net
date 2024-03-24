@@ -1,4 +1,6 @@
-﻿namespace Whatsapp.web.net.Domains;
+﻿using Newtonsoft.Json.Linq;
+
+namespace Whatsapp.web.net.Domains;
 
 public class GroupChat : Chat
 {
@@ -22,10 +24,10 @@ public class GroupChat : Chat
 
     private void PatchGroup(dynamic data)
     {
-        Owner = UserId.Create(data.owner);
-        Creation = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds((long)data.Creation);
+        Owner = UserId.Create(data.groupMetadata.owner);
+        Creation = DateTimeOffset.FromUnixTimeSeconds((long)data.groupMetadata.creation).UtcDateTime;
         Description = data.desc;
-        Participants = ((List<dynamic>)data.participants).Select(p => new GroupParticipant(p)).ToList();
+        Participants = ((JArray)data.groupMetadata.participants).Select(p => new GroupParticipant(p)).ToList();
     }
 
 }

@@ -3,5 +3,5 @@
 public class DeliveryInfo
 {
     public string Id { get; set; }
-    public long T { get; set; }
+    public DateTime T { get; set; }
 }

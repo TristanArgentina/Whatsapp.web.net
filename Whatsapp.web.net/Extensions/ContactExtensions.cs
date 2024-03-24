@@ -6,41 +6,41 @@ public static class ContactExtensions
 {
     public static async Task<string?> GetProfilePicUrl(this Contact contact, Client client)
     {
-        return await client.GetProfilePicUrl(contact.Id.Serialized);
+        return await client.Contact.GetProfilePicUrl(contact.Id.Id);
     }
 
     public static async Task<string> GetFormattedNumber(this Contact contact, Client client)
     {
-        return await client.GetFormattedNumber(contact.Id.Serialized);
+        return await client.Contact.GetFormattedNumber(contact.Id.Id);
     }
 
     public static async Task<string> GetCountryCode(this Contact contact, Client client)
     {
-        return await client.GetCountryCode(contact.Id.Serialized);
+        return await client.Contact.GetCountryCode(contact.Id.Id);
     }
 
     public static async Task<Chat?> GetChat(this Contact contact, Client client)
     {
-        return contact.IsMe ? null : client.GetChatById(contact.Id.Serialized);
+        return contact.IsMe ? null : client.Chat.Get(contact.Id.Id).Result;
     }
 
     public static async Task<bool> Block(this Contact contact, Client client)
     {
-        return client.Block(contact).Result;
+        return client.Contact.Block(contact).Result;
     }
 
     public static async Task<bool> Unblock(this Contact contact, Client client)
     {
-        return client.Unblock(contact).Result;
+        return client.Contact.Unblock(contact).Result;
     }
 
     public static async Task<string?> GetAbout(this Contact contact, Client client)
     {
-        return client.GetAbout(contact).Result;
+        return client.Contact.GetAbout(contact).Result;
     }
 
     public static async Task<List<string>> GetCommonGroups(this Contact contact, Client client)
     {
-        return await client.GetCommonGroups(contact.Id.Serialized);
+        return await client.Group.GetCommonGroups(contact.Id.Id);
     }
 }

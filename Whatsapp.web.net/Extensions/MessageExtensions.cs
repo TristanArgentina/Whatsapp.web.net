@@ -17,7 +17,7 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task<Message?> ReloadAsync(this Message msg, Client client)
     {
-        return await client.GetMessageById(msg.Id);
+        return await client.Message.Get(msg.Id);
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ public static class MessageExtensions
     public static async Task<Chat> GetChat(this Message msg, Client client)
     {
         var contactId = msg.GetContactId();
-        return client.GetChatById(contactId.Id);
+        return client.Chat.Get(contactId.Id).Result;
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task<Contact> GetContactId(this Message msg, Client client)
     {
-        return await client.GetContactById(msg.Author is not null ? msg.Author.Id : msg.From.Id);
+        return await client.Contact.GetContactById(msg.Author is not null ? msg.Author.Id : msg.From.Id);
     }
 
     /// <summary>
@@ -49,40 +49,32 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task<List<Contact>> GetMentions(this Message msg, Client client)
     {
-        List<Task<Contact>> contactTasks = msg.MentionedIds.Select(async id => await client.GetContactById(id)).ToList();
+        List<Task<Contact>> contactTasks = msg.MentionedIds.Select(async id => await client.Contact.GetContactById(id)).ToList();
         var contacts = await Task.WhenAll(contactTasks);
         return contacts.ToList();
     }
 
     public static async Task<List<GroupChat>> GetGroupMentions(this Message msg, Client client)
     {
-        List<Task<Chat>> groupTask = msg.GroupMentions.Select(async m => client.GetChatById(m.Id)).ToList();
+        List<Task<Chat>> groupTask = msg.GroupMentions.Select(async m => client.Chat.Get(m.Id).Result).ToList();
         var chats = await Task.WhenAll(groupTask);
         return chats.OfType<GroupChat>().ToList();
     }
 
     public static async Task<Message?> GetQuotedMessage(this Message msg, Client client)
     {
-        var quotedMsg = await client.GetQuotedMessage(msg.Id, msg.HasQuotedMsg);
+        var quotedMsg = await client.Message.GetQuoted(msg.Id, msg.HasQuotedMsg);
         return quotedMsg == null ? null : new Message(quotedMsg);
     }
 
     public static async Task<Message> Reply(this Message msg, Client client, object content, string? contactId = null, ReplayOptions? options = null)
     {
-        if (string.IsNullOrEmpty(contactId))
-        {
-            contactId = msg.GetContactId().Id;
-        }
-
-        options ??= new ReplayOptions();
-        options.QuotedMessageId = msg.Id;
-
-        return await client.SendMessage(contactId, content, options);
+        return await client.Message.Reply(msg, content, contactId, options);
     }
 
     public static async Task<dynamic> AcceptGroupV4Invite(this Message msg, Client client)
     {
-        return client.AcceptGroupV4InviteAsync(msg.InviteV4);
+        return client.Group.AcceptInvite(msg.InviteV4);
     }
 
     /// <summary>
@@ -94,17 +86,17 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task<dynamic> React(this Message msg, Client client, string redaction)
     {
-        return client.ReactAsync(msg.Id, redaction);
+        return client.Message.React(msg.Id, redaction);
     }
 
     public static async Task Forward(this Message msg, Client client, string chatId)
     {
-        await client.ForwardAsync(msg.Id, chatId);
+        await client.Message.Forward(msg.Id, chatId);
     }
 
     public static async Task<MessageMedia?> DownloadMedia(this Message msg, Client client)
     {
-        return await client.DownloadMediaAsync(msg.Id, msg.HasMedia);
+        return await client.Message.DownloadMedia(msg.Id, msg.HasMedia);
     }
 
     /// <summary>
@@ -116,7 +108,7 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task Delete(this Message msg, Client client, bool everyone)
     {
-        await client.DeleteAsync(msg.Id, everyone);
+        await client.Message.Delete(msg.Id, everyone);
     }
 
     /// <summary>
@@ -127,7 +119,7 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task Star(this Message msg, Client client)
     {
-        await client.StarAsync(msg.Id);
+        await client.Message.Star(msg.Id);
     }
 
     /// <summary>
@@ -138,41 +130,41 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task Unstar(this Message msg, Client client)
     {
-        await client.UnstarAsync(msg.Id);
+        await client.Message.UnStar(msg.Id);
     }
 
     public static async Task<bool> Pin(this Message msg, Client client, int duration)
     {
-        return await client.PinAsync(msg.Id, duration);
+        return await client.Message.Pin(msg.Id, duration);
     }
 
     public static async Task<bool> Unpin(this Message msg, Client client)
     {
-        return await client.UnpinAsync(msg.Id);
+        return await client.Message.Unpin(msg.Id);
     }
 
     public static async Task<MessageInfo?> GetInfo(this Message msg, Client client)
     {
-        return await client.GetInfoAsync(msg.Id);
+        return await client.Message.GetInfo(msg.Id);
     }
 
     public static async Task<Order?> GetOrder(this Message msg, Client client)
     {
-        return await client.GetOrderAsync(msg.Type, msg.OrderId, msg.Token, msg.GetContactId().Id);
+        return await client.Commerce.GetOrderAsync(msg.Type, msg.OrderId, msg.Token, msg.GetContactId().Id);
     }
 
     public static async Task<Payment> GetPayment(this Message msg, Client client)
     {
-        return await client.GetPayment(msg.Id, msg.Type);
+        return await client.Commerce.GetPayment(msg.Id, msg.Type);
     }
 
     public static async Task<ReactionList?> GetReactions(this Message msg, Client client)
     {
-        return await client.GetReactionsSync(msg.Id, msg.HasReaction);
+        return await client.Message.GetReactions(msg.Id, msg.HasReaction);
     }
 
     public static async Task<Message> Edit(this Message msg, Client client, string content, dynamic? options = null)
     {
-        return await client.EditAsync(msg.Id, content, options);
+        return await client.Message.Edit(msg.Id, content, options);
     }
 }

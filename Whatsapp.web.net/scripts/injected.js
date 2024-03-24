@@ -9,8 +9,8 @@
     window.Store.CryptoLib = window.mR.findModule('decryptE2EMedia');
     window.Store.DownloadManager = window.mR.findModule('downloadManager').downloadManager;
     //TODO: missing
-    //window.Store.GroupMetadata = window.mR.findModule('GroupMetadata').default.GroupMetadata;
-    //window.Store.GroupMetadata.queryAndUpdate = window.mR.findModule('GroupMetadata').queryAndUpdateGroupMetadataById;
+    //window.Store.GroupMetadata = window.mR.findModule('GroupMetadata');
+    window.Store.GroupMetadata.queryAndUpdate = window.mR.findModule('queryAndUpdateGroupMetadataById');
     window.Store.Label = window.mR.findModule('LabelCollection').LabelCollection;
     window.Store.ContactCollection = window.mR.findModule('ContactCollection').ContactCollection;
     window.Store.MediaPrep = window.mR.findModule('prepRawMedia');
@@ -561,7 +561,6 @@ function loadUtils() {
 
 
     window.WWebJS.getChatModel = async chat => {
-
         let res = chat.serialize();
         res.isGroup = chat.isGroup;
         res.formattedTitle = chat.formattedTitle;
@@ -569,7 +568,7 @@ function loadUtils() {
 
         if (chat.groupMetadata) {
             const chatWid = window.Store.WidFactory.createWid((chat.id));
-            await window.Store.GroupMetadata.update(chatWid);
+            //await window.Store.GroupMetadata.update(chatWid);
             res.groupMetadata = chat.groupMetadata.serialize();
         }
 
@@ -588,11 +587,14 @@ function loadUtils() {
         return res;
     };
 
-    window.WWebJS.getChat = async chatId => {
+    window.WWebJS.getChat = async function (chatId) {
         const chatWid = window.Store.WidFactory.createWid(chatId);
-        const chat = await window.Store.Chat.find(chatWid);
-        return await window.WWebJS.getChatModel(chat);
+        return window.Store.Chat.find(chatWid)
+            .then(function (chat) {
+                return window.WWebJS.getChatModel(chat);
+            });
     };
+
 
     window.WWebJS.getChats = async () => {
         const chats = window.Store.Chat.getModelsArray();
@@ -1129,7 +1131,7 @@ function loadUtils() {
 
 
 async function registerModuleRaid() {
-    
+
     /**
      * Clase principal de ModuleRaid
      */
@@ -1402,7 +1404,7 @@ async function registerModuleRaid() {
                 const module = this.modules[key.toString()];
 
                 if (module === undefined) {
-                    console.log(`el modulo no está definido => query: '${query} (${typeof query}) =>' key:'${key}'`);
+                    // console.log(`el modulo no está definido => query: '${query} (${typeof query}) =>' key:'${key}'`);
                     return;
                 }
 
@@ -1460,7 +1462,7 @@ async function registerModuleRaid() {
 
             console.log(`Encontrado: '${query}' -> funciones: '${results.length}' `);
 
-            return this.getModule(results, query);
+            return this.getModule_new(results, query);
         }
 
         getModule(modules, query) {
@@ -1481,6 +1483,35 @@ async function registerModuleRaid() {
             }
             return modules[0];
         }
+
+        getModule_new(modules, query) {
+            let foundModules = [];
+
+            if (modules.length === 0) {
+                console.log(`Query: '${query}' no encontrado.`);
+                return null;
+            }
+
+            for (const module of modules) {
+                for (const key of Reflect.ownKeys(module)) {
+                    if (key && typeof key === 'string' && key.toLowerCase() === query.toString().toLowerCase()) {
+                        if (!foundModules.includes(module)) {
+                            foundModules.push(module);
+                        }
+                    }
+                }
+            }
+
+            if (foundModules.length == 0) {
+                return modules[0];
+            } else if (foundModules.length > 1) {
+                console.log(`Query: '${query}' encontrado en ${foundModules.length} módulos.`);
+            }
+
+            return foundModules[0];
+        }
+
+
 
         // Método para buscar constructores
         findConstructor(query) {
@@ -1516,4 +1547,10 @@ async function registerModuleRaid() {
     };
 
     window.mR = new ModuleRaid(options);
+}
+function registerLoadingScreen() {
+
+    window.getElementByXpath = (path) => {
+        return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    }
 }

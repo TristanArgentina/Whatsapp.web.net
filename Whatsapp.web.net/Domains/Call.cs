@@ -4,7 +4,7 @@ public class Call
 {
     public string Id { get; set; }
     public string From { get; set; }
-    public long Timestamp { get; set; }
+    public DateTime Timestamp { get; set; }
     public bool IsVideo { get; set; }
     public bool IsGroup { get; set; }
     public bool FromMe { get; set; }
@@ -22,7 +22,7 @@ public class Call
         if (data is null) return;
         Id = data.id;
         From = data.peerJid;
-        Timestamp = data.offerTime;
+        Timestamp = DateTimeOffset.FromUnixTimeSeconds((long)data.offerTime).UtcDateTime;
         IsVideo = data.isVideo;
         IsGroup = data.isGroup;
         FromMe = data.outgoing;

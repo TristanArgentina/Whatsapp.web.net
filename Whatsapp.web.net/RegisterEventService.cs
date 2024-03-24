@@ -8,7 +8,7 @@ public class RegisterEventService : IRegisterEventService
     private readonly IEventDispatcher _eventDispatcher;
     private readonly IJavaScriptParser _parserFunctions;
     private readonly WhatsappOptions _options;
-    private IPage PupPage;
+    private IPage _pupPage;
 
     private Message last_message;
 
@@ -21,7 +21,7 @@ public class RegisterEventService : IRegisterEventService
 
     public async void Register(IPage page)
     {
-        PupPage = page;
+        _pupPage = page;
         await page.ExposeFunctionAsync("onAddMessageEvent", OnAddMessageEvent());
         await page.ExposeFunctionAsync("onChangeMessageTypeEvent", OnChangeMessageTypeEvent());
         await page.ExposeFunctionAsync("onChangeMessageEvent", OnChangeMessageEvent());
@@ -112,9 +112,7 @@ public class RegisterEventService : IRegisterEventService
     {
         return (chatId, currState, prevState) =>
         {
-            var chat = GetChatById(chatId);
-
-            _eventDispatcher.EmitChatArchived(chat, currState, prevState);
+            _eventDispatcher.EmitChatArchived(chatId, currState, prevState);
             return true;
         };
     }
@@ -123,9 +121,7 @@ public class RegisterEventService : IRegisterEventService
     {
         return (chatId) =>
         {
-            var chat = GetChatById(chatId);
-
-            _eventDispatcher.EmitChatRemoved(chat);
+            _eventDispatcher.EmitChatRemoved(chatId);
             return true;
         };
     }
@@ -182,9 +178,7 @@ public class RegisterEventService : IRegisterEventService
         {
             if (data is null || data.id is null) return false;
 
-            var chat = GetChatById(data.id.ToString());
-
-            _eventDispatcher.EmitUnreadCount(chat);
+            _eventDispatcher.EmitUnreadCount(data.id.ToString());
 
             return true;
         };
@@ -343,11 +337,5 @@ public class RegisterEventService : IRegisterEventService
 
             return true;
         };
-    }
-
-    public Chat GetChatById(string chatId)
-    {
-        dynamic dataChat = PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getChatById"), chatId).Result;
-        return Chat.Create(dataChat);
     }
 }

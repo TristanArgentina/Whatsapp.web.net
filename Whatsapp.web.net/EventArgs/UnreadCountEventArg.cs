@@ -1,18 +1,16 @@
-﻿using Whatsapp.web.net.Domains;
-
-namespace Whatsapp.web.net.EventArgs;
+﻿namespace Whatsapp.web.net.EventArgs;
 
 public class UnreadCountEventArg : DispatcherEventArg
 {
-    public Chat Chat { get; }
+    public string ChatId { get; }
 
-    public UnreadCountEventArg(Chat chat) : base(DispatcherEventsType.UNREAD_COUNT)
+    public UnreadCountEventArg(string chatId) : base(DispatcherEventsType.UNREAD_COUNT)
     {
-        Chat = chat;
+        ChatId = chatId;
     }
 
     public override string ToString()
     {
-        return $"Chat: \n {Chat}";
+        return $"Chat: \n {ChatId}";
     }
 }

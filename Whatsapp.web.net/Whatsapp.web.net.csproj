@@ -12,7 +12,7 @@
     <PackageReference Include="FFmpeg.Net" Version="1.1.0" />
     <PackageReference Include="FFMpegCore" Version="5.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="PuppeteerSharp" Version="14.1.0" />
+    <PackageReference Include="PuppeteerSharp" Version="15.1.0" />
   </ItemGroup>
 
   <ItemGroup>
