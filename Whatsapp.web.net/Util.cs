@@ -140,7 +140,7 @@ public class Util
         var result = await pupPage.EvaluateExpressionAsync<string>(evaluateScript);
 
         // Create and return a new MessageMedia with the webp data
-        return new MessageMedia("image/webp",result);
+        return new MessageMedia("image/webp", result);
     }
 
     public static async Task<MessageMedia> FormatVideoToWebpSticker(MessageMedia media)
@@ -173,6 +173,6 @@ public class Util
         File.Delete(tempFile);
 
 
-        return new MessageMedia(media.FileName, "image/webp",data);
+        return new MessageMedia(media.FileName, "image/webp", data);
     }
 }

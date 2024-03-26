@@ -1,6 +1,4 @@
-﻿using Whatsapp.web.net.Domains;
-
-namespace Whatsapp.web.net.Elements;
+﻿namespace Whatsapp.web.net.Domains;
 
 /// <summary>
 /// Represents a message with buttons

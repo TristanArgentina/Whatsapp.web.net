@@ -7,7 +7,9 @@
     window.Store.Call = window.mR.findModule((module) => module.default && module.default.Call).default.Call;
     window.Store.Cmd = window.mR.findModule('Cmd').Cmd;
     window.Store.CryptoLib = window.mR.findModule('decryptE2EMedia');
-    window.Store.DownloadManager = window.mR.findModule('downloadManager').downloadManager;
+    window.Store.DownloadManager = window.mR.findModule(941555).downloadManager; 
+    //window.Store.DownloadManager = window.mR.findModule('downloadAndDecrypt'); 
+    //window.Store.DownloadManager = window.mR.findModule('downloadAndMaybeDecrypt'); 
     //TODO: missing
     //window.Store.GroupMetadata = window.mR.findModule('GroupMetadata');
     window.Store.GroupMetadata.queryAndUpdate = window.mR.findModule('queryAndUpdateGroupMetadataById');
@@ -67,8 +69,8 @@
         setPushname: window.mR.findModule((m) => m.setPushname && !m.ChatlistPanelState).setPushname
     };
     window.Store.StickerTools = {
-        ...window.mR.findModule('toWebpSticker')[0],
-        ...window.mR.findModule('addWebpMetadata')[0]
+        ...window.mR.findModule('toWebpSticker'),
+        ...window.mR.findModule('addWebpMetadata')
     };
     window.Store.GroupUtils = {
         ...window.mR.findModule('createGroup')[0],
@@ -1435,6 +1437,10 @@ async function registerModuleRaid() {
                         if (query(module)) {
                             console.log(`El query es una funcion => query: ${query}`)
                             console.log(`Module key: ${key.toString()}`);
+                            results.push(module);
+                        }
+                    } else if (typeof query === 'number') {
+                        if (query == key) {
                             results.push(module);
                         }
                     } else {

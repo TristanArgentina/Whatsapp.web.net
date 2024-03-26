@@ -9,11 +9,13 @@ public class HandleEvents
 {
     private readonly Client _client;
     private readonly IEventDispatcher _eventDispatcher;
+    private readonly AI _ai;
 
     public HandleEvents(Client client, IEventDispatcher eventDispatcher)
     {
         _client = client;
         _eventDispatcher = eventDispatcher;
+        _ai = new AI();
     }
 
     public void SetHandle()
@@ -482,6 +484,11 @@ public class HandleEvents
             }
             else if (msg.Location != null)
             {
+            }
+            else if (msg.Body.StartsWith("AI:"))
+            {
+                var response = _ai.Ask(msg.From.Id, msg.Body.Substring(3)).Result;
+                await msg.Reply(_client, response);
             }
         };
     }

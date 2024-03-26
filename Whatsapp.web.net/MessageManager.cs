@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PuppeteerSharp;
 using Whatsapp.web.net.Domains;
-using Whatsapp.web.net.Elements;
 using Whatsapp.web.net.Extensions;
 
 namespace Whatsapp.web.net;
@@ -39,93 +38,103 @@ public class MessageManager : IMessageManager
 
     public async Task<Message> Send(string fromId, object content, ReplayOptions? options = null)
     {
-        var mentions = new List<UserId>();
-        if (options != null && options.Mentions != null && options.Mentions.Any())
-        {
-            mentions = options.Mentions.OfType<Contact>().Select(c => c.Id).ToList();
-        }
+        options ??= new ReplayOptions();
+        var internalOptions = BuildInternalOptions(options);
 
-        var internalOptions = new Dictionary<string, object?>
-        {
-            { "linkPreview", options != null && options.LinkPreview && !options.LinkPreview ? null : true },
-            { "sendAudioAsVoice", options != null && options.SendAudioAsVoice ? options.SendAudioAsVoice: null },
-            { "sendVideoAsGif", options != null && options.SendVideoAsGif ? options.SendVideoAsGif : null },
-            { "sendMediaAsSticker", options != null && options.SendMediaAsSticker ? options.SendMediaAsSticker : null },
-            { "sendMediaAsDocument", options != null && options.SendMediaAsDocument ? options.SendMediaAsDocument : null },
-            { "caption", options != null && !string.IsNullOrEmpty( options.Caption) ? options.Caption: null },
-            { "quotedMessageId", options != null && options.QuotedMessageId is not null ? options.QuotedMessageId : null },
-            { "parseVCards", options != null && options.ParseVCards && !options.ParseVCards? false : true },
-            { "mentionedJidList", mentions },
-            { "groupMentions", options != null && options.GroupMentions is not null && options.GroupMentions.Any() ? options.GroupMentions : null },
-            { "extraOptions", options?.Extra }
-        };
+        var sendSeen = options.SendSeen;
 
-        var sendSeen = options != null && options.SendSeen ? options.SendSeen : true;
-
-        if (content is MessageMedia)
+        if (content is MessageMedia messageMedia)
         {
-            internalOptions["attachment"] = content;
+            internalOptions["attachment"] = messageMedia;
             content = "";
+            if (internalOptions.ContainsKey("sendMediaAsSticker")
+                && (bool)internalOptions["sendMediaAsSticker"] 
+                && internalOptions.ContainsKey("attachment"))
+            {
+                internalOptions["attachment"] = await Util.FormatToWebpSticker(
+                    messageMedia,
+                    new StickerMetadata
+                    {
+                        Name = options.StickerName,
+                        Author = options.StickerAuthor,
+                        Categories = options.StickerCategories is not null && options.StickerCategories.Any() ? options.StickerCategories.ToArray() : null
+                    },
+                    _pupPage
+                );
+            }
         }
-        else if (options != null && options.Media is not null)
+        else if (options is { Media: not null })
         {
             internalOptions["attachment"] = options.Media;
             internalOptions["caption"] = content;
             content = "";
         }
-        else if (content is Location)
+        else switch (content)
         {
-            internalOptions["location"] = content;
-            content = "";
-        }
-        else if (content is Poll)
-        {
-            internalOptions["poll"] = content;
-            content = "";
-        }
-        else if (content is Contact contactCard)
-        {
-            internalOptions["contactCard"] = contactCard.Id;
-            content = "";
-        }
-        else if (content is IList<Contact> contactList && contactList.Any())
-        {
-            internalOptions["contactCardList"] = contactList.Select(contact => ((Contact)contact).Id).ToList();
-            content = "";
-        }
-        else if (content is Buttons buttons)
-        {
-            if (buttons.Type != "chat") internalOptions["attachment"] = buttons.Body;
-            internalOptions["buttons"] = buttons;
-            content = "";
-        }
-        else if (content is List)
-        {
-            internalOptions["list"] = content;
-            content = "";
+            case Location:
+                internalOptions["location"] = content;
+                content = "";
+                break;
+            case Poll:
+                internalOptions["poll"] = content;
+                content = "";
+                break;
+            case Contact contactCard:
+                internalOptions["contactCard"] = contactCard.Id;
+                content = "";
+                break;
+            case IList<Contact> contactList when contactList.Any():
+                internalOptions["contactCardList"] = contactList.Select(contact => contact.Id).ToList();
+                content = "";
+                break;
+            case Buttons buttons:
+                {
+                    if (buttons.Type != "chat") internalOptions["attachment"] = buttons.Body;
+                    internalOptions["buttons"] = buttons;
+                    content = "";
+                    break;
+                }
+            case List:
+                internalOptions["list"] = content;
+                content = "";
+                break;
         }
 
-        if (internalOptions.ContainsKey("sendMediaAsSticker") && internalOptions["sendMediaAsSticker"] != null && internalOptions.ContainsKey("attachment"))
-        {
-            internalOptions["attachment"] = await Util.FormatToWebpSticker(
-                (MessageMedia)internalOptions["attachment"],
-                new StickerMetadata
-                {
-                    Name = options != null && !string.IsNullOrEmpty(options.StickerName) ? options.StickerName : null,
-                    Author = options != null && !string.IsNullOrEmpty(options.StickerAuthor) ? options.StickerAuthor : null,
-                    Categories = options != null && options.StickerCategories is not null && options.StickerCategories.Any() ? options.StickerCategories.ToArray() : null
-                },
-                _pupPage
-            );
-        }
+
 
         var serialize = JsonConvert.SerializeObject(internalOptions);
         var method = _parserFunctions.GetMethod("sendMessageAsyncToChat");
 
-        var newMessage = await _pupPage.EvaluateFunctionAsync<dynamic>(method, fromId, content, serialize, sendSeen);
+        var newMessage = await _pupPage.EvaluateFunctionAsync<dynamic>(method, fromId, content, internalOptions, sendSeen);
 
         return new Message(newMessage);
     }
+
+
+    private Dictionary<string, object?> BuildInternalOptions(ReplayOptions options)
+    {
+        var internalOptions = new Dictionary<string, object?>
+        {
+            { "linkPreview", options.LinkPreview },
+            { "sendAudioAsVoice", options.SendAudioAsVoice },
+            { "sendVideoAsGif", options.SendVideoAsGif },
+            { "sendMediaAsSticker", options.SendMediaAsSticker },
+            { "sendMediaAsDocument", options.SendMediaAsDocument },
+            { "caption", options.Caption},
+            { "quotedMessageId", options.QuotedMessageId },
+            { "parseVCards", options.ParseVCards },
+            { "groupMentions", options.GroupMentions?.Any() == true ? options.GroupMentions : null },
+            { "extraOptions", options.Extra }
+        };
+
+        if (options.Mentions?.Any() == true)
+        {
+            internalOptions["mentionedJidList"] = options.Mentions.OfType<Contact>().Select(c => c.Id).ToList();
+        }
+
+        return internalOptions;
+    }
+
     public async Task React(MessageId? msgId, string reaction)
     {
         if (msgId is null) return;
@@ -143,7 +152,7 @@ public class MessageManager : IMessageManager
         if (msgId is null) return null;
         if (!hasMedia) return null;
 
-        var result = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("retrieveAndConvertMedia"), msgId);
+        dynamic result = await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getMessageMedia"), msgId.Serialized);
         return result == null ? null : new MessageMedia(result);
     }
 

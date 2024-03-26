@@ -178,7 +178,7 @@ public class Message
         HasMedia = data.mediaKey != null && data.directPath != null;
         Body = HasMedia ? data.caption ?? string.Empty : data.body ?? data.pollName ?? string.Empty;
         Type = data.type;
-        Timestamp = DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime; 
+        Timestamp = data.t is not null ? DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime : null;
         From = UserId.Create(data.from);
         To = UserId.Create(data.to);
         Author = UserId.Create(data.author);

@@ -107,10 +107,10 @@ public class Client : IDisposable, IAsyncDisposable
         // TODO: missing implementation
         // this.interface = new InterfaceController(this);
 
-        Thread.Sleep(5 * 1000);
 
-        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("registerEventListeners"));
         _registerEventService.Register(PupPage);
+        Thread.Sleep(5 * 1000);
+        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("registerEventListeners"));
         CreateManagers();
         return Task.CompletedTask;
     }

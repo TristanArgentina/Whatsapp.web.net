@@ -128,16 +128,10 @@ function serializeConnectionAndUser() {
 }
 
 function sendMessageAsyncToChat(chatId, message, options, sendSeen) {
-    console.log(`chatid: ${chatId}`);
-    console.log(`message: ${message}`);
-    console.log(`options: ${options} -> '${JSON.stringify(options)}'`);
-    console.log(`sendSeen: ${sendSeen}`);
-
     const chatWid = window.Store.WidFactory.createWid(chatId);
 
     return window.Store.Chat.find(chatWid)
         .then(chat => {
-            console.log(`chat: '${JSON.stringify(chat)}'`);
             if (sendSeen) {
                 return window.WWebJS.sendSeen(chatId).then(() => chat);
             } else {
@@ -511,7 +505,51 @@ async function forwardMessages(msgId, chatId) {
     });
 }
 
+function getMessageMedia(msgId) {
+    const msg = window.Store.Msg.get(msgId);
+    const handleMediaDownload = (msg) => {
+        return window.Store.DownloadManager.downloadAndMaybeDecrypt({
+            directPath: msg.directPath,
+            encFilehash: msg.encFilehash,
+            filehash: msg.filehash,
+            mediaKey: msg.mediaKey,
+            mediaKeyTimestamp: msg.mediaKeyTimestamp,
+            type: msg.type,
+            signal: new AbortController().signal
+        }).then(decryptedMedia => {
+            return window.WWebJS.arrayBufferToBase64Async(decryptedMedia).then(data => {
+                return {
+                    data,
+                    mimetype: msg.mimetype,
+                    filename: msg.filename,
+                    filesize: msg.filesize
+                };
+            });
+        });
+    }
 
+
+    if (!msg || !msg.mediaData) {
+        return Promise.resolve(undefined);
+    }
+    if (msg.mediaData.mediaStage !== 'RESOLVED') {
+        return msg.downloadMedia({
+            downloadEvenIfExpensive: true,
+            rmrReason: 1
+        }).then(() => {
+            return handleMediaDownload(msg);
+        });
+    }
+
+    if (msg.mediaData.mediaStage.includes('ERROR') || msg.mediaData.mediaStage === 'FETCHING') {
+        return Promise.resolve(undefined);
+    }
+
+    return handleMediaDownload(msg).catch(e => {
+        if (e.status && e.status === 404) return undefined;
+        throw e;
+    });
+}
 
 async function retrieveAndConvertMedia(msgId) {
     return new Promise((resolve, reject) => {
@@ -523,6 +561,10 @@ async function retrieveAndConvertMedia(msgId) {
 
         if (msg.mediaData.mediaStage != 'RESOLVED') {
             msg.downloadMedia({
+                directPath: msg.directPath,
+                fileEncSha256: msg.encFilehash,
+                mediaKey: msg.mediaKey,
+                fileSha256: msg.filehash,
                 downloadEvenIfExpensive: true,
                 rmrReason: 1
             }).then(() => {
@@ -540,7 +582,7 @@ async function retrieveAndConvertMedia(msgId) {
                 return;
             }
 
-            window.Store.DownloadManager.downloadAndMaybeDecrypt({
+            window.Store.DownloadManager.downloadAndDecrypt({
                 directPath: msg.directPath,
                 encFilehash: msg.encFilehash,
                 filehash: msg.filehash,
@@ -549,16 +591,17 @@ async function retrieveAndConvertMedia(msgId) {
                 type: msg.type,
                 signal: (new AbortController).signal
             }).then((decryptedMedia) => {
-                window.WWebJS.arrayBufferToBase64Async(decryptedMedia).then((data) => {
-                    resolve({
-                        data: data,
-                        mimetype: msg.mimetype,
-                        filename: msg.filename,
-                        filesize: msg.size
+                window.WWebJS.arrayBufferToBase64Async(decryptedMedia)
+                    .then((data) => {
+                        resolve({
+                            data: data,
+                            mimetype: msg.mimetype,
+                            filename: msg.filename,
+                            filesize: msg.size
+                        });
+                    }).catch((error) => {
+                        reject(error);
                     });
-                }).catch((error) => {
-                    reject(error);
-                });
             }).catch((error) => {
                 if (error.status && error.status === 404) {
                     resolve(null);
@@ -902,18 +945,14 @@ function registerEventListeners() {
     window.Store.Msg.on('change:body change:caption', (msg, newBody, prevBody) => { window.onEditMessageEvent(window.WWebJS.getMessageModel(msg), newBody, prevBody); });
     window.Store.Msg.on('add', (msg) => {
         if (msg.isNewMsg) {
-            console.log('New message');
             if (msg.type === 'ciphertext') {
                 // defer message event until ciphertext is resolved (type changed)
-                msg.once('change:type', (_msg) => window.onAddMessageEvent(window.WWebJS.getMessageModel(_msg)));
+                msg.once('change:type', (msg) => window.onAddMessageEvent(window.WWebJS.getMessageModel(msg)));
                 window.onAddMessageCiphertextEvent(window.WWebJS.getMessageModel(msg));
             } else {
                 window.onAddMessageEvent(window.WWebJS.getMessageModel(msg));
             }
         }
-        //else {
-        //    console.log(JSON.stringify(msg) );
-        //}
 
     });
 

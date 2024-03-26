@@ -4,23 +4,25 @@ namespace Whatsapp.web.net.EventArgs;
 
 public class EventDispatcher : IEventDispatcher
 {
+    public event EventHandler<MessageCreateEventArgs>? MessageCreateEvent;
+    public event EventHandler<MessageReceivedEventArgs>? MessageReceivedEvent;
+    public event EventHandler<MessageCiphertextEventArgs>? MessageCiphertextEvent;
+    public event EventHandler<MessageReactionEventArgs>? MessageReactionEvent;
+    public event EventHandler<MessageACKEventArg>? MessageACKEvent;
+    public event EventHandler<MessageEditEventArgs>? MessageEditEvent;
     public event EventHandler<DispatcherEventArg>? DispatchEventGeneric;
     public event EventHandler<AuthenticatedEventArg>? AuthenticatedEvent;
     public event EventHandler<LoadingScreenEventArg>? LoadingScreenEvent;
     public event EventHandler<RevokedEveryoneEventArg>? RevokedEveryoneEvent;
     public event EventHandler<ContactChangedEventArg>? ContactChangedEvent;
-    public event EventHandler<MessageACKEventArg>? MessageACKEvent;
     public event EventHandler<UnreadCountEventArg>? UnreadCountEvent;
     public event EventHandler<MediaUploadedEventArg>? MediaUploadedEvent;
     public event EventHandler<StateChangedEventArg>? StateChangedEvent;
     public event EventHandler<DisconnectedEventArgs>? DisconnectedEvent;
     public event EventHandler<BatteryChangedEventArgs>? BatteryChangedEvent;
     public event EventHandler<IncomingCallEventArgs>? IncomingCallEvent;
-    public event EventHandler<MessageReactionEventArgs>? MessageReactionEvent;
     public event EventHandler<ChatRemovedEventArgs>? ChatRemovedEvent;
     public event EventHandler<ChatArchivedEventArgs>? ChatArchivedEvent;
-    public event EventHandler<MessageEditEventArgs>? MessageEditEvent;
-    public event EventHandler<MessageCiphertextEventArgs>? MessageCiphertextEvent;
     public event EventHandler<AuthenticationFailureEventArgs>? AuthenticationFailureEvent;
     public event EventHandler<QRReceivedEventArgs>? QRReceivedEvent;
     public event EventHandler<GroupJoinEventArgs>? GroupJoinEvent;
@@ -28,8 +30,6 @@ public class EventDispatcher : IEventDispatcher
     public event EventHandler<GroupAdminChangedEventArgs>? GroupAdminChangedEvent;
     public event EventHandler<GroupMembershipRequestEventArgs>? GroupMembershipRequestEvent;
     public event EventHandler<GroupUpdateEventArgs>? GroupUpdateEvent;
-    public event EventHandler<MessageCreateEventArgs>? MessageCreateEvent;
-    public event EventHandler<MessageReceivedEventArgs>? MessageReceivedEvent;
     public event EventHandler<DispatcherEventArg>? RemoteSessionSavedEvent;
     public event EventHandler<ReadyEventArgs>? ReadyEvent;
 

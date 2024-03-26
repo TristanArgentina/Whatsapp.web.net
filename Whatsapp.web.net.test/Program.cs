@@ -20,7 +20,8 @@ var options = new WhatsappOptions
     {
         Type = "local",
         LocalPath = "./.wwebjs_cache/"
-    }
+    },
+    WebVersion = "2.2412.50"
 };
 
 var parserFunctions = new JavaScriptParser(@".\scripts\functions.js");

@@ -1,12 +1,12 @@
-﻿namespace Whatsapp.web.net.Elements;
+﻿namespace Whatsapp.web.net.Domains;
 
-public class Label 
+public class Label
 {
     public string Id { get; private set; }
     public string Name { get; private set; }
     public string HexColor { get; private set; }
 
-    public Label(dynamic? labelData) 
+    public Label(dynamic? labelData)
     {
         if (labelData != null)
             Patch(labelData);

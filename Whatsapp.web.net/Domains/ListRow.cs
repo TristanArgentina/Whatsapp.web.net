@@ -1,4 +1,4 @@
-﻿namespace Whatsapp.web.net.Elements;
+﻿namespace Whatsapp.web.net.Domains;
 
 /// <summary>
 /// Represents a row of a list message

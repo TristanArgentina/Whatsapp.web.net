@@ -1,7 +1,27 @@
-﻿namespace Whatsapp.web.net.Domains;
+﻿using Newtonsoft.Json;
+
+namespace Whatsapp.web.net.Domains;
 
 public class MessageMedia
 {
+    protected bool Equals(MessageMedia other)
+    {
+        return MimeType == other.MimeType && Data == other.Data && Filename == other.Filename;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((MessageMedia)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(MimeType, Data, Filename);
+    }
+
     public string MimeType { get; set; }
     public string Data { get; set; }
     public string Filename { get; private set; }
@@ -17,6 +37,7 @@ public class MessageMedia
 
     }
 
+    [JsonConstructor]
     public MessageMedia(dynamic? dynamicData)
     {
         if (dynamicData is not null)
@@ -33,10 +54,10 @@ public class MessageMedia
 
     private void Patch(dynamic data)
     {
-        MimeType = data.mimeType;
         Data = data.data;
+        MimeType = data.mimetype;
         Filename = data.filename;
-        FileSize = data.fileSize;
+        FileSize = data.filesize;
     }
 
 
@@ -71,11 +92,13 @@ public class MessageMedia
         }
 
         using var httpClient = client ?? new HttpClient();
-        var (data, mime, name, size) = await FetchData(url, httpClient, reqOptionsSize);
+        var (name, mime, data, size) = await FetchData(url, httpClient, reqOptionsSize);
         var finalFilename = filename ?? name ?? Path.GetFileName(pUrl.LocalPath) ?? "file";
 
         mimeType ??= mime;
 
         return new MessageMedia(finalFilename, mimeType, data, size);
     }
+
+
 }
