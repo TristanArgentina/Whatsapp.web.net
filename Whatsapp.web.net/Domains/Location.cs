@@ -1,9 +1,23 @@
 ﻿namespace Whatsapp.web.net.Domains;
 
+/// <summary>
+/// Location information
+/// </summary>
 public class Location
 {
+    /// <summary>
+    /// Location latitude
+    /// </summary>
     public double Latitude { get; private set; }
+
+    /// <summary>
+    /// Location longitude
+    /// </summary>
     public double Longitude { get; private set; }
+
+    /// <summary>
+    /// Location full description
+    /// </summary>
     public LocationOptions? Description { get; private set; }
 
     public Location(double latitude, double longitude, LocationOptions? description = null)

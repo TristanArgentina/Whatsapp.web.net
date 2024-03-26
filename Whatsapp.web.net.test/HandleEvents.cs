@@ -268,6 +268,12 @@ public class HandleEvents
             {
             }
 
+            if (msg.Body.StartsWith("AI:"))
+            {
+                var response = _ai.Ask(msg.From.Id, msg.Body.Substring(3)).Result;
+                await msg.Reply(_client, response);
+            }
+
             // Unpins a message
             if (msg.Id.FromMe && msg.Body.StartsWith("!unpin"))
             {
@@ -296,6 +302,12 @@ public class HandleEvents
         {
             var msg = args.Message;
             Console.WriteLine("MESSAGE RECEIVED " + msg);
+
+            if (msg.Body.StartsWith("AI:"))
+            {
+                var response = _ai.Ask(msg.From.Id, msg.Body.Substring(3)).Result;
+                await msg.Reply(_client, response);
+            }
 
             if (msg.Body == "!ping reply")
             {
@@ -336,7 +348,7 @@ public class HandleEvents
             else if (msg.Body.StartsWith("!preview "))
             {
                 var text = msg.Body.Substring(9);
-                await msg.Reply(_client, text, null, new ReplayOptions { LinkPreview = true });
+                await msg.Reply(_client, text, null, new MessageEditOptions { LinkPreview = true });
             }
             else if (msg.Body.StartsWith("!desc "))
             {
@@ -418,7 +430,7 @@ public class HandleEvents
                 await _client.Message.Send(msg.From, $@"
                         *Connection info*
                         User name: {info.PushName}
-                        My number: {info.Wid.User}
+                        My number: {info.Id.User}
                         Platform: {info.Platform}
                     ");
             }
@@ -449,13 +461,13 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var attachmentData = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, attachmentData, new ReplayOptions { Caption = "Here's your requested media." });
+                    await _client.Message.Send(msg.From, attachmentData, new MessageEditOptions { Caption = "Here's your requested media." });
                 }
 
                 if (quotedMsg.HasMedia && quotedMsg.Type == "audio")
                 {
                     var audio = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, audio, new ReplayOptions { SendAudioAsVoice = true });
+                    await _client.Message.Send(msg.From, audio, new MessageEditOptions { SendAudioAsVoice = true });
                 }
             }
             else if (msg.Body == "!isviewonce" && msg.HasQuotedMsg)
@@ -464,7 +476,7 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var media = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, media, new ReplayOptions { IsViewOnce = true });
+                    await _client.Message.Send(msg.From, media, new MessageEditOptions { IsViewOnce = true });
                 }
             }
             else if (msg.Body == "!location")
@@ -484,11 +496,6 @@ public class HandleEvents
             }
             else if (msg.Location != null)
             {
-            }
-            else if (msg.Body.StartsWith("AI:"))
-            {
-                var response = _ai.Ask(msg.From.Id, msg.Body.Substring(3)).Result;
-                await msg.Reply(_client, response);
             }
         };
     }

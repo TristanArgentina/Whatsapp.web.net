@@ -2,30 +2,35 @@
 
 namespace Whatsapp.web.net.Domains;
 
+/// <summary>
+/// Media attached to a message
+/// </summary>
 public class MessageMedia
 {
-    protected bool Equals(MessageMedia other)
-    {
-        return MimeType == other.MimeType && Data == other.Data && Filename == other.Filename;
-    }
 
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
-        return Equals((MessageMedia)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(MimeType, Data, Filename);
-    }
-
+    /// <summary>
+    /// MIME type of the attachment
+    /// </summary>
     public string MimeType { get; set; }
+
+    /// <summary>
+    /// Base64 encoded data that represents the file
+    /// </summary>
     public string Data { get; set; }
+
+    /// <summary>
+    /// Document file name. Value can be null
+    /// </summary>
     public string Filename { get; private set; }
+
+    /// <summary>
+    /// Document file size in bytes. Value can be null
+    /// </summary>
     public long? FileSize { get; private set; }
+
+    /// <summary>
+    /// Document file name. Value can be null
+    /// </summary>
     public string FileName { get; set; }
 
     public MessageMedia(string filename, string mimeType, string data, long? fileSize = null)
@@ -100,5 +105,21 @@ public class MessageMedia
         return new MessageMedia(finalFilename, mimeType, data, size);
     }
 
+    protected bool Equals(MessageMedia other)
+    {
+        return MimeType == other.MimeType && Data == other.Data && Filename == other.Filename;
+    }
 
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((MessageMedia)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(MimeType, Data, Filename);
+    }
 }

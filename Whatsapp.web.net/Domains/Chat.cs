@@ -1,17 +1,63 @@
 ﻿namespace Whatsapp.web.net.Domains;
 
+/// <summary>
+/// Represents a Chat on WhatsApp
+/// </summary>
 public class Chat
 {
+    /// <summary>
+    /// ID that represents the chat
+    /// </summary>
     public UserId Id { get; private set; }
+
+    /// <summary>
+    /// Title of the chat
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// Indicates if the Chat is a Group Chat
+    /// </summary>
     public bool IsGroup { get; private set; }
+
+    /// <summary>
+    /// Indicates if the Chat is readonly
+    /// </summary>
     public bool IsReadOnly { get; private set; }
+
+    /// <summary>
+    /// Amount of messages unread
+    /// </summary>
     public int UnreadCount { get; private set; }
+
+    /// <summary>
+    /// Unix timestamp for when the last activity occurred
+    /// </summary>
     public DateTime Timestamp { get; private set; }
+
+    /// <summary>
+    /// Indicates if the Chat is archived
+    /// </summary>
     public bool Archived { get; private set; }
+
+    /// <summary>
+    /// Indicates if the Chat is pinned
+    /// </summary>
     public bool Pinned { get; private set; }
+
+    /// <summary>
+    /// Indicates if the chat is muted or not
+    /// </summary>
     public bool IsMuted { get; private set; }
+
+    /// <summary>
+    /// Unix timestamp for when the mute expires
+    /// </summary>
     public long MuteExpiration { get; private set; }
+
+    /// <summary>
+    /// Last message fo chat
+    /// </summary>
     public Message? LastMessage { get; private set; }
 
 

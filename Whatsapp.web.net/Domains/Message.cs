@@ -2,6 +2,9 @@
 
 namespace Whatsapp.web.net.Domains;
 
+/// <summary>
+/// Represents a Message on WhatsApp
+/// </summary>
 public class Message
 {
     /// <summary>
@@ -147,13 +150,19 @@ public class Message
     /// </summary>
     public bool IsEphemeral { get; private set; }
 
+
+    /// <summary>
+    /// Links included in the message.
+    /// Array of {link: string, isSuspicious: boolean}
+    /// </summary>
+    public List<dynamic> Links { get; private set; }
     public string? Title { get; private set; }
     public string? Description { get; private set; }
     public string? BusinessOwnerJid { get; private set; }
     public string? ProductId { get; private set; }
     public long LatestEditSenderTimestampMs { get; private set; }
     public MessageId? LatestEditMsgKey { get; private set; }
-    public List<dynamic> Links { get; private set; }
+
     public dynamic? DynamicReplyButtons { get; private set; }
     public string? SelectedButtonId { get; private set; }
     public string? SelectedRowId { get; private set; }

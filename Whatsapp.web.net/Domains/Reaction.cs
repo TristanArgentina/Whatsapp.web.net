@@ -1,5 +1,8 @@
 ﻿namespace Whatsapp.web.net.Domains;
 
+/// <summary>
+/// Represents a Reaction on WhatsApp
+/// </summary>
 public class Reaction
 {
     /// <summary>

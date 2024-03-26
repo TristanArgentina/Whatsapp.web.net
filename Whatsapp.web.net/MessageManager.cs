@@ -26,19 +26,19 @@ public class MessageManager : IMessageManager
         return await Send(from.Id, content);
     }
 
-    public async Task<Message> Send(UserId from, MessageMedia attachmentData, ReplayOptions options)
+    public async Task<Message> Send(UserId from, MessageMedia attachmentData, MessageEditOptions options)
     {
         return await Send(from.Id, attachmentData, options);
     }
 
-    public async Task<Message> Send(UserId fromId, object content, ReplayOptions? options = null)
+    public async Task<Message> Send(UserId fromId, object content, MessageEditOptions? options = null)
     {
         return await Send(fromId.Id, content, options);
     }
 
-    public async Task<Message> Send(string fromId, object content, ReplayOptions? options = null)
+    public async Task<Message> Send(string fromId, object content, MessageEditOptions? options = null)
     {
-        options ??= new ReplayOptions();
+        options ??= new MessageEditOptions();
         var internalOptions = BuildInternalOptions(options);
 
         var sendSeen = options.SendSeen;
@@ -111,7 +111,7 @@ public class MessageManager : IMessageManager
     }
 
 
-    private Dictionary<string, object?> BuildInternalOptions(ReplayOptions options)
+    private Dictionary<string, object?> BuildInternalOptions(MessageEditOptions options)
     {
         var internalOptions = new Dictionary<string, object?>
         {
@@ -222,7 +222,7 @@ public class MessageManager : IMessageManager
         return new ReactionList(data);
     }
 
-    public async Task<Message?> Edit(MessageId msgId, string content, ReplayOptions? options = null)
+    public async Task<Message?> Edit(MessageId msgId, string content, MessageEditOptions? options = null)
     {
         if (!msgId.FromMe) return null;
 
@@ -263,14 +263,14 @@ public class MessageManager : IMessageManager
         return quotedMsg == null ? null : new Message(quotedMsg);
     }
 
-    public async Task<Message> Reply(Message msg, object content, string? contactId = null, ReplayOptions? options = null)
+    public async Task<Message> Reply(Message msg, object content, string? contactId = null, MessageEditOptions? options = null)
     {
         if (string.IsNullOrEmpty(contactId))
         {
             contactId = msg.GetContactId().Id;
         }
 
-        options ??= new ReplayOptions();
+        options ??= new MessageEditOptions();
         options.QuotedMessageId = msg.Id;
 
         return await Send(contactId, content, options);

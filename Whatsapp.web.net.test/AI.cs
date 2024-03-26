@@ -20,10 +20,6 @@ public class AI
 
     public async Task<string> Ask(string idId, string request)
     {
-        //var prompt = @"{{Mi equipo favorito es Boca.}}";
-        //var summarize = _kernel.CreateFunctionFromPrompt(prompt, executionSettings: new OpenAIPromptExecutionSettings { MaxTokens = 100 });
-
-        //return await _kernel.InvokeAsync(summarize, new() {["input"] = message}).Result.;
         if (!_histories.ContainsKey(idId)) _histories.Add(idId, new ChatHistory());
         var history = _histories[idId] ;
         var healthcareChat = _kernel.CreateFunctionFromPrompt(

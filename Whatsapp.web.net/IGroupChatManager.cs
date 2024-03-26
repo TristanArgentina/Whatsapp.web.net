@@ -4,6 +4,11 @@ namespace Whatsapp.web.net;
 
 public interface IGroupChatManager : IManager
 {
+    /// <summary>
+    /// Accept Group V4 Invite
+    /// </summary>
+    /// <param name="inviteInfo"></param>
+    /// <returns></returns>
     Task<InviteV4> AcceptInvite(InviteV4 inviteInfo);
     Task<List<string>> GetCommonGroups(string contactId);
 

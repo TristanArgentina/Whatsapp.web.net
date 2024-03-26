@@ -1,6 +1,6 @@
 ﻿namespace Whatsapp.web.net.Domains;
 
-public class ReplayOptions
+public class MessageEditOptions
 {
     public bool LinkPreview { get; set; } = true;
     public bool SendAudioAsVoice { get; set; }

@@ -2,18 +2,33 @@
 
 namespace Whatsapp.web.net.Domains;
 
+/// <summary>
+/// Represents a Group Chat on WhatsApp
+/// </summary>
 public class GroupChat : Chat
 {
+    /// <summary>
+    /// Gets the group owner
+    /// </summary>
     public UserId Owner { get; set; }
 
+    /// <summary>
+    /// Gets the date at which the group was created
+    /// </summary>
     public DateTime Creation { get; set; }
 
+    /// <summary>
+    /// Gets the group description
+    /// </summary>
     public string Description { get; set; }
 
     public bool Announce { get; set; }
 
     public bool Restrict { get; set; }
 
+    /// <summary>
+    /// Gets the group participants
+    /// </summary>
     public List<GroupParticipant> Participants { get; set; }
 
     public GroupChat(dynamic? data)
