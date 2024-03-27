@@ -1,6 +1,4 @@
-﻿using Whatsapp.web.net.Domains;
-
-namespace Whatsapp.web.net.EventArgs;
+﻿namespace Whatsapp.web.net.EventArgs;
 
 public class ChatArchivedEventArgs : DispatcherEventArg
 {

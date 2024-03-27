@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whatsapp.web.net", "Whatsap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Whatsapp.web.net.test", "Whatsapp.web.net.test\Whatsapp.web.net.test.csproj", "{8A2F1E01-1854-4D60-A674-159753079CBD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatbotAI.net", "ChatbotAI.net\ChatbotAI.net.csproj", "{D754D08C-BF9E-4A16-B824-B20C97A29A80}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8A2F1E01-1854-4D60-A674-159753079CBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A2F1E01-1854-4D60-A674-159753079CBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A2F1E01-1854-4D60-A674-159753079CBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D754D08C-BF9E-4A16-B824-B20C97A29A80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D754D08C-BF9E-4A16-B824-B20C97A29A80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D754D08C-BF9E-4A16-B824-B20C97A29A80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D754D08C-BF9E-4A16-B824-B20C97A29A80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

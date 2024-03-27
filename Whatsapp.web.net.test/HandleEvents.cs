@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using ChatbotAI.net;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.EventArgs;
 using Whatsapp.web.net.Extensions;
@@ -50,10 +51,7 @@ public class HandleEvents
 
     private static EventHandler<ReadyEventArgs>? OnReadyEvent()
     {
-        return (sender, args) =>
-        {
-            Console.WriteLine("READY");
-        };
+        return (sender, args) => { Console.WriteLine("READY"); };
     }
 
 
@@ -156,10 +154,7 @@ public class HandleEvents
 
     private static EventHandler<DisconnectedEventArgs>? OnDisconnectedEvent()
     {
-        return (sender, args) =>
-        {
-            Console.WriteLine("Client was logged out " + args.State);
-        };
+        return (sender, args) => { Console.WriteLine("Client was logged out " + args.State); };
     }
 
     private EventHandler<IncomingCallEventArgs>? OnIncomingCallEvent(bool rejectCalls)
@@ -167,17 +162,15 @@ public class HandleEvents
         return async (sender, args) =>
         {
             Console.WriteLine("Call received, rejecting. GOTO Line 261 to disable " + args.Call);
-            if (rejectCalls)  args.Call.Reject(_client);
-            await _client.Message.Send(args.Call.From, $"[{(args.Call.FromMe ? "Outgoing" : "Incoming")}] Phone call from {args.Call.From}, type {(args.Call.IsGroup ? "group" : "")} {(args.Call.IsVideo ? "video" : "audio")} call. {(rejectCalls ? "This call was automatically rejected by the script." : "")}");
+            if (rejectCalls) args.Call.Reject(_client);
+            await _client.Message.Send(args.Call.From,
+                $"[{(args.Call.FromMe ? "Outgoing" : "Incoming")}] Phone call from {args.Call.From}, type {(args.Call.IsGroup ? "group" : "")} {(args.Call.IsVideo ? "video" : "audio")} call. {(rejectCalls ? "This call was automatically rejected by the script." : "")}");
         };
     }
 
     private static EventHandler<StateChangedEventArg>? OnStateChangedEvent()
     {
-        return (sender, args) =>
-        {
-            Console.WriteLine("CHANGE STATE " + args.State);
-        };
+        return (sender, args) => { Console.WriteLine("CHANGE STATE " + args.State); };
     }
 
     private static EventHandler<GroupUpdateEventArgs>? OnGroupUpdateEvent()
@@ -266,6 +259,15 @@ public class HandleEvents
             // Fired on all message creations, including your own
             if (msg.Id.FromMe)
             {
+                if (msg.Type == MessageTypes.VOICE)
+                {
+                    var downloadMedia = await msg.DownloadMedia(_client);
+                    var audioBytes = Convert.FromBase64String(downloadMedia.Data);
+                    using var memoryStream = new MemoryStream(audioBytes);
+                    var text = _ai.ConvertToText("test.mp3", memoryStream).Result;
+
+                    //Utils.SaveToMp3(downloadMedia.Data, "test.mp3");
+                }
             }
 
             if (msg.Body.StartsWith("AI:"))
@@ -290,10 +292,7 @@ public class HandleEvents
 
     private static EventHandler<LoadingScreenEventArg>? OnLoadingScreenEvent()
     {
-        return (sender, args) =>
-        {
-            Console.WriteLine($"LOADING SCREEN {args.Percent}% {args.Message}");
-        };
+        return (sender, args) => { Console.WriteLine($"LOADING SCREEN {args.Percent}% {args.Message}"); };
     }
 
     private EventHandler<MessageReceivedEventArgs>? OnMessageReceivedEvent()
@@ -348,7 +347,7 @@ public class HandleEvents
             else if (msg.Body.StartsWith("!preview "))
             {
                 var text = msg.Body.Substring(9);
-                await msg.Reply(_client, text, null, new MessageOptions { LinkPreview = true });
+                await msg.Reply(_client, text, null, new MessageOptions {LinkPreview = true});
             }
             else if (msg.Body.StartsWith("!desc "))
             {
@@ -390,8 +389,9 @@ public class HandleEvents
             }
             else if (msg.Body.StartsWith("!addmembers"))
             {
-                var group = (GroupChat)await msg.GetChat(_client);
-                var result = await group.AddParticipants(_client, new[] { "number1@c.us", "number2@c.us", "number3@c.us" });
+                var group = (GroupChat) await msg.GetChat(_client);
+                var result =
+                    await group.AddParticipants(_client, new[] {"number1@c.us", "number2@c.us", "number3@c.us"});
                 Console.WriteLine(result);
             }
             else if (msg.Body == "!creategroup")
@@ -461,13 +461,14 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var attachmentData = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, attachmentData, new MessageOptions { Caption = "Here's your requested media." });
+                    await _client.Message.Send(msg.From, attachmentData,
+                        new MessageOptions {Caption = "Here's your requested media."});
                 }
 
                 if (quotedMsg.HasMedia && quotedMsg.Type == "audio")
                 {
                     var audio = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, audio, new MessageOptions { SendAudioAsVoice = true });
+                    await _client.Message.Send(msg.From, audio, new MessageOptions {SendAudioAsVoice = true});
                 }
             }
             else if (msg.Body == "!isviewonce" && msg.HasQuotedMsg)
@@ -476,13 +477,13 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var media = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, media, new MessageOptions { IsViewOnce = true });
+                    await _client.Message.Send(msg.From, media, new MessageOptions {IsViewOnce = true});
                 }
             }
             else if (msg.Body == "!location")
             {
                 await msg.Reply(_client, new Location(37.422, -122.084));
-                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions { Name = "Googleplex" }));
+                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions {Name = "Googleplex"}));
                 await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions
                 {
                     Address = "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA"
@@ -491,7 +492,7 @@ public class HandleEvents
                 {
                     Name = "Googleplex",
                     Address = "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA",
-                    
+
                 }));
             }
             else if (msg.Location != null)
@@ -504,10 +505,7 @@ public class HandleEvents
 
     private static EventHandler<AuthenticationFailureEventArgs>? OnAuthenticationFailureEvent()
     {
-        return (sender, args) =>
-        {
-            Console.Error.WriteLine("AUTHENTICATION FAILURE " + args.Payload);
-        };
+        return (sender, args) => { Console.Error.WriteLine("AUTHENTICATION FAILURE " + args.Payload); };
     }
 
     private static EventHandler<AuthenticatedEventArg>? OnAuthenticatedEvent()
@@ -524,7 +522,7 @@ public class HandleEvents
     {
         return (sender, args) =>
         {
-                
+
             Console.WriteLine("QR RECEIVED " + args.Qr);
 
             try
@@ -542,4 +540,6 @@ public class HandleEvents
 
     }
 
+    
+   
 }

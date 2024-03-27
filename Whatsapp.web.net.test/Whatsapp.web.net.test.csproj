@@ -9,24 +9,28 @@
 
   <ItemGroup>
     <PackageReference Include="Logging.Net" Version="1.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.6.3" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Milvus" Version="1.6.3-alpha" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.6.3" />
     <PackageReference Include="NUnit" Version="4.1.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.3" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.3" />
-    <PackageReference Include="System.Numerics.Tensors" Version="8.0.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.9" />
     <PackageReference Include="ZXing.Net.Bindings.Windows.Compatibility" Version="0.16.12" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ChatbotAI.net\ChatbotAI.net.csproj" />
     <ProjectReference Include="..\Whatsapp.web.net\Whatsapp.web.net.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="image.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

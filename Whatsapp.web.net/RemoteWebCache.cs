@@ -22,13 +22,11 @@ public class RemoteWebCache : WebCache
 
         try
         {
-            using (var httpClient = new HttpClient())
+            using var httpClient = new HttpClient();
+            var cachedRes = await httpClient.GetAsync(remotePath);
+            if (cachedRes.IsSuccessStatusCode)
             {
-                var cachedRes = await httpClient.GetAsync(remotePath);
-                if (cachedRes.IsSuccessStatusCode)
-                {
-                    return await cachedRes.Content.ReadAsStringAsync();
-                }
+                return await cachedRes.Content.ReadAsStringAsync();
             }
         }
         catch (Exception err)

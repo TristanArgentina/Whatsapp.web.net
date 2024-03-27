@@ -196,19 +196,17 @@ public class RemoteAuth : BaseAuthStrategy
     {
         await Task.Run(() =>
         {
-            using (var zip = ZipFile.OpenRead(compressedSessionPath))
+            using var zip = ZipFile.OpenRead(compressedSessionPath);
+            foreach (var entry in zip.Entries)
             {
-                foreach (var entry in zip.Entries)
+                var destinationPath = Path.Combine(userDataDir, entry.FullName);
+                if (entry.FullName.EndsWith("/") || entry.FullName.EndsWith("\\"))
                 {
-                    var destinationPath = Path.Combine(userDataDir, entry.FullName);
-                    if (entry.FullName.EndsWith("/") || entry.FullName.EndsWith("\\"))
-                    {
-                        Directory.CreateDirectory(destinationPath);
-                    }
-                    else
-                    {
-                        entry.ExtractToFile(destinationPath, true);
-                    }
+                    Directory.CreateDirectory(destinationPath);
+                }
+                else
+                {
+                    entry.ExtractToFile(destinationPath, true);
                 }
             }
         });
