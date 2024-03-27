@@ -4,7 +4,10 @@ using FFMpegCore;
 using FFMpegCore.Arguments;
 using FFMpegCore.Pipes;
 using PuppeteerSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using Whatsapp.web.net.Domains;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace Whatsapp.web.net;
 
@@ -67,42 +70,42 @@ public class Util
     {
         MessageMedia webpMedia;
 
-        if (media.MimeType.Contains("image"))
+        if (media.Mimetype.Contains("image"))
             webpMedia = await FormatImageToWebpSticker(media, pupPage);
-        else if (media.MimeType.Contains("video"))
+        else if (media.Mimetype.Contains("video"))
             webpMedia = await FormatVideoToWebpSticker(media);
         else
             throw new Exception("Invalid media format");
 
-        if (metadata.Name != null || metadata.Author != null)
-        {
-            var img = new WebpImage();
-            var hash = GenerateHash(32);
-            var stickerPackId = hash;
-            var packname = metadata.Name;
-            var author = metadata.Author;
-            var categories = metadata.Categories ?? [""];
-            var json = new { sticker_pack_id = stickerPackId, sticker_pack_name = packname, sticker_pack_publisher = author, emojis = categories };
-            var exifAttr = new byte[] { 0x49, 0x49, 0x2A, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00 };
-            var jsonBuffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json));
-            var exif = new byte[exifAttr.Length + jsonBuffer.Length];
-            Buffer.BlockCopy(exifAttr, 0, exif, 0, exifAttr.Length);
-            Buffer.BlockCopy(jsonBuffer, 0, exif, exifAttr.Length, jsonBuffer.Length);
-            Buffer.BlockCopy(BitConverter.GetBytes(jsonBuffer.Length), 0, exif, 14, 4);
-            await img.Load(Convert.FromBase64String(webpMedia.Data));
-            img.Exif = exif;
-            webpMedia.Data = Convert.ToBase64String(await img.Save());
-        }
+        if (metadata.Name == null && metadata.Author == null) return webpMedia;
+        
+        var img = Image.Load(Convert.FromBase64String(webpMedia.Data));
+        var hash = GenerateHash(32);
+        var stickerPackId = hash;
+        var packName = metadata.Name;
+        var author = metadata.Author;
+        var categories = metadata.Categories ?? [""];
+        var json = new { sticker_pack_id = stickerPackId, sticker_pack_name = packName, sticker_pack_publisher = author, emojis = categories };
+        var exifAttr = new byte[] { 0x49, 0x49, 0x2A, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00 };
+        var jsonBuffer = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json));
+        var exif = new byte[exifAttr.Length + jsonBuffer.Length];
+        Buffer.BlockCopy(exifAttr, 0, exif, 0, exifAttr.Length);
+        Buffer.BlockCopy(jsonBuffer, 0, exif, exifAttr.Length, jsonBuffer.Length);
+        Buffer.BlockCopy(BitConverter.GetBytes(jsonBuffer.Length), 0, exif, 14, 4);
+        img.Metadata.ExifProfile = new ExifProfile(exif);
+        using var stream = new MemoryStream();
+        await img.SaveAsync(stream, new WebpEncoder());
+        webpMedia.Data = Convert.ToBase64String(stream.ToArray());
 
         return webpMedia;
     }
 
     public static async Task<MessageMedia> FormatImageToWebpSticker(MessageMedia media, IPage pupPage)
     {
-        if (!media.MimeType.Contains("image"))
+        if (!media.Mimetype.Contains("image"))
             throw new Exception("media is not an image");
 
-        if (media.MimeType.Contains("webp"))
+        if (media.Mimetype.Contains("webp"))
             return media;
 
         return await pupPage.EvaluateFunctionAsync<MessageMedia>(@"(media) => {
@@ -110,6 +113,20 @@ public class Util
         }", media);
     }
 
+    public static async Task<MessageMedia> FormatImageToWebpSticker(MessageMedia media, Page pupPage)
+    {
+        if (!media.Mimetype.Contains("image"))
+            throw new Exception("media is not an image");
+
+        if (media.Mimetype.Contains("webp"))
+            return media;
+
+        var evaluateScript = $"window.WWebJS.toStickerData({{ mimeType: '{media.Mimetype}', data: '{media.Data}' }})";
+        var result = await pupPage.EvaluateExpressionAsync<string>(evaluateScript);
+
+        // Create and return a new MessageMedia with the webp data
+        return new MessageMedia("image/webp", result);
+    }
 
 
     public static string GenerateHash(int length)
@@ -128,27 +145,14 @@ public class Util
     }
 
 
-    public static async Task<MessageMedia> FormatImageToWebpSticker(MessageMedia media, Page pupPage)
-    {
-        if (!media.MimeType.Contains("image"))
-            throw new Exception("media is not an image");
 
-        if (media.MimeType.Contains("webp"))
-            return media;
-
-        var evaluateScript = $"window.WWebJS.toStickerData({{ mimeType: '{media.MimeType}', data: '{media.Data}' }})";
-        var result = await pupPage.EvaluateExpressionAsync<string>(evaluateScript);
-
-        // Create and return a new MessageMedia with the webp data
-        return new MessageMedia("image/webp", result);
-    }
 
     public static async Task<MessageMedia> FormatVideoToWebpSticker(MessageMedia media)
     {
-        if (!media.MimeType.Contains("video"))
+        if (!media.Mimetype.Contains("video"))
             throw new Exception("media is not a video");
 
-        var videoType = media.MimeType.Split('/')[1];
+        var videoType = media.Mimetype.Split('/')[1];
 
         var tempFile = Path.Combine(Path.GetTempPath(), $"{Path.GetRandomFileName()}.webp");
 
@@ -173,6 +177,6 @@ public class Util
         File.Delete(tempFile);
 
 
-        return new MessageMedia(media.FileName, "image/webp", data);
+        return new MessageMedia(media.Filename, "image/webp", data);
     }
 }

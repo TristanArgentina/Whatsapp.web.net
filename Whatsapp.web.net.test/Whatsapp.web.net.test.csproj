@@ -11,11 +11,13 @@
     <PackageReference Include="Logging.Net" Version="1.1.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.6.3" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Milvus" Version="1.6.3-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.6.3" />
     <PackageReference Include="NUnit" Version="4.1.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.3" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.3" />
+    <PackageReference Include="System.Numerics.Tensors" Version="8.0.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.9" />
     <PackageReference Include="ZXing.Net.Bindings.Windows.Compatibility" Version="0.16.12" />
   </ItemGroup>

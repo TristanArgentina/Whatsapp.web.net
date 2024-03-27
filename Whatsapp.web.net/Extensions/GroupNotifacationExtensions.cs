@@ -26,7 +26,7 @@ public static class GroupNotifacationExtensions
         return recipients;
     }
 
-    public static async Task<Message> Reply(this GroupNotification groupNotification, Client client,dynamic content, MessageEditOptions? options = null)
+    public static async Task<Message> Reply(this GroupNotification groupNotification, Client client,dynamic content, MessageOptions? options = null)
     {
         return await client.Message.Send(groupNotification.ChatId.Id, content, options);
     }

@@ -26,19 +26,19 @@ public class MessageManager : IMessageManager
         return await Send(from.Id, content);
     }
 
-    public async Task<Message> Send(UserId from, MessageMedia attachmentData, MessageEditOptions options)
+    public async Task<Message> Send(UserId from, MessageMedia attachmentData, MessageOptions options)
     {
         return await Send(from.Id, attachmentData, options);
     }
 
-    public async Task<Message> Send(UserId fromId, object content, MessageEditOptions? options = null)
+    public async Task<Message> Send(UserId fromId, object content, MessageOptions? options = null)
     {
         return await Send(fromId.Id, content, options);
     }
 
-    public async Task<Message> Send(string fromId, object content, MessageEditOptions? options = null)
+    public async Task<Message> Send(string fromId, object content, MessageOptions? options = null)
     {
-        options ??= new MessageEditOptions();
+        options ??= new MessageOptions();
         var internalOptions = BuildInternalOptions(options);
 
         var sendSeen = options.SendSeen;
@@ -111,7 +111,7 @@ public class MessageManager : IMessageManager
     }
 
 
-    private Dictionary<string, object?> BuildInternalOptions(MessageEditOptions options)
+    private Dictionary<string, object?> BuildInternalOptions(MessageOptions options)
     {
         var internalOptions = new Dictionary<string, object?>
         {
@@ -222,14 +222,15 @@ public class MessageManager : IMessageManager
         return new ReactionList(data);
     }
 
-    public async Task<Message?> Edit(MessageId msgId, string content, MessageEditOptions? options = null)
+    public async Task<Message?> Edit(MessageId msgId, string content, MessageOptions? options = null)
     {
         if (!msgId.FromMe) return null;
 
-        if (options?.Mentions != null)
-        {
-            options.Mentions = options.Mentions.Select(m => m is Contact c ? c.Id : m).ToList();
-        }
+        //TODO: review
+        //if (options?.Mentions != null)
+        //{
+        //    options.Mentions = options.Mentions.Select(m => m is Contact c ? c.Id : m).ToList();
+        //}
 
         var internalOptions = new
         {
@@ -263,14 +264,14 @@ public class MessageManager : IMessageManager
         return quotedMsg == null ? null : new Message(quotedMsg);
     }
 
-    public async Task<Message> Reply(Message msg, object content, string? contactId = null, MessageEditOptions? options = null)
+    public async Task<Message> Reply(Message msg, object content, string? contactId = null, MessageOptions? options = null)
     {
         if (string.IsNullOrEmpty(contactId))
         {
             contactId = msg.GetContactId().Id;
         }
 
-        options ??= new MessageEditOptions();
+        options ??= new MessageOptions();
         options.QuotedMessageId = msg.Id;
 
         return await Send(contactId, content, options);

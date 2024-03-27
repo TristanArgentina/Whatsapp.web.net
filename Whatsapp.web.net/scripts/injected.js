@@ -35,7 +35,12 @@
     window.Store.UploadUtils = window.mR.findModule((module) => (module.default && module.default.encryptAndUpload) ? module.default : null).default;
     window.Store.UserConstructor = window.mR.findModule((module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null).default;
     window.Store.Validators = window.mR.findModule('findLinks');
+
+
     window.Store.VCard = window.mR.findModule('vcardFromContactModel');
+    window.Store.VCard.vcardGetNameFromParsed = window.mR.findModule('vcardGetNameFromParsed').vcardGetNameFromParsed;
+    window.Store.VCard.parseVcard = window.mR.findModule(791648).parseVcard;
+
     window.Store.WidFactory = window.mR.findModule('createWid');
     window.Store.ProfilePic = window.mR.findModule('profilePicResync');
     window.Store.PresenceUtils = window.mR.findModule('sendPresenceAvailable');
@@ -272,13 +277,15 @@ function loadUtils() {
             delete options.parseVCards;
             try {
                 const parsed = window.Store.VCard.parseVcard(content);
+                console.log(`parsed: ${JSON.stringify(parsed)}`);
                 if (parsed) {
                     vcardOptions = {
                         type: 'vcard',
                         vcardFormattedName: window.Store.VCard.vcardGetNameFromParsed(parsed)
                     };
                 }
-            } catch (_) {
+            } catch (err) {
+                console.error(err);
                 // not a vcard
             }
         }
@@ -354,6 +361,7 @@ function loadUtils() {
 
         const ephemeralFields = window.Store.EphemeralFields.getEphemeralFields(chat);
 
+        
         const message = {
             ...options,
             id: newMsgId,
@@ -377,7 +385,6 @@ function loadUtils() {
             ...listOptions,
             ...extraOptions
         };
-
         await window.Store.SendMessage.addAndSendMsgToChat(chat, message);
         return window.Store.Msg.get(newMsgId);
     };
@@ -442,6 +449,7 @@ function loadUtils() {
     };
 
     window.WWebJS.processStickerData = async (mediaInfo) => {
+        console.log(`mediaInfo: ${JSON.stringify(mediaInfo)}`);
         if (mediaInfo.mimetype !== 'image/webp') throw new Error('Invalid media type');
 
         const file = window.WWebJS.mediaInfoToFile(mediaInfo);

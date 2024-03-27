@@ -1,10 +1,15 @@
-﻿namespace Whatsapp.web.net.Domains;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace Whatsapp.web.net.Domains;
 
 /// <summary>
 /// Location information
 /// </summary>
 public class Location
 {
+    private LocationOptions? _locationOptions;
+
     /// <summary>
     /// Location latitude
     /// </summary>
@@ -18,18 +23,32 @@ public class Location
     /// <summary>
     /// Location full description
     /// </summary>
-    public LocationOptions? Description { get; private set; }
+    public string Description => _locationOptions?.ToString() ?? "";
 
-    public Location(double latitude, double longitude, LocationOptions? description = null)
+    /// <summary>
+    /// URL address to be shown within a location message
+    /// </summary>
+    public string? Url { get; set; }
+
+
+    public Location(double latitude, double longitude, LocationOptions? locationOptions = null, string? url = null)
     {
+        _locationOptions = locationOptions;
         Latitude = latitude;
         Longitude = longitude;
-        Description = description;
+        Url = url;
     }
 
+    [JsonConstructor]
     public Location(dynamic data)
     {
         Patch(data);
+    }
+
+    public Location(double latitude, double longitude, string description)
+    : this(latitude, longitude, new LocationOptions { Name = description })
+    {
+
     }
 
     private void Patch(dynamic? data)
@@ -38,8 +57,9 @@ public class Location
 
         Latitude = (double)data.lat;
         Longitude = (double)data.lng;
-        Description = data.loc is string loc
-            ? new LocationOptions() { Name = loc.Split('\n')[0], Address = loc.Split('\n')[1], Url = data.clientUrl }
+        Url = data.clientUrl;
+        _locationOptions = data.loc is not null && data.loc.Type == JTokenType.String && !string.IsNullOrEmpty(data.loc)
+            ? new LocationOptions { Name = data.loc.Value.Split('\n')[0], Address = data.loc.Value.Split('\n')[1] }
             : null;
     }
 }

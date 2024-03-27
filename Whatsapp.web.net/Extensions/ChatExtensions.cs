@@ -4,7 +4,7 @@ namespace Whatsapp.web.net.Extensions;
 
 public static class ChatExtensions
 {
-    public static async Task<Message> SendMessage(this Chat chat, Client client, object content, MessageEditOptions? options = null)
+    public static async Task<Message> SendMessage(this Chat chat, Client client, object content, MessageOptions? options = null)
     {
         return await client.Message.Send(chat.Id, content, options);
     }

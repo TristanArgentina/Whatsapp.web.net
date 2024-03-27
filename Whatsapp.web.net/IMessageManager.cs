@@ -6,11 +6,11 @@ public interface IMessageManager : IManager
 {
     Task<Message> Send(UserId from, string content);
 
-    Task<Message> Send(UserId from, MessageMedia attachmentData, MessageEditOptions options);
+    Task<Message> Send(UserId from, MessageMedia attachmentData, MessageOptions options);
 
-    Task<Message> Send(UserId fromId, object content, MessageEditOptions? options = null);
+    Task<Message> Send(UserId fromId, object content, MessageOptions? options = null);
 
-    Task<Message> Send(string fromId, object content, MessageEditOptions? options = null);
+    Task<Message> Send(string fromId, object content, MessageOptions? options = null);
 
     /// <summary>
     /// React to this message with an emoji
@@ -91,7 +91,7 @@ public interface IMessageManager : IManager
     /// <param name="content"></param>
     /// <param name="options">Options used when editing the message</param>
     /// <returns></returns>
-    Task<Message?> Edit(MessageId msgId, string content, MessageEditOptions? options = null);
+    Task<Message?> Edit(MessageId msgId, string content, MessageOptions? options = null);
 
     /// <summary>
     ///     Reloads this Message object's data in-place with the latest values from WhatsApp Web.
@@ -116,5 +116,5 @@ public interface IMessageManager : IManager
     /// <param name="contactId"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    Task<Message> Reply(Message msg, object content, string? contactId = null, MessageEditOptions? options = null);
+    Task<Message> Reply(Message msg, object content, string? contactId = null, MessageOptions? options = null);
 }

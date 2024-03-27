@@ -12,7 +12,7 @@ var options = new WhatsappOptions
     FfmpegPath = @"C:\ffmpeg",
     Puppeteer = new PuppeteerOptions
     {
-//        ExecutablePath = @"C:\chromium-browser\chrome.exe"
+        //        ExecutablePath = @"C:\chromium-browser\chrome.exe"
         ExecutablePath = @"C:\Program Files\Google\Chrome\Application\chrome.exe",
         Headless = false
     },
@@ -29,9 +29,9 @@ var parserInjected = new JavaScriptParser(@".\scripts\injected.js");
 var eventDispatcher = new EventDispatcher();
 var registerEventService = new RegisterEventService(eventDispatcher, parserFunctions, options);
 var client = new Client(parserFunctions, parserInjected, eventDispatcher, registerEventService, options);
-
+var ai = new AI("gpt-3.5-turbo", "**********");
 await client.Initialize().Result;
-var handleEvents = new HandleEvents(client, eventDispatcher);
+var handleEvents = new HandleEvents(client, eventDispatcher, ai);
 handleEvents.SetHandle();
 eventDispatcher.EmitReady();
 

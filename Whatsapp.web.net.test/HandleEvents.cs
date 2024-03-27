@@ -9,13 +9,13 @@ public class HandleEvents
 {
     private readonly Client _client;
     private readonly IEventDispatcher _eventDispatcher;
-    private readonly AI _ai;
+    private readonly IAI _ai;
 
-    public HandleEvents(Client client, IEventDispatcher eventDispatcher)
+    public HandleEvents(Client client, IEventDispatcher eventDispatcher, IAI ai)
     {
         _client = client;
         _eventDispatcher = eventDispatcher;
-        _ai = new AI();
+        _ai = ai;
     }
 
     public void SetHandle()
@@ -38,7 +38,7 @@ public class HandleEvents
         _eventDispatcher.StateChangedEvent += OnStateChangedEvent();
 
         // Change to false if you don't want to reject incoming calls
-        bool rejectCalls = true;
+        var rejectCalls = true;
 
         _eventDispatcher.IncomingCallEvent += OnIncomingCallEvent(rejectCalls);
         _eventDispatcher.DisconnectedEvent += OnDisconnectedEvent();
@@ -303,11 +303,11 @@ public class HandleEvents
             var msg = args.Message;
             Console.WriteLine("MESSAGE RECEIVED " + msg);
 
-            if (msg.Body.StartsWith("AI:"))
-            {
-                var response = _ai.Ask(msg.From.Id, msg.Body.Substring(3)).Result;
-                await msg.Reply(_client, response);
-            }
+            //if (msg.Body.StartsWith("AI:"))
+            //{
+            //    var response = _ai.Ask(msg.From.Id, msg.Body.Substring(3)).Result;
+            //    await msg.Reply(_client, response);
+            //}
 
             if (msg.Body == "!ping reply")
             {
@@ -348,7 +348,7 @@ public class HandleEvents
             else if (msg.Body.StartsWith("!preview "))
             {
                 var text = msg.Body.Substring(9);
-                await msg.Reply(_client, text, null, new MessageEditOptions { LinkPreview = true });
+                await msg.Reply(_client, text, null, new MessageOptions { LinkPreview = true });
             }
             else if (msg.Body.StartsWith("!desc "))
             {
@@ -396,7 +396,7 @@ public class HandleEvents
             }
             else if (msg.Body == "!creategroup")
             {
-                string[] participantsToAdd = { "number1@c.us", "number2@c.us", "number3@c.us" };
+                string[] participantsToAdd = ["number1@c.us", "number2@c.us", "number3@c.us"];
                 var result = await _client.Group.CreateGroup("Group Title", participantsToAdd);
                 Console.WriteLine(result);
             }
@@ -439,7 +439,7 @@ public class HandleEvents
                 var attachmentData = await msg.DownloadMedia(_client);
                 await msg.Reply(_client, $@"
                         *Media info*
-                        MimeType: {attachmentData.MimeType}
+                        MimeType: {attachmentData.Mimetype}
                         Filename: {attachmentData.Filename}
                         Data (length): {attachmentData.Data.Length}
                     ");
@@ -461,13 +461,13 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var attachmentData = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, attachmentData, new MessageEditOptions { Caption = "Here's your requested media." });
+                    await _client.Message.Send(msg.From, attachmentData, new MessageOptions { Caption = "Here's your requested media." });
                 }
 
                 if (quotedMsg.HasMedia && quotedMsg.Type == "audio")
                 {
                     var audio = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, audio, new MessageEditOptions { SendAudioAsVoice = true });
+                    await _client.Message.Send(msg.From, audio, new MessageOptions { SendAudioAsVoice = true });
                 }
             }
             else if (msg.Body == "!isviewonce" && msg.HasQuotedMsg)
@@ -476,7 +476,7 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var media = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, media, new MessageEditOptions { IsViewOnce = true });
+                    await _client.Message.Send(msg.From, media, new MessageOptions { IsViewOnce = true });
                 }
             }
             else if (msg.Body == "!location")
@@ -491,7 +491,7 @@ public class HandleEvents
                 {
                     Name = "Googleplex",
                     Address = "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA",
-                    Url = "https://google.com"
+                    
                 }));
             }
             else if (msg.Location != null)

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Whatsapp.web.net.Domains;
 
@@ -113,7 +114,7 @@ public class Message
     /// <summary>
     /// List of vCards contained in the message.
     /// </summary>
-    public List<string>? VCards { get; private set; }
+    public List<VCard>? VCards { get; private set; }
 
     /// <summary>
     /// Group Invite Data
@@ -171,6 +172,7 @@ public class Message
     public List<string> Recipients { get; set; } = [];
     public List<string> TemplateParams { get; set; } = [];
 
+    [JsonConstructor]
     public Message(dynamic data)
     {
         if (data != null)
@@ -206,9 +208,9 @@ public class Message
             ? new Location(data)
             : null;
         VCards = data.type == MessageTypes.CONTACT_CARD_MULTI
-            ? data.vcardList.Select((Func<dynamic, string>)(c => c.vcard)).ToList()
+            ? data.vcardList.Select((Func<dynamic, VCard>)(c =>new VCard(c.vcard))).ToList()
             : data.type == MessageTypes.CONTACT_CARD
-                ? new List<string> { data.body.ToString() }
+                ? new List<VCard> { new VCard( data.body) }
                 : null;
         InviteV4 = data.type == MessageTypes.GROUP_INVITE
             ? new InviteV4(data)

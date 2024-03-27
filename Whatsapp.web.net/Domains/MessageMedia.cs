@@ -11,7 +11,7 @@ public class MessageMedia
     /// <summary>
     /// MIME type of the attachment
     /// </summary>
-    public string MimeType { get; set; }
+    public string Mimetype { get; set; }
 
     /// <summary>
     /// Base64 encoded data that represents the file
@@ -28,15 +28,10 @@ public class MessageMedia
     /// </summary>
     public long? FileSize { get; private set; }
 
-    /// <summary>
-    /// Document file name. Value can be null
-    /// </summary>
-    public string FileName { get; set; }
-
-    public MessageMedia(string filename, string mimeType, string data, long? fileSize = null)
+    public MessageMedia(string filename, string mimetype, string data, long? fileSize = null)
     {
         Data = data;
-        MimeType = mimeType;
+        Mimetype = mimetype;
         Filename = filename;
         FileSize = fileSize;
 
@@ -51,16 +46,16 @@ public class MessageMedia
         }
     }
 
-    public MessageMedia(string? mimeType, string? data)
+    public MessageMedia(string? mimetype, string? data)
     {
         Data = data;
-        MimeType = mimeType;
+        Mimetype = mimetype;
     }
 
     private void Patch(dynamic data)
     {
         Data = data.data;
-        MimeType = data.mimetype;
+        Mimetype = data.mimetype;
         Filename = data.filename;
         FileSize = data.filesize;
     }
@@ -107,7 +102,7 @@ public class MessageMedia
 
     protected bool Equals(MessageMedia other)
     {
-        return MimeType == other.MimeType && Data == other.Data && Filename == other.Filename;
+        return Mimetype == other.Mimetype && Data == other.Data && Filename == other.Filename;
     }
 
     public override bool Equals(object? obj)
@@ -120,6 +115,6 @@ public class MessageMedia
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(MimeType, Data, Filename);
+        return HashCode.Combine(Mimetype, Data, Filename);
     }
 }

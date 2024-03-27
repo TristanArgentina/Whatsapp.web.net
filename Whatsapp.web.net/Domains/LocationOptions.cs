@@ -5,15 +5,18 @@ public class LocationOptions
     /// <summary>
     /// Name for the location
     /// </summary>
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     /// <summary>
     /// Location address
     /// </summary>
-    public string Address { get; set; }
+    public string? Address { get; set; }
 
-    /// <summary>
-    /// URL address to be shown within a location message
-    /// </summary>
-    public string Url { get; set; }
+    public override string ToString()
+    {
+        if (!string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(Address) ) return Name;
+        if (string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Address) ) return Address;
+        if (!string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Address)) return $"{Name}\n{Address}";
+        return string.Empty;
+    }
 }
