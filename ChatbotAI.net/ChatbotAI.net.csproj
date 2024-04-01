@@ -7,12 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
     <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.6.3" />
     <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.6.3" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Milvus" Version="1.6.3-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.6.3" />
     <PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.6.3-preview" />
+    <PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.6.3-alpha" />
     <PackageReference Include="System.Numerics.Tensors" Version="8.0.0" />
 
   </ItemGroup>

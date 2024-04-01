@@ -9,7 +9,7 @@ public class MessageManagerTests
 {
     private Client? _client;
     private EventDispatcher? _eventDispatcher;
-    private readonly UserId _userId = new ContactId("*****", "c.us");
+    private readonly UserId _userId = new ContactId("**********", "c.us");
 
     [OneTimeSetUp]
     public async Task Setup()

@@ -1,8 +1,6 @@
-﻿using System.Collections.Concurrent;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Numerics.Tensors;
-using System.Text;
-using ChatbotAI.net.Plugins;
+using Azure.AI.OpenAI;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Milvus;
@@ -11,36 +9,37 @@ using Milvus.Client;
 
 namespace ChatbotAI.net;
 
-public class AI : IAI
+public class ChatBotAi : IChatBotAI
 {
-    private readonly string _apiKey;
+    private readonly OpenAIOptions _openAiOptions;
     private readonly Kernel _kernel;
-    private readonly ConcurrentDictionary<string, ChatHistory> _histories;
+    private ChatHistory _history;
+    private readonly OpenAIClient _openai;
+    private readonly IChatCompletionService _chatCompletionService;
 
-    public AI(string modelId, string apiKey)
+    public ChatBotAi(OpenAIOptions openAiOptions, Kernel kernel)
     {
-        _apiKey = apiKey;
-        var builder = Kernel.CreateBuilder();
-        builder.AddOpenAIChatCompletion(modelId, apiKey);
+        _openAiOptions = openAiOptions;
+        _kernel = kernel;
+        CreateHistory();
+        _openai = new OpenAIClient(openAiOptions.ApiKey);
+        _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
+    }
 
-
-#pragma warning disable SKEXP0010
-        builder.AddOpenAITextEmbeddingGeneration("text-embedding-ada-002", apiKey);
-#pragma warning restore SKEXP0010
-
-        _kernel = builder.Build();
-        _histories = new ConcurrentDictionary<string, ChatHistory>();
-
-
-
-        // TestEmbeding(apiKey);
+    private void CreateHistory()
+    {
+        _history = new ChatHistory(@"
+        Eres un asistente amigable, que vas a responder honestamente a las preguntas.
+        Tu nombre va a ser Venus.
+        No desperdicies palabras, utiliza oraciones cortas, claras y completas.
+        No utilice viñetas ni guiones.
+        Usa voz activa.
+        Maximizar el detalle, el significado enfoque en el contenido");
     }
 
     private static void TestEmbeding(string apiKey)
     {
-#pragma warning disable SKEXP0001 
-#pragma warning disable SKEXP0010 
-#pragma warning disable SKEXP0020 
+
         var input = "What is an amphibian?";
         string[] examples =
         {
@@ -58,7 +57,9 @@ public class AI : IAI
             "You ain't never had a friend like me.",
             "Rachel, Monica, Phoebe, Joey, Chandler, Ross",
         };
+#pragma warning disable SKEXP0010
         var embeddingGen = new OpenAITextEmbeddingGenerationService("text-embedding-3-small", apiKey);
+#pragma warning restore SKEXP0010
         var inputEmbedding = embeddingGen.GenerateEmbeddingsAsync([input]).Result[0];
         var exampleEmbeddings = embeddingGen.GenerateEmbeddingsAsync(examples).Result;
         var similarity = exampleEmbeddings.Select(e => TensorPrimitives.CosineSimilarity(e.Span, inputEmbedding.Span)).ToArray();
@@ -73,7 +74,9 @@ public class AI : IAI
 
         var endpoint = new Uri("http://localhost:19530");
         var milvusClient = new MilvusClient(endpoint);
+#pragma warning disable SKEXP0020
         var memoryStore = new MilvusMemoryStore(milvusClient);
+#pragma warning restore SKEXP0020
         var collectionName = "test-autino";
         //memoryStore.CreateCollectionAsync(collectionName);
         //var memoryRecordMetadata = new MemoryRecordMetadata(false, "1", "text", "description", "externalSourceName", "additionalMetadata");
@@ -92,50 +95,66 @@ public class AI : IAI
 
     public async Task<string> Ask(string idId, string request)
     {
-        var history = _histories.GetOrAdd(idId, []);
-        var healthcareChat = _kernel.CreateFunctionFromPrompt(
-            @"{{$history}}  
-             User: {{$request}}  
-             Asistente de viajes: "
-        );
-
-        var chatResult = _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(
-            healthcareChat,
-            new KernelArguments
-            {
-                { "request", request },
-                { "history", string.Join("\n", history.Select(x => x.Role + ": " + x.Content)) }
-            }
-        );
-
-
-        var response = new StringBuilder();
-        await foreach (var chunk in chatResult)
+        var settings = new OpenAIPromptExecutionSettings()
         {
-            request += chunk;
-            response.Append(chunk);
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+        };
+        _history.AddUserMessage(request);
+        var result = _chatCompletionService.GetStreamingChatMessageContentsAsync(_history, settings, _kernel);
+        var fullMessage = string.Empty;
+        await foreach (var content in result)
+        {
+            fullMessage += content.Content;
         }
-        history.AddUserMessage(request);
-        history.AddUserMessage(response.ToString());
-        return response.ToString();
+        _history.AddAssistantMessage(fullMessage);
+        return fullMessage;
     }
 
     public async Task<string> ConvertToText(string filePath, MemoryStream memoryStream)
     {
         var client = new HttpClient();
 
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _openAiOptions.ApiKey);
 
-        //using var memoryStream = new MemoryStream();
-        //await using var fs = File.OpenRead(filePath);
-        //await fs.CopyToAsync(memoryStream);
         var content = new MultipartFormDataContent
         {
-            { new StringContent("whisper-1"), "model" },
+            { new StringContent(_openAiOptions.Models.AudioTranscription), "model" },
             { new StringContent("srt"), "response_format" },
             { new ByteArrayContent(memoryStream.ToArray()), "file", filePath }
         };
         var response = await client.PostAsync("https://api.openai.com/v1/audio/transcriptions", content);
         return await response.Content.ReadAsStringAsync();
+    }
+
+    public byte[] GenerateSpeechFromText(string text)
+    {
+        var openai = new OpenAIClient(_openAiOptions.ApiKey);
+        var speechGenerationOptions = new SpeechGenerationOptions()
+        {
+            DeploymentName = _openAiOptions.Models.Speech,
+            Input = text,
+            Voice = new SpeechVoice("shimmer"),
+            ResponseFormat = new SpeechGenerationResponseFormat("opus"),
+            Speed = 1
+        };
+        var audio = openai.GenerateSpeechFromText(speechGenerationOptions);
+        return audio.Value.ToArray();
+    }
+
+    public string GetAudioTranscription(byte[] audio)
+    {
+        var binaryData = BinaryData.FromBytes(audio);
+        return GetAudioTranscription(binaryData);
+    }
+
+    public string GetAudioTranscription(BinaryData binaryData)
+    {
+        var audioTranscriptionOptions = new AudioTranscriptionOptions()
+        {
+            AudioData = binaryData,
+            DeploymentName = _openAiOptions.Models.AudioTranscription
+        };
+        var audioTranscription = _openai.GetAudioTranscription(audioTranscriptionOptions);
+        return audioTranscription.Value.Text;
     }
 }

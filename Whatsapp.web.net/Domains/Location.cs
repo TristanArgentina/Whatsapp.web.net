@@ -58,7 +58,7 @@ public class Location
         Latitude = (double)data.lat;
         Longitude = (double)data.lng;
         Url = data.clientUrl;
-        _locationOptions = data.loc is not null && data.loc.Type == JTokenType.String && !string.IsNullOrEmpty(data.loc)
+        _locationOptions = data.loc is not null && data.loc.Type == JTokenType.String && !string.IsNullOrEmpty(data.loc.ToString())
             ? new LocationOptions { Name = data.loc.Value.Split('\n')[0], Address = data.loc.Value.Split('\n')[1] }
             : null;
     }

@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Concurrent;
+using System.Drawing;
 using ChatbotAI.net;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.EventArgs;
@@ -10,13 +11,14 @@ public class HandleEvents
 {
     private readonly Client _client;
     private readonly IEventDispatcher _eventDispatcher;
-    private readonly IAI _ai;
+    private readonly OpenAIOptions _openAiOptions;
+    private readonly ConcurrentDictionary<string, IChatBotAI> _ChatBots = new();
 
-    public HandleEvents(Client client, IEventDispatcher eventDispatcher, IAI ai)
+    public HandleEvents(Client client, IEventDispatcher eventDispatcher, OpenAIOptions openAiOptions)
     {
         _client = client;
         _eventDispatcher = eventDispatcher;
-        _ai = ai;
+        _openAiOptions = openAiOptions;
     }
 
     public void SetHandle()
@@ -47,6 +49,16 @@ public class HandleEvents
         _eventDispatcher.GroupAdminChangedEvent += OnGroupAdminChangedEvent();
         _eventDispatcher.GroupMembershipRequestEvent += OnGroupMembershipRequestEvent();
 
+    }
+
+    private IChatBotAI GetChatBotAI(string key)
+    {
+        return _ChatBots.GetOrAdd(key, s =>
+        {
+            var kernel = KernelFactory.Create(_openAiOptions);
+            var ai = new ChatBotAi(_openAiOptions, kernel);
+            return ai;
+        });
     }
 
     private static EventHandler<ReadyEventArgs>? OnReadyEvent()
@@ -263,16 +275,20 @@ public class HandleEvents
                 {
                     var downloadMedia = await msg.DownloadMedia(_client);
                     var audioBytes = Convert.FromBase64String(downloadMedia.Data);
-                    using var memoryStream = new MemoryStream(audioBytes);
-                    var text = _ai.ConvertToText("test.mp3", memoryStream).Result;
-
-                    //Utils.SaveToMp3(downloadMedia.Data, "test.mp3");
+                    var text = GetChatBotAI(msg.From.Id).GetAudioTranscription(audioBytes);
+                    msg.Reply(_client, text);
                 }
             }
 
-            if (msg.Body.StartsWith("AI:"))
+            if (msg.Body.StartsWith("AI:Convertir a audio:"))
             {
-                var response = _ai.Ask(msg.From.Id, msg.Body.Substring(3)).Result;
+                var audioBytes = GetChatBotAI(msg.From.Id).GenerateSpeechFromText(msg.Body.Substring(21));
+                var audioBase64 = Convert.ToBase64String(audioBytes);
+                var messageMedia = new MessageMedia("audio", audioBase64);
+                await msg.Reply(_client, messageMedia);
+            } else if (msg.Body.StartsWith("AI:"))
+            {
+                var response = GetChatBotAI(msg.From.Id).Ask(msg.From.Id, msg.Body.Substring(3)).Result;
                 await msg.Reply(_client, response);
             }
 

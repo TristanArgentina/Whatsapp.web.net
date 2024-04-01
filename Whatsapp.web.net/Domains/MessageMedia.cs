@@ -7,9 +7,9 @@ namespace Whatsapp.web.net.Domains;
 /// </summary>
 public class MessageMedia
 {
-
     /// <summary>
     /// MIME type of the attachment
+    /// image, video, webp, audio 
     /// </summary>
     public string Mimetype { get; set; }
 

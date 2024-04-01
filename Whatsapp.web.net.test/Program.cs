@@ -1,39 +1,47 @@
 ﻿using ChatbotAI.net;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Whatsapp.web.net;
-using Whatsapp.web.net.AuthenticationStrategies;
 using Whatsapp.web.net.EventArgs;
 using Whatsapp.web.net.test;
 
 Console.WriteLine("Hello, World!");
-var config = Utils.BuildConfig([]);
 
-var options = new WhatsappOptions
-{
-    UserAgent = config["AppSettings:"],
-    AuthStrategy = new LocalAuth(config["AppSettings:AuthStrategy:ClientId"]),
-    FfmpegPath = config["AppSettings:FfmpegPath"],
-    Puppeteer = new PuppeteerOptions
-    {
-        //        ExecutablePath = @"C:\chromium-browser\chrome.exe"
-        ExecutablePath = config["AppSettings:Puppeteer:ExecutablePath"],
-        Headless = Convert.ToBoolean(config["AppSettings:Puppeteer:Headless"])
-    },
-    WebVersionCache = new WebVersionCache
-    {
-        Type = config["AppSettings:WebVersionCache:Type"],
-        LocalPath = config["AppSettings:WebVersionCache:LocalPath"]
-    },
-    WebVersion = "2.2412.50"
-};
+var builder = Host.CreateApplicationBuilder(args);
+builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile(@"appsettings.json", optional: false, reloadOnChange: true);
+
+builder.Services
+    .AddLogging(loggingBuilder => loggingBuilder.AddConsole().AddDebug().SetMinimumLevel(LogLevel.Information));
+
+builder.Services.AddOptions<WhatsappOptions>()
+    .BindConfiguration("Whatsapp")
+    .ValidateOnStart();
+
+builder.Services.AddOptions<OpenAIOptions>()
+    .BindConfiguration("OpenAI")
+    .ValidateOnStart();
+
+await using var serviceProvider = builder.Services.BuildServiceProvider();
+
+var whatsappOptions = serviceProvider.GetRequiredService<IOptions<WhatsappOptions>>().Value;
+var openAIOptions = serviceProvider.GetRequiredService<IOptions<OpenAIOptions>>().Value;
+
+
 
 var parserFunctions = new JavaScriptParser(@".\scripts\functions.js");
 var parserInjected = new JavaScriptParser(@".\scripts\injected.js");
 var eventDispatcher = new EventDispatcher();
-var registerEventService = new RegisterEventService(eventDispatcher, parserFunctions, options);
-var client = new Client(parserFunctions, parserInjected, eventDispatcher, registerEventService, options);
-var ai = new AI("gpt-3.5-turbo", config["AppSettings:OpenAI:ApiKey"]);
+var registerEventService = new RegisterEventService(eventDispatcher, parserFunctions, whatsappOptions);
+var client = new Client(parserFunctions, parserInjected, eventDispatcher, registerEventService, whatsappOptions);
+
 await client.Initialize().Result;
-var handleEvents = new HandleEvents(client, eventDispatcher, ai);
+
+var handleEvents = new HandleEvents(client, eventDispatcher, openAIOptions);
+
 handleEvents.SetHandle();
 eventDispatcher.EmitReady();
 
