@@ -18,7 +18,7 @@ public class UserId
         User = user;
         Server = server;
         Id = $"{User}@{Server}";
-        Serialized = Id;
+        _serialized = Id;
     }
 
     protected void Patch(dynamic? data)
@@ -26,7 +26,7 @@ public class UserId
         if (data is null) return;
         User = data.user;
         Server = data.server;
-        Serialized = data._serialized;
+        _serialized = data._serialized;
         Id = $"{User}@{Server}";
     }
 
@@ -36,7 +36,7 @@ public class UserId
 
     public string User { get; private set; }
 
-    public string Serialized { get; set; }
+    public string _serialized { get; set; }
 
     public override string ToString()
     {

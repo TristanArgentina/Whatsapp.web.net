@@ -63,12 +63,12 @@ public static class GroupChatExtensions
 
     public static async Task<bool> DeletePicture(this GroupChat groupChat, Client client)
     {
-        return await client.Group.DeletePicture(groupChat.Id.Id);
+        return await client.Group.DeletePicture(groupChat.Id._serialized);
     }
 
     public static async Task<bool> SetPicture(this GroupChat groupChat, Client client, MessageMedia media)
     {
-        return await client.Group.SetPicture(groupChat.Id.Id, media);
+        return await client.Group.SetPicture(groupChat.Id._serialized, media);
     }
 
     public static async Task<string> GetInviteCode(this GroupChat groupChat, Client client)

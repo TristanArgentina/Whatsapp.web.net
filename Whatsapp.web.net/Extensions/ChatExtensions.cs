@@ -6,37 +6,37 @@ public static class ChatExtensions
 {
     public static async Task<Message> SendMessage(this Chat chat, Client client, object content, MessageOptions? options = null)
     {
-        return await client.Message.Send(chat.Id, content, options);
+        return await client.Message.Send(chat.Id._serialized, content, options);
     }
 
     public static async Task<bool> SendSeen(this Chat chat, Client client)
     {
-        return await client.Chat.SendSeen(chat.Id.Id);
+        return await client.Chat.SendSeen(chat.Id._serialized);
     }
 
     public static async Task<bool> ClearMessages(this Chat chat, Client client)
     {
-        return await client.Chat.ClearMessages(chat.Id.Id);
+        return await client.Chat.ClearMessages(chat.Id._serialized);
     }
 
     public static async Task<bool> Delete(this Chat chat, Client client)
     {
-        return await client.Chat.Delete(chat.Id.Id);
+        return await client.Chat.Delete(chat.Id._serialized);
     }
 
     public static async Task SendStateTyping(this Chat chat, Client client)
     {
-        await client.Chat.SendStateTyping(chat.Id.Id);
+        await client.Chat.SendStateTyping(chat.Id._serialized);
     }
 
     public static async Task SendStateRecording(this Chat chat, Client client)
     {
-        await client.Chat.SendStateRecording(chat.Id.Id);
+        await client.Chat.SendStateRecording(chat.Id._serialized);
     }
 
     public static async Task ClearState(this Chat chat, Client client)
     {
-        await client.Chat.ClearState(chat.Id.Id);
+        await client.Chat.ClearState(chat.Id._serialized);
     }
 
     public static async Task Archive(this Chat chat, Client client)
@@ -81,7 +81,7 @@ public static class ChatExtensions
 
     public static async Task<Contact> GetContact(this Chat chat, Client client)
     {
-        return await client.Contact.GetContactById(chat.Id.Id);
+        return await client.Contact.Get(chat.Id.Id);
     }
 
     public static async Task<List<Label>> GetLabels(this Chat chat, Client client)

@@ -14,11 +14,11 @@ public class MessageId
         FromMe = data.fromMe;
         Remote = UserId.Create(data.remote);
         Participant = UserId.Create(data.participant);
-        Serialized = data._serialized ?? Id;
+        _serialized = data._serialized ?? Id;
 
     }
 
-    public string Serialized { get; set; }
+    public string _serialized { get; set; }
 
     /// <summary>
     /// Indicates if the message was sent by the current user

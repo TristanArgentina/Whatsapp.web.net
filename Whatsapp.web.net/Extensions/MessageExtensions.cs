@@ -40,7 +40,7 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task<Contact> GetContactId(this Message msg, Client client)
     {
-        return await client.Contact.GetContactById(msg.Author is not null ? msg.Author.Id : msg.From.Id);
+        return await client.Contact.Get(msg.Author is not null ? msg.Author.Id : msg.From.Id);
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task<List<Contact>> GetMentions(this Message msg, Client client)
     {
-        List<Task<Contact>> contactTasks = msg.MentionedIds.Select(async id => await client.Contact.GetContactById(id)).ToList();
+        List<Task<Contact>> contactTasks = msg.MentionedIds.Select(async id => await client.Contact.Get(id)).ToList();
         var contacts = await Task.WhenAll(contactTasks);
         return contacts.ToList();
     }

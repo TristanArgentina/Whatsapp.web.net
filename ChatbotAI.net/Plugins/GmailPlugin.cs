@@ -33,7 +33,7 @@ namespace ChatbotAI.net.Plugins
                 using (var smtpClient = new SmtpClient())
                 {
                     await smtpClient.ConnectAsync("smtp.gmail.com", 465, SecureSocketOptions.SslOnConnect);
-                    await smtpClient.AuthenticateAsync("plusware.ai@gmail.com", "**********");
+                    await smtpClient.AuthenticateAsync("plusware.ai@gmail.com", "wcfg rzop svea gzjl");
                     await smtpClient.SendAsync(message);
                     await smtpClient.DisconnectAsync(true);
                 }

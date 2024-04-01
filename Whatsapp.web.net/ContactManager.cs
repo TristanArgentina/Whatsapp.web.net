@@ -16,9 +16,9 @@ public class ContactManager : IContactManager
         _pupPage = pupPage;
     }
 
-    public async Task<Contact> GetContactById(string contactId)
+    public async Task<Contact> Get(string contactId)
     {
-        dynamic data = _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getContactById"), contactId);
+        dynamic data = _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getContactById"), contactId).Result;
 
         return Contact.Create(data);
     }
@@ -27,17 +27,32 @@ public class ContactManager : IContactManager
     {
         if (contact.IsGroup) return false;
 
-        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("blockContactById"), contact.Id.Serialized);
+        Block( contact.Id._serialized);
 
         contact.IsBlocked = true;
         return true;
     }
 
+    public async Task<Contact[]> GetBlocked()
+    {
+        dynamic data = _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getBlockedContacts")).Result;
+
+        var dataList = new List<dynamic>((JArray)data);
+
+        return dataList.Select(d => new Contact(d)).ToArray();
+    }
+
+    public async void Block(string contactId)
+    {
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("blockContactById"), contactId);
+    }
+
+
     public async Task<bool> Unblock(Contact contact)
     {
         if (contact.IsGroup) return false;
 
-        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("unblockContactById"), contact.Id.Serialized);
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("unblockContactById"), contact.Id._serialized);
 
         contact.IsBlocked = false;
         return true;
@@ -45,7 +60,7 @@ public class ContactManager : IContactManager
 
     public async Task<string?> GetAbout(Contact contact)
     {
-        var about = await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getStatusContactById"), contact.Id.Serialized);
+        var about = await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getStatusContactById"), contact.Id._serialized);
 
         if (about?["status"] is null || about["status"]!.Type != JTokenType.String)
         {
@@ -73,5 +88,13 @@ public class ContactManager : IContactManager
         return await _pupPage.EvaluateFunctionAsync<string>(_parserFunctions.GetMethod("getCountryCode"), number);
     }
 
+    public async Task<Contact[]> Get()
+    {
+        var data = _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getContacts")).Result;
+
+        var dataList = new List<dynamic>((JArray)data);
+
+        return dataList.Select(d => new  Contact(d)).ToArray();
+    }
 
 }

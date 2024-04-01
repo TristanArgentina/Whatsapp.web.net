@@ -80,14 +80,18 @@ public class MessageManager : IMessageManager
                 content = "";
                 break;
             case Contact contactCard:
-                internalOptions["contactCard"] = contactCard.Id;
+                internalOptions["contactCard"] = contactCard.Id._serialized;
                 content = "";
                 break;
             case IList<Contact> contactList when contactList.Any():
-                internalOptions["contactCardList"] = contactList.Select(contact => contact.Id).ToList();
+                internalOptions["contactCardList"] = contactList.Select(contact => contact.Id._serialized).ToList();
                 content = "";
                 break;
-            case Buttons buttons:
+            case Contact[] contactList when contactList.Any():
+                internalOptions["contactCardList"] = contactList.Select(contact => contact.Id._serialized).ToList();
+                content = "";
+                break;
+                case Buttons buttons:
                 {
                     if (buttons.Type != "chat") internalOptions["attachment"] = buttons.Body;
                     internalOptions["buttons"] = buttons;
@@ -129,7 +133,7 @@ public class MessageManager : IMessageManager
 
         if (options.Mentions?.Any() == true)
         {
-            internalOptions["mentionedJidList"] = options.Mentions.OfType<Contact>().Select(c => c.Id).ToList();
+            internalOptions["mentionedJidList"] = options.Mentions.OfType<Contact>().Select(c => c.Id._serialized).ToList();
         }
 
         return internalOptions;
@@ -152,7 +156,7 @@ public class MessageManager : IMessageManager
         if (msgId is null) return null;
         if (!hasMedia) return null;
 
-        dynamic result = await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getMessageMedia"), msgId.Serialized);
+        dynamic result = await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getMessageMedia"), msgId._serialized);
         return result == null ? null : new MessageMedia(result);
     }
 

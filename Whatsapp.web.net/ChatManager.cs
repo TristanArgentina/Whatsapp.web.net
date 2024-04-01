@@ -1,4 +1,5 @@
-﻿using PuppeteerSharp;
+﻿using Newtonsoft.Json.Linq;
+using PuppeteerSharp;
 using Whatsapp.web.net.Domains;
 
 namespace Whatsapp.web.net;
@@ -117,9 +118,9 @@ public class ChatManager : IChatManager
     {
         var data = _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getChats")).Result;
 
-        var dataList = new List<dynamic>(data);
+        var dataList = new List<dynamic>((JArray)data);
 
-        return (Chat[])dataList.Select(d => Chat.Create(d));
+        return dataList.Select(d => Chat.Create(d)).OfType<Chat>().ToArray();
     }
 
     public async Task ApproveMembership(string chatId, string requesterId)

@@ -99,7 +99,7 @@ public class Contact
         Id = UserId.Create(data.id);
         Number = data.userid;
         IsBusiness = data.isBusiness;
-        IsEnterprise = data.isEnterprise;
+        IsEnterprise = data.isEnterprise is null ? false : data.isEnterprise;
         Labels = data.labels;
         Name = data.name;
         Pushname = data.pushname;
@@ -120,7 +120,7 @@ public class Contact
     public static Contact Create(dynamic? data)
     {
         if (data is null) return null;
-        return data.isBusiness
+        return bool.Parse(data.isBusiness.ToString())
             ? (Contact)BusinessContact.CreateBusinessContact(data)
             : (Contact)PrivateContact.CreatePrivateContact(data);
     }

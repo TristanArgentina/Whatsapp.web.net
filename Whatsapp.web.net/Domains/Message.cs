@@ -169,7 +169,7 @@ public class Message
     public string? SelectedRowId { get; private set; }
 
     public Poll Poll { get; private set; }
-    public List<string> Recipients { get; set; } = [];
+    public List<UserId> Recipients { get; set; } = [];
     public List<string> TemplateParams { get; set; } = [];
 
     [JsonConstructor]
@@ -208,7 +208,7 @@ public class Message
             ? new Location(data)
             : null;
         VCards = data.type == MessageTypes.CONTACT_CARD_MULTI
-            ? data.vcardList.Select((Func<dynamic, VCard>)(c =>new VCard(c.vcard))).ToList()
+            ? ((JArray)data.vcardList).Select((Func<dynamic, VCard>)(c =>new VCard(c.vcard))).ToList()
             : data.type == MessageTypes.CONTACT_CARD
                 ? new List<VCard> { new VCard( data.body) }
                 : null;
@@ -239,10 +239,12 @@ public class Message
         DynamicReplyButtons = data.dynamicReplyButtons ?? null;
         SelectedButtonId = data.selectedButtonId ?? null;
         SelectedRowId = data.listResponse?.singleSelectReply?.selectedRowId ?? null;
-        Recipients = data.recipients is not null ? ((JArray)data.recipients).ToObject<string[]>().ToList() : [];
+        Recipients = data.recipients is not null 
+            ? ((JArray)data.recipients).Select(r=> UserId.Create(r)).ToList() 
+            : new List<UserId>();
         TemplateParams = data.templateParams is not null
-            ? ((JArray)data.templateParams).ToObject<string[]>().ToList()
-            : [];
+            ? ((JArray)data.templateParams).Select(t=> t.ToString()).ToList()
+            :new List<string>();
         if (Type == MessageTypes.POLL_CREATION)
         {
             Poll = new Poll(data.pollName, data.pollOptions, new PollSendOptions()

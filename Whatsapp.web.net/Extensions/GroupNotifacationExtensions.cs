@@ -12,7 +12,7 @@ public static class GroupNotifacationExtensions
 
     public static async Task<Contact> GetContact(this GroupNotification groupNotification, Client client)
     {
-        return await client.Contact.GetContactById(groupNotification.Author.Id);
+        return await client.Contact.Get(groupNotification.Author.Id);
     }
 
     public static async Task<List<Contact>> GetRecipients(this GroupNotification groupNotification, Client client)
@@ -20,7 +20,7 @@ public static class GroupNotifacationExtensions
         var recipients = new List<Contact>();
         foreach (var recipientId in groupNotification.RecipientIds)
         {
-            var contact = await client.Contact.GetContactById(recipientId);
+            var contact = await client.Contact.Get(recipientId);
             recipients.Add(contact);
         }
         return recipients;

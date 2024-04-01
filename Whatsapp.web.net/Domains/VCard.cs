@@ -7,8 +7,8 @@ public class VCard
     public string Version { get; set; }
     public string FullName { get; set; }
     public string[] Names { get; set; }
-    public string Email { get; set; }
-    public string Telephone { get; set; }
+    public Email Email { get; set; }
+    public Phone Telephone { get; set; }
     public DateTime Revision { get; set; }
 
     [JsonConstructor]
@@ -24,12 +24,15 @@ public class VCard
     private void Patch(dynamic data)
     {
         string dataString = data.ToString();
-        var lines = dataString.Split(["\r\n"], StringSplitOptions.RemoveEmptyEntries);
+        var lines = dataString.Contains("\r\n")
+            ? dataString.Split(["\r\n"], StringSplitOptions.RemoveEmptyEntries)
+            : dataString.Split(["\n"], StringSplitOptions.RemoveEmptyEntries);
         foreach (var line in lines)
         {
             var parts = line.Split([':'], 2);
-            var key = parts[0];
-            var value = parts[1];
+            if (parts.Length != 2) continue; 
+            var key = parts[0].Trim();
+            var value = parts[1].Trim();
 
             switch (key)
             {
@@ -39,17 +42,17 @@ public class VCard
                 case "VERSION":
                     Version = value;
                     break;
-                case "FN;CHARSET=UTF-8":
+                case var fnKey when fnKey.StartsWith("FN"):
                     FullName = value;
                     break;
-                case "N;CHARSET=UTF-8":
+                case var nameKey when nameKey.StartsWith("N"):
                     Names = value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     break;
-                case "EMAIL;CHARSET=UTF-8;type=HOME,INTERNET":
-                    Email = value;
+                case var emailKey when emailKey.StartsWith("EMAIL"):
+                    Email = new Email(value, key);
                     break;
-                case "TEL;TYPE=HOME,VOICE":
-                    Telephone = value;
+                case var emailKey when emailKey.StartsWith("TEL"):
+                    Telephone = new Phone(value, key);
                     break;
                 case "REV":
                     Revision = DateTime.Parse(value);
@@ -62,6 +65,6 @@ public class VCard
 
     public override string ToString()
     {
-        return $"BEGIN:VCARD\r\nVERSION:{Version}\r\nFN;CHARSET=UTF-8:{FullName}\r\nN;CHARSET=UTF-8:{string.Join(";", Names)};;;\r\nEMAIL;CHARSET=UTF-8;type=HOME,INTERNET:{Email}\r\nTEL;TYPE=HOME,VOICE:{Telephone}\r\nREV:{Revision.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}\r\nEND:VCARD";
+        return $"BEGIN:VCARD\r\nVERSION:{Version}\r\nFN;CHARSET=UTF-8:{FullName}\r\nN;CHARSET=UTF-8:{string.Join(";", Names)};;;\r\n{Email}\r\n{Telephone}\r\nREV:{Revision.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}\r\nEND:VCARD";
     }
 }

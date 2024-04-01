@@ -33,7 +33,7 @@ public class Chat
     /// <summary>
     /// Unix timestamp for when the last activity occurred
     /// </summary>
-    public DateTime Timestamp { get; private set; }
+    public DateTime? Timestamp { get; private set; }
 
     /// <summary>
     /// Indicates if the Chat is archived
@@ -80,8 +80,10 @@ public class Chat
         IsGroup = data.isGroup;
         IsReadOnly = data.isReadOnly;
         UnreadCount = data.unreadCount;
-        Timestamp = DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime;
-        Archived = data.archive;
+        Timestamp = data.t is null
+            ? null
+            : DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime;
+        Archived = data.archive is null ? false : bool.Parse(data.archive);
         Pinned = data.pin != null;
         IsMuted = data.muteExpiration == 0;
         MuteExpiration = data.muteExpiration;

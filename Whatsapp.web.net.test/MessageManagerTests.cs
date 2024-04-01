@@ -9,7 +9,8 @@ public class MessageManagerTests
 {
     private Client? _client;
     private EventDispatcher? _eventDispatcher;
-    private readonly UserId _userId = new ContactId("**********", "c.us");
+    private readonly UserId _userId = new ContactId("5493816092122", "c.us");
+    private readonly UserId _userId_aux = new ContactId("5493814128871", "c.us");
 
     [OneTimeSetUp]
     public async Task Setup()
@@ -139,7 +140,7 @@ public class MessageManagerTests
         Assert.That(msg.From.Id == _userId.Id);
         Assert.That(msg.Type == MessageTypes.LOCATION);
         Assert.That(msg.Id!.FromMe);
-        
+
         Assert.That(msg.Location is not null);
         Assert.That(msg.Location!.Latitude == expectedLocation.Latitude);
         Assert.That(msg.Location.Longitude == expectedLocation.Longitude);
@@ -155,8 +156,8 @@ public class MessageManagerTests
             Version = "3.0",
             FullName = "John Doe",
             Names = ["Dow", "John"],
-            Email = "john@doe.com",
-            Telephone = "1234567890",
+            Email = new Email("john@doe.com"),
+            Telephone = new Phone("1234567890"),
             Revision = DateTime.Now.ToUniversalTime()
         };
 
@@ -175,4 +176,67 @@ public class MessageManagerTests
         Assert.That(msg.VCards[0].Email == expectedVCard.Email);
         Assert.That(msg.VCards[0].Telephone == expectedVCard.Telephone);
     }
+
+    [Test]
+    public void SendVCardTurnOffParsingTest()
+    {
+
+        var expectedVCard = new VCard()
+        {
+            Version = "3.0",
+            FullName = "John Doe",
+            Names = ["Dow", "John"],
+            Email = new Email("john@doe.com"),
+            Telephone = new Phone("1234567890"),
+            Revision = DateTime.Now.ToUniversalTime()
+        };
+
+        var msg = _client!.Message.Send(_userId, expectedVCard.ToString(), new MessageOptions { ParseVCards = false }).Result;
+
+        Assert.That(msg is not null);
+        Assert.That(msg!.To.Id == _userId.Id);
+        Assert.That(msg.From.Id == _userId.Id);
+        Assert.That(msg.Type == MessageTypes.TEXT);
+        Assert.That(msg.Id!.FromMe);
+        Assert.That(msg.VCards is null);
+    }
+
+    [Test]
+    public void SendContactAsContactCardTest()
+    {
+
+        var contact = _client!.Contact.Get(_userId.Id).Result;
+
+        var msg = _client!.Message.Send(_userId, contact).Result;
+
+        Assert.That(msg is not null);
+        Assert.That(msg.Type == MessageTypes.CONTACT_CARD);
+        Assert.That(msg!.To.Id == _userId.Id);
+        Assert.That(msg.From.Id == _userId.Id);
+        Assert.That(msg.Id!.FromMe);
+        Assert.That(msg.Body.Contains("BEGIN:VCARD"));
+        Assert.That(msg.VCards is not null);
+        Assert.That(msg.VCards.Count == 1);
+        Assert.That(msg.VCards[0].Telephone.Value == "+54 9 3816 09-2122");
+    }
+
+    [Test]
+    public void SendMultipleContactAsContactCardTest()
+    {
+
+        var contact1 = _client!.Contact.Get(_userId.Id).Result;
+        var contact2 = _client!.Contact.Get(_userId_aux.Id).Result;
+
+        var msg = _client!.Message.Send(_userId, new[] { contact1, contact2 }).Result;
+
+        Assert.That(msg is not null);
+        Assert.That(msg.Type == MessageTypes.CONTACT_CARD_MULTI);
+        Assert.That(msg!.To.Id == _userId.Id);
+        Assert.That(msg.From.Id == _userId.Id);
+        Assert.That(msg.Id!.FromMe);
+        Assert.That(msg.VCards is not null);
+        Assert.That(msg.VCards.Count == 2);
+        Assert.That(msg.VCards[0].Telephone.Value == "+54 9 3816 09-2122");
+    }
+
 }

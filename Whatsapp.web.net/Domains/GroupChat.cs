@@ -40,7 +40,20 @@ public class GroupChat : Chat
     private void PatchGroup(dynamic data)
     {
         Owner = UserId.Create(data.groupMetadata.owner);
-        Creation = DateTimeOffset.FromUnixTimeSeconds((long)data.groupMetadata.creation).UtcDateTime;
+
+        var creation = (long)data.groupMetadata.creation;
+        if (creation < -62135596800)
+        {
+            Creation = DateTime.MinValue;
+        }
+        else if (creation > 253402300799)
+        {
+            Creation = DateTime.MaxValue;
+        }
+        else
+        {
+            Creation = DateTimeOffset.FromUnixTimeSeconds(creation).UtcDateTime;
+        }
         Description = data.desc;
         Participants = ((JArray)data.groupMetadata.participants).Select(p => new GroupParticipant(p)).ToList();
     }

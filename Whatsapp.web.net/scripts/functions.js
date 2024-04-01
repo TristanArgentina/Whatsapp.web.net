@@ -129,7 +129,6 @@ function serializeConnectionAndUser() {
 
 function sendMessageAsyncToChat(chatId, message, options, sendSeen) {
     const chatWid = window.Store.WidFactory.createWid(chatId);
-
     return window.Store.Chat.find(chatWid)
         .then(chat => {
             if (sendSeen) {
@@ -141,10 +140,10 @@ function sendMessageAsyncToChat(chatId, message, options, sendSeen) {
         .then(chat => window.WWebJS.sendMessage(chat, message, options, sendSeen))
         .then(msg => window.WWebJS.getMessageModel(msg))
         .catch(err => {
+            console.error("Error:", err);
             console.error("Error:", JSON.stringify(err));
             throw err;
         });
-    return null;
 }
 
 
@@ -1075,10 +1074,13 @@ async function createGroup(title, participants, options) {
 
     return { title: title, gid: createGroupResult.wid, participants: participantData };
 }
-async function getChats() {
-    return await window.WWebJS.getChats();
+function getChats() {
+    return window.WWebJS.getChats();
 }
 
+function getContacts() {
+    return window.WWebJS.getContacts();
+}
 
 function approveMembershipRequestAction(groupId, options = {}) {
     return this.pupPage.evaluate((groupId, options) => {
@@ -1090,4 +1092,10 @@ function approveMembershipRequestAction(groupId, options = {}) {
 function rejectMembershipRequestAction(groupId, options) {
     const { requesterIds = null, sleep = [250, 500] } = options;
     return window.WWebJS.membershipRequestAction(groupId, 'Reject', requesterIds, sleep);
+}
+
+
+function getBlockedContacts() {
+    let chatIds = window.Store.Blocklist.getModelsArray().map(a => a.id._serialized);
+    return Promise.all(chatIds.map(id => window.WWebJS.getContact(id)));
 }
