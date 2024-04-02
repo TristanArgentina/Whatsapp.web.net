@@ -1,4 +1,6 @@
+ [![Discord Chat](https://img.shields.io/discord/698610475432411196.svg?logo=discord)](https://discord.com/channels/1224834763886428252/1224834764356456518)  
 
+ 
 # whatsapp.web.net
 A WhatsApp API client that connects through the WhatsApp Web browser app
 
