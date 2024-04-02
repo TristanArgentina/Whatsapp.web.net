@@ -10,11 +10,11 @@ namespace Whatsapp.web.net.test;
 public class HandleEvents
 {
     private readonly Client _client;
-    private readonly IEventDispatcher _eventDispatcher;
+    private readonly IEventDispatcher? _eventDispatcher;
     private readonly OpenAIOptions _openAiOptions;
     private readonly ConcurrentDictionary<string, IChatBotAI> _ChatBots = new();
 
-    public HandleEvents(Client client, IEventDispatcher eventDispatcher, OpenAIOptions openAiOptions)
+    public HandleEvents(Client client, IEventDispatcher? eventDispatcher, OpenAIOptions openAiOptions)
     {
         _client = client;
         _eventDispatcher = eventDispatcher;

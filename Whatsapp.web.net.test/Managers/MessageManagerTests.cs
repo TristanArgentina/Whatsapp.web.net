@@ -1,24 +1,11 @@
 ﻿using NUnit.Framework;
 using Whatsapp.web.net.Domains;
-using Whatsapp.web.net.EventArgs;
 
-namespace Whatsapp.web.net.test;
+namespace Whatsapp.web.net.test.Managers;
 
 [TestFixture]
-public class MessageManagerTests
+public class MessageManagerTests : TestBase
 {
-    private Client? _client;
-    private EventDispatcher? _eventDispatcher;
-    private readonly UserId _userId = new ContactId("5493816092122", "c.us");
-    private readonly UserId _userId_aux = new ContactId("5493814128871", "c.us");
-
-    [OneTimeSetUp]
-    public async Task Setup()
-    {
-        (_client, _eventDispatcher) = await ClientHelper.CreateClient();
-
-    }
-
     [Test]
     public void SendTextTest()
     {
@@ -26,15 +13,22 @@ public class MessageManagerTests
 
         Message? message = null;
 
-        _eventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
+        EventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
 
-        var msg = _client!.Message.Send(_userId, expectedContent).Result;
+        var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
         Assert.That(message is not null);
-        Assert.That(message!.To.Id == _userId.Id);
-        Assert.That(message.From.Id == _userId.Id);
+        Assert.That(message!.To.Id == ContactId1.Id);
+        Assert.That(message.From.Id == ContactId1.Id);
         Assert.That(message.Type == MessageTypes.TEXT);
         Assert.That(message.Id!.FromMe);
         Assert.That(message.Body == expectedContent);
+
+        Assert.That(msg is not null);
+        Assert.That(msg!.To.Id == ContactId1.Id);
+        Assert.That(msg.From.Id == ContactId1.Id);
+        Assert.That(msg.Type == MessageTypes.TEXT);
+        Assert.That(msg.Id!.FromMe);
+        Assert.That(msg.Body == expectedContent);
     }
 
 
@@ -45,18 +39,25 @@ public class MessageManagerTests
 
         Message? message = null;
 
-        _eventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
+        EventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
 
-        var msg = _client!.Message.Send(_userId, expectedMedia).Result;
+        var msg = Client!.Message.Send(ContactId1, expectedMedia).Result;
         Assert.That(message is not null);
-        Assert.That(message!.To.Id == _userId.Id);
-        Assert.That(message.From.Id == _userId.Id);
+        Assert.That(message!.To.Id == ContactId1.Id);
+        Assert.That(message.From.Id == ContactId1.Id);
         Assert.That(message.Type == MessageTypes.IMAGE);
         Assert.That(message.Id!.FromMe);
         Assert.That(message.HasMedia);
 
-        var resultMedia = _client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
+        var resultMedia = Client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
         Assert.That(resultMedia is not null);
+
+        Assert.That(msg is not null);
+        Assert.That(msg!.To.Id == ContactId1.Id);
+        Assert.That(msg.From.Id == ContactId1.Id);
+        Assert.That(msg.Type == MessageTypes.IMAGE);
+        Assert.That(msg.Id!.FromMe);
+        Assert.That(msg.HasMedia);
     }
 
     [Test]
@@ -66,19 +67,26 @@ public class MessageManagerTests
 
         Message? message = null;
 
-        _eventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
+        EventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
 
-        var msg = _client!.Message.Send(_userId, expectedMedia, new MessageOptions { SendMediaAsDocument = true }).Result;
+        var msg = Client!.Message.Send(ContactId1, expectedMedia, new MessageOptions { SendMediaAsDocument = true }).Result;
         Assert.That(message is not null);
-        Assert.That(message!.To.Id == _userId.Id);
-        Assert.That(message.From.Id == _userId.Id);
+        Assert.That(message!.To.Id == ContactId1.Id);
+        Assert.That(message.From.Id == ContactId1.Id);
         Assert.That(message.Type == MessageTypes.DOCUMENT);
         Assert.That(message.Id!.FromMe);
         Assert.That(message.HasMedia);
 
-        var resultMedia = _client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
+        var resultMedia = Client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
         Assert.That(resultMedia is not null);
         Assert.That(resultMedia!.Equals(expectedMedia));
+
+        Assert.That(msg is not null);
+        Assert.That(msg!.To.Id == ContactId1.Id);
+        Assert.That(msg.From.Id == ContactId1.Id);
+        Assert.That(msg.Type == MessageTypes.DOCUMENT);
+        Assert.That(msg.Id!.FromMe);
+        Assert.That(msg.HasMedia);
     }
 
     [Test]
@@ -88,16 +96,16 @@ public class MessageManagerTests
 
         Message? message = null;
 
-        _eventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
+        EventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
 
-        var msg = _client!.Message.Send(_userId, expectedMedia).Result;
+        var msg = Client!.Message.Send(ContactId1, expectedMedia).Result;
         Assert.That(message is not null);
-        Assert.That(message.To.Id == _userId.Id);
-        Assert.That(message.From.Id == _userId.Id);
+        Assert.That(message.To.Id == ContactId1.Id);
+        Assert.That(message.From.Id == ContactId1.Id);
         Assert.That(message.Type == MessageTypes.IMAGE);
         Assert.That(message.Id.FromMe);
         Assert.That(message.HasMedia);
-        var resultMedia = _client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
+        var resultMedia = Client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
         Assert.That(resultMedia is not null);
     }
 
@@ -108,7 +116,7 @@ public class MessageManagerTests
 
         Message? message = null;
 
-        _eventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
+        EventDispatcher!.MessageCreateEvent += (_, args) => message = args.Message;
 
         var messageOptions = new MessageOptions
         {
@@ -116,15 +124,15 @@ public class MessageManagerTests
             StickerAuthor = "Author Test",
             StickerName = "Robot"
         };
-        var msg = _client!.Message.Send(_userId, expectedMedia, messageOptions).Result;
+        var msg = Client!.Message.Send(ContactId1, expectedMedia, messageOptions).Result;
         Assert.That(message is not null);
-        Assert.That(message!.To.Id == _userId.Id);
-        Assert.That(message.From.Id == _userId.Id);
+        Assert.That(message!.To.Id == ContactId1.Id);
+        Assert.That(message.From.Id == ContactId1.Id);
         Assert.That(message.Type == MessageTypes.STICKER);
         Assert.That(message.Id!.FromMe);
         Assert.That(message.HasMedia);
 
-        var resultMedia = _client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
+        var resultMedia = Client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
         Assert.That(resultMedia is not null);
     }
 
@@ -134,10 +142,10 @@ public class MessageManagerTests
     {
         var description = "Sakananjy\nMadagascar";
         var expectedLocation = new Location(-21.537863752674124, 45.40548904077514, description);
-        var msg = _client!.Message.Send(_userId, expectedLocation).Result;
+        var msg = Client!.Message.Send(ContactId1, expectedLocation).Result;
         Assert.That(msg is not null);
-        Assert.That(msg!.To.Id == _userId.Id);
-        Assert.That(msg.From.Id == _userId.Id);
+        Assert.That(msg!.To.Id == ContactId1.Id);
+        Assert.That(msg.From.Id == ContactId1.Id);
         Assert.That(msg.Type == MessageTypes.LOCATION);
         Assert.That(msg.Id!.FromMe);
 
@@ -154,18 +162,18 @@ public class MessageManagerTests
         var expectedVCard = new VCard()
         {
             Version = "3.0",
-            FullName = "John Doe",
-            Names = ["Dow", "John"],
-            Email = new Email("john@doe.com"),
-            Telephone = new Phone("1234567890"),
+            FullName = "Johnson Don",
+            Names = ["Don", "Johnson"],
+            Email = new Email("Johnson@don.com"),
+            Telephone = new Phone("3107140202"),
             Revision = DateTime.Now.ToUniversalTime()
         };
 
-        var msg = _client!.Message.Send(_userId, expectedVCard.ToString()).Result;
+        var msg = Client!.Message.Send(ContactId1, expectedVCard.ToString()).Result;
 
         Assert.That(msg is not null);
-        Assert.That(msg!.To.Id == _userId.Id);
-        Assert.That(msg.From.Id == _userId.Id);
+        Assert.That(msg!.To.Id == ContactId1.Id);
+        Assert.That(msg.From.Id == ContactId1.Id);
         Assert.That(msg.Type == MessageTypes.CONTACT_CARD);
         Assert.That(msg.Id!.FromMe);
         Assert.That(msg.VCards is not null);
@@ -184,18 +192,18 @@ public class MessageManagerTests
         var expectedVCard = new VCard()
         {
             Version = "3.0",
-            FullName = "John Doe",
-            Names = ["Dow", "John"],
-            Email = new Email("john@doe.com"),
-            Telephone = new Phone("1234567890"),
+            FullName = "Johnson Don",
+            Names = ["Don", "Johnson"],
+            Email = new Email("Johnson@don.com"),
+            Telephone = new Phone("3107140202"),
             Revision = DateTime.Now.ToUniversalTime()
         };
 
-        var msg = _client!.Message.Send(_userId, expectedVCard.ToString(), new MessageOptions { ParseVCards = false }).Result;
+        var msg = Client!.Message.Send(ContactId1, expectedVCard.ToString(), new MessageOptions { ParseVCards = false }).Result;
 
         Assert.That(msg is not null);
-        Assert.That(msg!.To.Id == _userId.Id);
-        Assert.That(msg.From.Id == _userId.Id);
+        Assert.That(msg!.To.Id == ContactId1.Id);
+        Assert.That(msg.From.Id == ContactId1.Id);
         Assert.That(msg.Type == MessageTypes.TEXT);
         Assert.That(msg.Id!.FromMe);
         Assert.That(msg.VCards is null);
@@ -204,39 +212,37 @@ public class MessageManagerTests
     [Test]
     public void SendContactAsContactCardTest()
     {
+        var contact = Client!.Contact.Get(ContactId1.Id).Result;
 
-        var contact = _client!.Contact.Get(_userId.Id).Result;
-
-        var msg = _client!.Message.Send(_userId, contact).Result;
+        var msg = Client!.Message.Send(ContactId1, contact).Result;
 
         Assert.That(msg is not null);
         Assert.That(msg.Type == MessageTypes.CONTACT_CARD);
-        Assert.That(msg!.To.Id == _userId.Id);
-        Assert.That(msg.From.Id == _userId.Id);
+        Assert.That(msg!.To.Id == ContactId1.Id);
+        Assert.That(msg.From.Id == ContactId1.Id);
         Assert.That(msg.Id!.FromMe);
         Assert.That(msg.Body.Contains("BEGIN:VCARD"));
         Assert.That(msg.VCards is not null);
         Assert.That(msg.VCards.Count == 1);
-        Assert.That(msg.VCards[0].Telephone.Value == "+54 9 3816 09-2122");
+        Assert.That(msg.VCards[0].Telephone.Value.Replace("+","").Replace(" ","") == ContactId1.User);
     }
 
     [Test]
     public void SendMultipleContactAsContactCardTest()
     {
+        var contact1 = Client!.Contact.Get(ContactId1.Id).Result;
+        var contact2 = Client!.Contact.Get(ContactId2.Id).Result;
 
-        var contact1 = _client!.Contact.Get(_userId.Id).Result;
-        var contact2 = _client!.Contact.Get(_userId_aux.Id).Result;
-
-        var msg = _client!.Message.Send(_userId, new[] { contact1, contact2 }).Result;
+        var msg = Client!.Message.Send(ContactId1, new[] { contact1, contact2 }).Result;
 
         Assert.That(msg is not null);
         Assert.That(msg.Type == MessageTypes.CONTACT_CARD_MULTI);
-        Assert.That(msg!.To.Id == _userId.Id);
-        Assert.That(msg.From.Id == _userId.Id);
+        Assert.That(msg!.To.Id == ContactId1.Id);
+        Assert.That(msg.From.Id == ContactId1.Id);
         Assert.That(msg.Id!.FromMe);
         Assert.That(msg.VCards is not null);
         Assert.That(msg.VCards.Count == 2);
-        Assert.That(msg.VCards[0].Telephone.Value == "+54 9 3816 09-2122");
+        Assert.That(msg.VCards[0].Telephone.Value.Replace("+", "").Replace(" ", "") == ContactId1.User);
     }
 
 }

@@ -4,7 +4,7 @@ public abstract class BaseAuthStrategy
 {
     protected Client? Client;
     protected string? SessionName;
-    protected WhatsappOptions? Options;
+    protected WhatsappOptions Options;
 
     public virtual void Setup(Client client, WhatsappOptions options)
     {
