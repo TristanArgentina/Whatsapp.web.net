@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Whatsapp.web.net;
 using Whatsapp.web.net.EventArgs;
+using Whatsapp.web.net.scripts;
 using Whatsapp.web.net.test;
 
 Console.WriteLine("Hello, World!");
@@ -32,11 +33,9 @@ var openAIOptions = serviceProvider.GetRequiredService<IOptions<OpenAIOptions>>(
 
 
 
-var parserFunctions = new JavaScriptParser(@".\scripts\functions.js");
-var parserInjected = new JavaScriptParser(@".\scripts\injected.js");
 var eventDispatcher = new EventDispatcher();
-var registerEventService = new RegisterEventService(eventDispatcher, parserFunctions, whatsappOptions);
-var client = new Client(parserFunctions, parserInjected, eventDispatcher, registerEventService, whatsappOptions);
+var registerEventService = new RegisterEventService(eventDispatcher, whatsappOptions);
+var client = new Client(eventDispatcher, registerEventService, whatsappOptions);
 
 await client.Initialize().Result;
 

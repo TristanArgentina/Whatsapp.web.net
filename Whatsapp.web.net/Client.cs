@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using PuppeteerSharp;
 using Whatsapp.web.net.AuthenticationStrategies;
 using Whatsapp.web.net.Domains;
+using Whatsapp.web.net.scripts;
 using ErrorEventArgs = PuppeteerSharp.ErrorEventArgs;
 
 namespace Whatsapp.web.net;
@@ -46,11 +47,11 @@ public class Client : IDisposable, IAsyncDisposable
     public IMessageManager Message { get; private set; }
     public ICommerceManager Commerce { get; private set; }
 
-    public Client(IJavaScriptParser parserFunctions, IJavaScriptParser parserInjected, IEventDispatcher eventDispatcher, IRegisterEventService registerEventService, WhatsappOptions options)
+    public Client(IEventDispatcher eventDispatcher, IRegisterEventService registerEventService, WhatsappOptions options)
     {
         _streamWriter = new StreamWriter("log.txt", true);
-        _parserFunctions = parserFunctions;
-        _parserInjected = parserInjected;
+        _parserFunctions = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.functions.js");
+        _parserInjected = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.injected.js");
         _eventDispatcher = eventDispatcher;
         _registerEventService = registerEventService;
         _options = options;
@@ -136,7 +137,7 @@ public class Client : IDisposable, IAsyncDisposable
         var qrSelectorTask = PupPage.WaitForSelectorAsync(INTRO_QRCODE_SELECTOR, new WaitForSelectorOptions { Timeout = _options.AuthTimeoutMs });
         var needAuthentication = await Task.WhenAny(imgSelectorTask, qrSelectorTask);
 
-            needAuthentication.Wait();
+        needAuthentication.Wait();
 
         // Check if an error occurred on the first found selector
         if (needAuthentication.IsFaulted)
@@ -297,7 +298,7 @@ public class Client : IDisposable, IAsyncDisposable
 
     private void PageError(object? sender, PageErrorEventArgs e)
     {
-        Console.WriteLine($"PageError: {e.Message}" );
+        Console.WriteLine($"PageError: {e.Message}");
     }
 
     private readonly List<string> mensajes = [];
@@ -364,32 +365,23 @@ public class Client : IDisposable, IAsyncDisposable
         await _pupBrowser.CloseAsync();
         await _authStrategy.Destroy();
     }
-
-
- 
+    
     public void Dispose()
     {
         _pupBrowser.Dispose();
         _streamWriter.Dispose();
         PupPage.Dispose();
     }
-
-
+    
     public async ValueTask DisposeAsync()
     {
         await _pupBrowser.DisposeAsync();
         await _streamWriter.DisposeAsync();
         await PupPage.DisposeAsync();
     }
-
-   
-
+    
     public async Task Reject(string peerJid, string callId)
     {
-         await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectCall"), peerJid, callId);
+        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectCall"), peerJid, callId);
     }
-
-  
-
-  
 }

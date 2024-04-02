@@ -277,7 +277,6 @@ function loadUtils() {
             delete options.parseVCards;
             try {
                 const parsed = window.Store.VCard.parseVcard(content);
-                console.log(`parsed: ${JSON.stringify(parsed)}`);
                 if (parsed) {
                     vcardOptions = {
                         type: 'vcard',
@@ -449,7 +448,6 @@ function loadUtils() {
     };
 
     window.WWebJS.processStickerData = async (mediaInfo) => {
-        console.log(`mediaInfo: ${JSON.stringify(mediaInfo)}`);
         if (mediaInfo.mimetype !== 'image/webp') throw new Error('Invalid media type');
 
         const file = window.WWebJS.mediaInfoToFile(mediaInfo);
@@ -1352,7 +1350,6 @@ async function registerModuleRaid() {
 
         // Método para detectar el punto de entrada de Webpack
         detectEntrypoint() {
-            console.log(`detectEntrypoint -> entrypoint : ${this.entrypoint}`)
             if (window[this.entrypoint] != undefined) {
                 return;
             }
@@ -1370,7 +1367,6 @@ async function registerModuleRaid() {
             if (windowObjects.length === 0) {
                 throw Error('No Webpack JSONP entrypoints could be detected');
             }
-            console.log(`Entrypoint has been detected at window.${windowObjects[0]} and set for injection`);
             this.entrypoint = windowObjects[0];
         }
 
@@ -1399,7 +1395,6 @@ async function registerModuleRaid() {
 
         findModule(query) {
             if (query === undefined) {
-                console.log('el query no está definido')
                 return null;
             }
 
@@ -1414,7 +1409,6 @@ async function registerModuleRaid() {
                 const module = this.modules[key.toString()];
 
                 if (module === undefined) {
-                    // console.log(`el modulo no está definido => query: '${query} (${typeof query}) =>' key:'${key}'`);
                     return;
                 }
 
@@ -1443,8 +1437,8 @@ async function registerModuleRaid() {
                         }
                     } else if (typeof query === 'function') {
                         if (query(module)) {
-                            console.log(`El query es una funcion => query: ${query}`)
-                            console.log(`Module key: ${key.toString()}`);
+                            //console.log(`El query es una funcion => query: ${query}`)
+                            //console.log(`Module key: ${key.toString()}`);
                             results.push(module);
                         }
                     } else if (typeof query === 'number') {
@@ -1459,7 +1453,7 @@ async function registerModuleRaid() {
                 }
             });
 
-            const object = {};
+            //const object = {};
 
             //results.forEach(result => {
             //    // Obtener todas las propiedades del resultado (incluyendo métodos)
@@ -1472,16 +1466,15 @@ async function registerModuleRaid() {
             //});
 
             //console.log(`Objecto: ${JSON.stringify(object)}`);
-            console.log('');
 
-            console.log(`Encontrado: '${query}' -> funciones: '${results.length}' `);
+            //console.log(`Encontrado: '${query}' -> funciones: '${results.length}' `);
 
             return this.getModule_new(results, query);
         }
 
         getModule(modules, query) {
             if (modules.length === 0) {
-                console.log(`Query: '${query}' no encontrado.`)
+                //console.log(`Query: '${query}' no encontrado.`)
                 return null;
             }
             for (const module of modules) {
@@ -1493,7 +1486,7 @@ async function registerModuleRaid() {
             }
 
             if (modules.length !== 1) {
-                console.log(`Query: '${query}' se eligio el primero de ${modules.length}`)
+                //console.log(`Query: '${query}' se eligio el primero de ${modules.length}`)
             }
             return modules[0];
         }
@@ -1502,7 +1495,7 @@ async function registerModuleRaid() {
             let foundModules = [];
 
             if (modules.length === 0) {
-                console.log(`Query: '${query}' no encontrado.`);
+                //console.log(`Query: '${query}' no encontrado.`);
                 return null;
             }
 
@@ -1519,7 +1512,7 @@ async function registerModuleRaid() {
             if (foundModules.length == 0) {
                 return modules[0];
             } else if (foundModules.length > 1) {
-                console.log(`Query: '${query}' encontrado en ${foundModules.length} módulos.`);
+                // console.log(`Query: '${query}' encontrado en ${foundModules.length} módulos.`);
             }
 
             return foundModules[0];
@@ -1548,7 +1541,7 @@ async function registerModuleRaid() {
                         if (query(constructor)) results.push([this.constructors[key], this.modules[key]]);
                     }
                 } catch (err) {
-                    console.log(`There was an error while searching through constructor '${key}':\n${err}\n${err.stack}`);
+                    //console.log(`There was an error while searching through constructor '${key}':\n${err}\n${err.stack}`);
                 }
             });
 

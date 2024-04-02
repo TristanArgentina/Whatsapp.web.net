@@ -6,16 +6,14 @@ namespace Whatsapp.web.net;
 public class RegisterEventService : IRegisterEventService
 {
     private readonly IEventDispatcher _eventDispatcher;
-    private readonly IJavaScriptParser _parserFunctions;
     private readonly WhatsappOptions _options;
     private IPage _pupPage;
 
     private Message last_message;
 
-    public RegisterEventService(IEventDispatcher eventDispatcher, IJavaScriptParser parserFunctions, WhatsappOptions options)
+    public RegisterEventService(IEventDispatcher eventDispatcher, WhatsappOptions options)
     {
         _eventDispatcher = eventDispatcher;
-        _parserFunctions = parserFunctions;
         _options = options;
     }
 

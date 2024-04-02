@@ -1,4 +1,4 @@
-﻿namespace Whatsapp.web.net;
+﻿namespace Whatsapp.web.net.scripts;
 
 public interface IJavaScriptParser
 {

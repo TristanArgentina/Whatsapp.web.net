@@ -2,6 +2,7 @@
 using PuppeteerSharp;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.Extensions;
+using Whatsapp.web.net.scripts;
 
 namespace Whatsapp.web.net;
 

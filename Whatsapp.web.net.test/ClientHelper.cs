@@ -1,5 +1,6 @@
 ﻿using Whatsapp.web.net.AuthenticationStrategies;
 using Whatsapp.web.net.EventArgs;
+using Whatsapp.web.net.scripts;
 
 namespace Whatsapp.web.net.test;
 
@@ -27,11 +28,9 @@ public static class ClientHelper
             WebVersion = "2.2412.50"
         };
 
-        var parserFunctions = new JavaScriptParser(@".\scripts\functions.js");
-        var parserInjected = new JavaScriptParser(@".\scripts\injected.js");
         var eventDispatcher = new EventDispatcher();
-        var registerEventService = new RegisterEventService(eventDispatcher, parserFunctions, options);
-        var client = new Client(parserFunctions, parserInjected, eventDispatcher, registerEventService, options);
+        var registerEventService = new RegisterEventService(eventDispatcher, options);
+        var client = new Client(eventDispatcher, registerEventService, options);
 
         await client.Initialize().Result;
         eventDispatcher.EmitReady();

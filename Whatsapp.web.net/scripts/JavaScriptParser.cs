@@ -1,14 +1,14 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Whatsapp.web.net;
+namespace Whatsapp.web.net.scripts;
 
 public class JavaScriptParser : IJavaScriptParser
 {
     private readonly Dictionary<string, string> _methods = new();
 
-    public JavaScriptParser(string filePath)
+    public JavaScriptParser(string content)
     {
-        LoadMethodsFromFile(filePath);
+        LoadMethodsFromFile(content);
     }
 
     public string? GetMethod(string methodName)
@@ -16,9 +16,8 @@ public class JavaScriptParser : IJavaScriptParser
         return _methods.GetValueOrDefault(methodName);
     }
 
-    private void LoadMethodsFromFile(string filePath)
+    private void LoadMethodsFromFile(string content)
     {
-        var content = File.ReadAllText(filePath);
         var pattern = @"function\s+(\w+)\s*\(";
         var regex = new Regex(pattern);
         var matches = regex.Matches(content);

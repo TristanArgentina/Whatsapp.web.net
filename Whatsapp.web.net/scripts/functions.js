@@ -935,7 +935,7 @@ async function getChatLabels(chatId) {
 
 
 function registerEventListeners() {
-    console.log('Agregando eventos a Msg');
+//    console.log('Agregando eventos a Msg');
     window.Store.Msg.on('change', (msg) => { window.onChangeMessageEvent(window.WWebJS.getMessageModel(msg)); });
     window.Store.Msg.on('change:type', (msg) => { window.onChangeMessageTypeEvent(window.WWebJS.getMessageModel(msg)); });
     window.Store.Msg.on('change:ack', (msg, ack) => { window.onMessageAckEvent(window.WWebJS.getMessageModel(msg), ack); });
@@ -955,7 +955,7 @@ function registerEventListeners() {
 
     });
 
-    console.log('Agregando eventos a Chat');
+    //console.log('Agregando eventos a Chat');
     //TODO: missing
     //window.Store.Chat.on('remove', async (chat) => { window.onRemoveChatEvent(await window.WWebJS.getChatModel(chat)); });
     //window.Store.Chat.on('change:archive', async (chat, currState, prevState) => { window.onArchiveChatEvent(await window.WWebJS.getChatModel(chat), currState, prevState); });
@@ -965,14 +965,14 @@ function registerEventListeners() {
     //console.log('Agregando eventos a Conn');
     window.Store.Conn.on('change:battery', (state) => { window.onBatteryStateChangedEvent(state); });
 
-    console.log('Agregando eventos a Call');
+    //console.log('Agregando eventos a Call');
     window.Store.Call.on('add', (call) => { window.onIncomingCall(call); });
 
     //TODO: missing
     //console.log('Agregando eventos a AppState');
     //window.Store.AppState.on('change:state', (_AppState, state) => { window.onAppStateChangedEvent(state); });
 
-    console.log('Agregando eventos a createOrUpdateReactions');
+    //console.log('Agregando eventos a createOrUpdateReactions');
     {
         const module = window.Store.createOrUpdateReactionsModule;
         const ogMethod = module.createOrUpdateReactions;

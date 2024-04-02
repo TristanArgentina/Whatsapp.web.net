@@ -48,22 +48,14 @@ public class Util
 
     public static void SetFfmpegPath(string path)
     {
-        // Establece la variable de entorno PATH para incluir la ruta de FFmpeg
         var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
         var newPath = $"{currentPath};{path}";
         Environment.SetEnvironmentVariable("PATH", newPath);
 
-        // Verifica que la ruta especificada sea válida
-        if (!VerifyFfmpegPath(path))
+        if (!File.Exists(Path.Combine(path, "ffmpeg.exe")))
         {
-            throw new Exception("La ruta de FFmpeg especificada no es válida.");
+            throw new Exception("The specified FFmpeg path is invalid.");
         }
-    }
-
-    private static bool VerifyFfmpegPath(string path)
-    {
-        // Verifica si el archivo ejecutable de FFmpeg existe en la ruta especificada
-        return File.Exists(Path.Combine(path, "ffmpeg.exe"));
     }
 
     public static async Task<MessageMedia> FormatToWebpSticker(MessageMedia media, StickerMetadata metadata, IPage pupPage)
