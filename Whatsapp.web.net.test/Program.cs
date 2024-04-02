@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Whatsapp.web.net;
 using Whatsapp.web.net.EventArgs;
-using Whatsapp.web.net.scripts;
 using Whatsapp.web.net.test;
 
 Console.WriteLine("Hello, World!");

@@ -1279,28 +1279,23 @@ async function registerModuleRaid() {
             this.detectEntrypoint();
             this.fillModules();
 
-            // Reemplazando el getter
             this.replaceGet();
 
-            // Configurando el evento de empuje
             this.setupPushEvent();
         }
 
-        // Método de registro de depuración
         log(message) {
             if (this.debug) {
                 console.warn(`[moduleRaid] ${message}`);
             }
         }
 
-        // Método para reemplazar el getter
         replaceGet() {
             if (this.get === null) {
                 this.get = (key) => this.modules[key];
             }
         }
 
-        // Método para llenar los módulos
         fillModules() {
             if (typeof window[this.entrypoint] === 'function') {
                 this.functionArguments.forEach((argument, index) => {
@@ -1338,7 +1333,6 @@ async function registerModuleRaid() {
             }
         }
 
-        // Método para configurar el evento de empuje
         setupPushEvent() {
             const originalPush = window[this.entrypoint].push;
             window[this.entrypoint].push = (...args) => {
@@ -1348,7 +1342,6 @@ async function registerModuleRaid() {
             };
         }
 
-        // Método para detectar el punto de entrada de Webpack
         detectEntrypoint() {
             if (window[this.entrypoint] != undefined) {
                 return;
@@ -1370,7 +1363,6 @@ async function registerModuleRaid() {
             this.entrypoint = windowObjects[0];
         }
 
-        // Método para buscar en el objeto
         searchObject(object, query) {
             for (const key in object) {
                 const value = object[key];

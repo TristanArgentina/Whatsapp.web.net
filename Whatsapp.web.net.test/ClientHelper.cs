@@ -1,6 +1,5 @@
 ﻿using Whatsapp.web.net.AuthenticationStrategies;
 using Whatsapp.web.net.EventArgs;
-using Whatsapp.web.net.scripts;
 
 namespace Whatsapp.web.net.test;
 
@@ -13,7 +12,6 @@ public static class ClientHelper
         {
             UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36",
             AuthStrategy = new LocalAuth(3.ToString()),
-            FfmpegPath = @"C:\ffmpeg",
             Puppeteer = new PuppeteerOptions
             {
                 //        ExecutablePath = @"C:\chromium-browser\chrome.exe"

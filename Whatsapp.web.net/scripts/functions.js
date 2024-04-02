@@ -935,7 +935,7 @@ async function getChatLabels(chatId) {
 
 
 function registerEventListeners() {
-//    console.log('Agregando eventos a Msg');
+//    console.log('add event of Msg');
     window.Store.Msg.on('change', (msg) => { window.onChangeMessageEvent(window.WWebJS.getMessageModel(msg)); });
     window.Store.Msg.on('change:type', (msg) => { window.onChangeMessageTypeEvent(window.WWebJS.getMessageModel(msg)); });
     window.Store.Msg.on('change:ack', (msg, ack) => { window.onMessageAckEvent(window.WWebJS.getMessageModel(msg), ack); });

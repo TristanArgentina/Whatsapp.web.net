@@ -46,11 +46,6 @@ public class WhatsappOptions
     public string UserAgent { get; set; } 
 
     /// <summary>
-    /// Ffmpeg path to use when formatting videos to webp while sending stickers 
-    /// </summary>
-    public string FfmpegPath { get; set; }
-
-    /// <summary>
     /// Sets bypassing of page&#x27;s Content-Security-Policy.
     /// </summary>
     public bool BypassCSP { get; set; } = false;

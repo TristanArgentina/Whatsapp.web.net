@@ -117,7 +117,6 @@ public class GroupChatManager : IGroupChatManager
 
     public async Task<GroupChat> CreateGroup(string title, object? participants = null, GroupChatOptions options = null)
     {
-        // Convierte participants a una lista si no lo es
         if (!(participants is IEnumerable<object>))
         {
             participants = new List<object> { participants };

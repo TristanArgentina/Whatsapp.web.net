@@ -173,8 +173,8 @@ public class MessageManagerTests
         Assert.That(msg.VCards[0].Version == expectedVCard.Version);
         Assert.That(msg.VCards[0].FullName == expectedVCard.FullName);
         Assert.That(msg.VCards[0].Names.SequenceEqual(expectedVCard.Names));
-        Assert.That(msg.VCards[0].Email == expectedVCard.Email);
-        Assert.That(msg.VCards[0].Telephone == expectedVCard.Telephone);
+        Assert.That(msg.VCards[0].Email.Value == expectedVCard.Email.Value);
+        Assert.That(msg.VCards[0].Telephone.Value == expectedVCard.Telephone.Value);
     }
 
     [Test]

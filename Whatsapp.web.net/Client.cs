@@ -59,8 +59,6 @@ public class Client : IDisposable, IAsyncDisposable
 
         TaskUtils.KillProcessesByName("chrome", options.Puppeteer.ExecutablePath);
         _authStrategy.Setup(this, options);
-
-        Util.SetFfmpegPath(options.FfmpegPath);
     }
 
     public async Task<Task> Initialize()

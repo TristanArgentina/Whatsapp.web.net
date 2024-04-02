@@ -5,6 +5,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyVersion>0.1.2</AssemblyVersion>
+    <FileVersion>0.1.2</FileVersion>
+    <Version>0.1.2-alfa</Version>
+    <Copyright>Apache 2.0</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/TristanArgentina/Whatsapp.web.net</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,8 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FFmpeg.AutoGen" Version="6.1.0.1" />
-    <PackageReference Include="FFmpeg.Net" Version="1.1.0" />
     <PackageReference Include="FFMpegCore" Version="5.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="PuppeteerSharp" Version="15.1.0" />
@@ -43,6 +48,19 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

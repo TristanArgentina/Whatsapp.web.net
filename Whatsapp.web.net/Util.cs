@@ -40,24 +40,11 @@ public class Util
                 return "image/jpeg";
             case ".png":
                 return "image/png";
-            // Añade más casos según sea necesario
             default:
-                return "application/octet-stream"; // Tipo MIME predeterminado
+                return "application/octet-stream"; 
         }
     }
-
-    public static void SetFfmpegPath(string path)
-    {
-        var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
-        var newPath = $"{currentPath};{path}";
-        Environment.SetEnvironmentVariable("PATH", newPath);
-
-        if (!File.Exists(Path.Combine(path, "ffmpeg.exe")))
-        {
-            throw new Exception("The specified FFmpeg path is invalid.");
-        }
-    }
-
+    
     public static async Task<MessageMedia> FormatToWebpSticker(MessageMedia media, StickerMetadata metadata, IPage pupPage)
     {
         MessageMedia webpMedia;
@@ -148,8 +135,6 @@ public class Util
 
         var tempFile = Path.Combine(Path.GetTempPath(), $"{Path.GetRandomFileName()}.webp");
 
-
-        // Construir la línea de comandos FFmpeg para convertir el video a webp
         var ffmpegCmd = FFMpegArguments
             .FromPipeInput(new StreamPipeSource(new MemoryStream(Convert.FromBase64String(media.Data))))
             .OutputToPipe(new StreamPipeSink(new FileStream(tempFile, FileMode.Create)), options =>
@@ -160,11 +145,8 @@ public class Util
                 options.WithArgument(new FrameRateArgument(10));
                 options.Resize(512, 512);
             });
-
-        // Ejecutar el comando FFmpeg
         await ffmpegCmd.ProcessAsynchronously();
 
-        // Leer el archivo de salida webp
         var data = Convert.ToBase64String(await File.ReadAllBytesAsync(tempFile));
         File.Delete(tempFile);
 
