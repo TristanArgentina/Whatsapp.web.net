@@ -78,7 +78,7 @@ public class Chat
         Id = UserId.Create(data.id);
         Name = data.name;
         IsGroup = data.isGroup;
-        IsReadOnly = data.isReadOnly;
+        IsReadOnly = data.isReadOnly is null ? false : data.isReadOnly;
         UnreadCount = data.unreadCount;
         Timestamp = data.t is null
             ? null

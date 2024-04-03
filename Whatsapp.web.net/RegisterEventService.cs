@@ -228,7 +228,7 @@ public class RegisterEventService : IRegisterEventService
             var message = new Message(msg);
 
             // Extract old and new IDs
-            string newId = isParticipant ? message.Recipients[0] : msg.to;
+            string newId = isParticipant ? message.Recipients[0].Id : msg.to;
             var oldId = isParticipant ? message.Author.Id : message.TemplateParams.FirstOrDefault(id => id != newId);
 
             _eventDispatcher.EmitContactChanged(message, oldId, newId, isContact);

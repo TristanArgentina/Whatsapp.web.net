@@ -77,6 +77,19 @@ public class Client : IDisposable, IAsyncDisposable
             Referer = "https://whatsapp.com/"
         });
 
+        await PupPage.AddScriptTagAsync(new AddTagOptions()
+        {
+            Url = "https://unpkg.com/moduleraid/dist/moduleraid.iife.js"
+        });
+
+
+
+
+        await PupPage.AddScriptTagAsync(new AddTagOptions()
+        {
+            Content = "import ModuleRaid from 'moduleRaid';window.mR = new moduleRaid();",
+            Type = "module"
+        });
         await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getElementByXpath"));
 
         var lastPercent = default(int?);
@@ -200,12 +213,20 @@ public class Client : IDisposable, IAsyncDisposable
             }
         }
 
-        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("compareWwebVersions"));
-
-        await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("registerModuleRaid"));
+        var version = PupPage.EvaluateFunctionHandleAsync(_parserFunctions.GetMethod("getWWebVersion")).Result.ToString();
+        var isCometOrAbove = int.Parse(version.Split('.')[1]) >= 3000;
+        if (isCometOrAbove)
+        {
+            await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("exposeStore"));
+        }
+        else
+        {
+            await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("registerModuleRaid"));
+            await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("exposeStore2_3"));
+        }
 
         // Evaluate ExposeStore 
-        await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("exposeStore"));
+        
 
 
         // Wait for window.Store to be defined
@@ -363,21 +384,21 @@ public class Client : IDisposable, IAsyncDisposable
         await _pupBrowser.CloseAsync();
         await _authStrategy.Destroy();
     }
-    
+
     public void Dispose()
     {
         _pupBrowser.Dispose();
         _streamWriter.Dispose();
         PupPage.Dispose();
     }
-    
+
     public async ValueTask DisposeAsync()
     {
         await _pupBrowser.DisposeAsync();
         await _streamWriter.DisposeAsync();
         await PupPage.DisposeAsync();
     }
-    
+
     public async Task Reject(string peerJid, string callId)
     {
         await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectCall"), peerJid, callId);
