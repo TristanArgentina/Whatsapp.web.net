@@ -221,10 +221,6 @@ public class Client : IDisposable, IAsyncDisposable
             await _pupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("exposeStore2_3"));
         }
 
-        // Evaluate ExposeStore 
-
-
-
         // Wait for window.Store to be defined
         await _pupPage.WaitForFunctionAsync("() => window.Store != undefined");
 
@@ -237,7 +233,6 @@ public class Client : IDisposable, IAsyncDisposable
 
 
         // Expose client info
-
         var clientInfo = await _pupPage.EvaluateFunctionAsync<object>(_parserFunctions.GetMethod("serializeConnectionAndUser"));
 
         ClientInfo = new ClientInfo(clientInfo);

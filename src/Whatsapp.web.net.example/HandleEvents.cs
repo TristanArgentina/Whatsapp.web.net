@@ -19,21 +19,22 @@ public class HandleEvents
     public void SetHandle()
     {
         // Define event handlers
-        _eventDispatcher.LoadingScreenEvent += OnLoadingScreenEvent();
-        _eventDispatcher.QRReceivedEvent += OnQRReceivedEvent();
-        _eventDispatcher.AuthenticatedEvent += OnAuthenticatedEvent();
-        _eventDispatcher.AuthenticationFailureEvent += OnAuthenticationFailureEvent();
-        _eventDispatcher.ReadyEvent += OnReadyEvent();
-        _eventDispatcher.MessageReceivedEvent += OnMessageReceivedEvent();
-        _eventDispatcher.MessageCreateEvent += OnMessageCreateEvent();
-        _eventDispatcher.MessageCiphertextEvent += OnMessageCiphertextEvent();
-        _eventDispatcher.RevokedEveryoneEvent += OnRevokedEveryoneEvent();
-        _eventDispatcher.RevokedMeEvent += OnRevokedMeEvent();
-        _eventDispatcher.MessageACKEvent += OnMessageACKEvent();
-        _eventDispatcher.GroupJoinEvent += OnGroupJoinEvent();
-        _eventDispatcher.GroupLeaveEvent += OnGroupLeaveEvent();
-        _eventDispatcher.GroupUpdateEvent += OnGroupUpdateEvent();
-        _eventDispatcher.StateChangedEvent += OnStateChangedEvent();
+        _eventDispatcher.LoadingScreenEvent += OnLoadingScreen();
+        _eventDispatcher.QRReceivedEvent += OnQRReceived();
+        _eventDispatcher.AuthenticatedEvent += OnAuthenticated();
+        _eventDispatcher.AuthenticationFailureEvent += OnAuthenticationFailure();
+        _eventDispatcher.ReadyEvent += OnReady();
+        _eventDispatcher.MessageReceivedEvent += OnMessageReceived();
+        _eventDispatcher.MessageCreateEvent += OnMessageCreate();
+        _eventDispatcher.MessageCiphertextEvent += OnMessageCiphertext();
+        _eventDispatcher.RevokedEveryoneEvent += OnRevokedEveryone();
+        _eventDispatcher.RevokedMeEvent += OnRevokedMe();
+        _eventDispatcher.MessageACKEvent += OnMessageACK();
+        _eventDispatcher.GroupJoinEvent += OnGroupJoin();
+        _eventDispatcher.GroupLeaveEvent += OnGroupLeave();
+        _eventDispatcher.GroupUpdateEvent += OnGroupUpdate();
+        _eventDispatcher.StateChangedEvent += OnStateChanged();
+        _eventDispatcher.MessageReactionEvent += OnMessageReaction();
 
         // Change to false if you don't want to reject incoming calls
         var rejectCalls = true;
@@ -46,8 +47,13 @@ public class HandleEvents
 
     }
 
-    
-    private static EventHandler<ReadyEventArgs>? OnReadyEvent()
+    private EventHandler<MessageReactionEventArgs>? OnMessageReaction()
+    {
+        return (sender, args) => { Console.WriteLine($"Reaction: {args.Reaction.Text}"); };
+    }
+
+
+    private static EventHandler<ReadyEventArgs>? OnReady()
     {
         return (sender, args) => { Console.WriteLine("READY"); };
     }
@@ -166,12 +172,12 @@ public class HandleEvents
         };
     }
 
-    private static EventHandler<StateChangedEventArg>? OnStateChangedEvent()
+    private static EventHandler<StateChangedEventArg>? OnStateChanged()
     {
         return (sender, args) => { Console.WriteLine("CHANGE STATE " + args.State); };
     }
 
-    private static EventHandler<GroupUpdateEventArgs>? OnGroupUpdateEvent()
+    private static EventHandler<GroupUpdateEventArgs>? OnGroupUpdate()
     {
         return (sender, args) =>
         {
@@ -180,7 +186,7 @@ public class HandleEvents
         };
     }
 
-    private EventHandler<GroupLeaveEventArgs>? OnGroupLeaveEvent()
+    private EventHandler<GroupLeaveEventArgs>? OnGroupLeave()
     {
         return (sender, args) =>
         {
@@ -190,7 +196,7 @@ public class HandleEvents
         };
     }
 
-    private EventHandler<GroupJoinEventArgs>? OnGroupJoinEvent()
+    private EventHandler<GroupJoinEventArgs>? OnGroupJoin()
     {
         return (sender, args) =>
         {
@@ -200,7 +206,7 @@ public class HandleEvents
         };
     }
 
-    private EventHandler<MessageACKEventArg>? OnMessageACKEvent()
+    private EventHandler<MessageACKEventArg>? OnMessageACK()
     {
         return (sender, args) =>
         {
@@ -211,7 +217,7 @@ public class HandleEvents
         };
     }
 
-    private EventHandler<RevokedMeEventArg>? OnRevokedMeEvent()
+    private EventHandler<RevokedMeEventArg>? OnRevokedMe()
     {
         return (sender, args) =>
         {
@@ -220,7 +226,7 @@ public class HandleEvents
         };
     }
 
-    private EventHandler<RevokedEveryoneEventArg>? OnRevokedEveryoneEvent()
+    private EventHandler<RevokedEveryoneEventArg>? OnRevokedEveryone()
     {
         return async (sender, args) =>
         {
@@ -233,7 +239,7 @@ public class HandleEvents
         };
     }
 
-    private EventHandler<MessageCiphertextEventArgs>? OnMessageCiphertextEvent()
+    private EventHandler<MessageCiphertextEventArgs>? OnMessageCiphertext()
     {
         return (sender, args) =>
         {
@@ -246,7 +252,7 @@ public class HandleEvents
         };
     }
 
-    private EventHandler<MessageCreateEventArgs>? OnMessageCreateEvent()
+    private EventHandler<MessageCreateEventArgs>? OnMessageCreate()
     {
         return async (sender, args) =>
         {
@@ -270,12 +276,12 @@ public class HandleEvents
         };
     }
 
-    private static EventHandler<LoadingScreenEventArg>? OnLoadingScreenEvent()
+    private static EventHandler<LoadingScreenEventArg>? OnLoadingScreen()
     {
         return (sender, args) => { Console.WriteLine($"LOADING SCREEN {args.Percent}% {args.Message}"); };
     }
 
-    private EventHandler<MessageReceivedEventArgs>? OnMessageReceivedEvent()
+    private EventHandler<MessageReceivedEventArgs>? OnMessageReceived()
     {
         return async (sender, args) =>
         {
@@ -483,12 +489,12 @@ public class HandleEvents
 
 
 
-    private static EventHandler<AuthenticationFailureEventArgs>? OnAuthenticationFailureEvent()
+    private static EventHandler<AuthenticationFailureEventArgs>? OnAuthenticationFailure()
     {
         return (sender, args) => { Console.Error.WriteLine("AUTHENTICATION FAILURE " + args.Payload); };
     }
 
-    private static EventHandler<AuthenticatedEventArg>? OnAuthenticatedEvent()
+    private static EventHandler<AuthenticatedEventArg>? OnAuthenticated()
     {
         return (sender, args) =>
         {
@@ -498,7 +504,7 @@ public class HandleEvents
         };
     }
 
-    private static EventHandler<QRReceivedEventArgs>? OnQRReceivedEvent()
+    private static EventHandler<QRReceivedEventArgs>? OnQRReceived()
     {
         return (sender, args) =>
         {

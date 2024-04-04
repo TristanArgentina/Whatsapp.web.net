@@ -13,6 +13,22 @@ namespace Whatsapp.web.net;
 
 public class Util
 {
+    public static DateTime ConvertToDate(dynamic timestampDynamic)
+    {
+        var timestamp = (long) timestampDynamic;
+
+        if (timestamp < -62135596800)
+        {
+            return DateTime.MinValue;
+        }
+
+        if (timestamp > 253402300799)
+        {
+            return DateTime.MaxValue;
+        }
+        return DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
+    }
+
     public static Dictionary<string, object> MergeDefault(Dictionary<string, object> def, Dictionary<string, object> given)
     {
         if (given == null) return def;

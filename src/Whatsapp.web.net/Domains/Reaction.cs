@@ -8,7 +8,9 @@ public class Reaction
     /// <summary>
     /// Reaction ID
     /// </summary>
-    public object Id { get; set; }
+    public MsgKey Key { get; set; }
+
+    public MsgKey ParentKey { get; set; }
 
     /// <summary>
     /// Orphan
@@ -16,19 +18,14 @@ public class Reaction
     public int Orphan { get; set; }
 
     /// <summary>
-    /// Orphan reason
-    /// </summary>
-    public string OrphanReason { get; set; }
-
-    /// <summary>
     /// Unix timestamp for when the reaction was created
     /// </summary>
-    public long Timestamp { get; set; }
+    public DateTime Timestamp { get; set; }
 
     /// <summary>
     /// Reaction
     /// </summary>
-    public string Reaction1 { get; set; }
+    public string Text { get; set; }
 
     /// <summary>
     /// Read
@@ -36,19 +33,9 @@ public class Reaction
     public bool Read { get; set; }
 
     /// <summary>
-    /// Message ID
-    /// </summary>
-    public object MsgId { get; set; }
-
-    /// <summary>
     /// Sender ID
     /// </summary>
-    public string SenderId { get; set; }
-
-    /// <summary>
-    /// ACK
-    /// </summary>
-    public int? Ack { get; set; }
+    public UserId SenderId { get; set; }
 
     public Reaction(dynamic data)
     {
@@ -60,14 +47,12 @@ public class Reaction
 
     private void Patch(dynamic data)
     {
-        Id = data.id;
+        Key = new MsgKey(data.msgKey);
+        ParentKey = new MsgKey(data.parentMsgKey);
+        SenderId = UserId.Create(data.senderId);
+        Text = data.reactionText;
+        Timestamp = Util.ConvertToDate( data.timestamp);
         Orphan = data.orphan;
-        OrphanReason = data.orphanReason;
-        Timestamp = data.timestamp;
-        Reaction1 = data.reaction;
         Read = data.read;
-        MsgId = data.msgid;
-        SenderId = data.senderId;
-        Ack = data.ack;
     }
 }
