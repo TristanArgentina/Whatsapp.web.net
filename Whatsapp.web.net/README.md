@@ -1,4 +1,6 @@
+ [![Discord Chat](https://img.shields.io/discord/698610475432411196.svg?logo=discord)](https://discord.com/channels/1224834763886428252/1224834764356456518)  
 
+ 
 # whatsapp.web.net
 A WhatsApp API client that connects through the WhatsApp Web browser app
 
@@ -7,6 +9,36 @@ It uses Puppeteer to run a real instance of Whatsapp Web to avoid getting blocke
 **NOTE:** It is based on the whatsapp-web.js project.
 
 **It is experimental and is not intended for use in production.**
+## Example usage
+
+```json
+{
+  "Whatsapp": {
+    "UserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36",
+
+    "Puppeteer": {
+      "ExecutablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "Headless": false
+    },
+    "WebVersionCache": {
+      "ClientId": "3",
+      "Type": "local"
+    },
+    "WebVersion": "2.3000.1012539641"
+  },
+  "Dummy": {
+    "User1": {
+      "user": "0195556092222",
+      "server": "c.us"
+    },
+    "User2": {
+      "user": "0195554128871",
+      "server": "c.us"
+    }
+  }
+}
+
+```
 
 
 ```c#
@@ -259,6 +291,42 @@ public class MessageManagerTests : TestBase
 
 }
 ```
+
+```c#
+var builder = Host.CreateApplicationBuilder();
+builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile(@"appsettings.json", optional: false, reloadOnChange: true);
+
+builder.Services.AddOptions<WhatsappOptions>()
+    .BindConfiguration("Whatsapp")
+    .ValidateOnStart();
+
+builder.Services.AddOptions<DummyOptions>()
+    .BindConfiguration("Dummy")
+    .ValidateOnStart();
+
+builder.Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.Puppeteer);
+builder.Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.WebVersionCache);
+
+builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
+builder.Services.AddSingleton<IRegisterEventService, RegisterEventService>();
+builder.Services.AddSingleton<IAuthenticatorProvider, AuthenticatorProvider>();
+builder.Services.AddSingleton<Client>();
+
+_serviceProvider = builder.Services.BuildServiceProvider();
+
+EventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
+Client = _serviceProvider.GetService<Client>();
+var dummyOptions = _serviceProvider.GetRequiredService<IOptions<DummyOptions>>().Value;
+ContactId1 = new ContactId(dummyOptions.User1.User, dummyOptions.User1.Server);
+ContactId2 = new ContactId(dummyOptions.User2.User, dummyOptions.User2.Server);
+var puppeteerOptions = _serviceProvider.GetRequiredService<PuppeteerOptions>();
+TaskUtils.KillProcessesByName("chrome", puppeteerOptions.ExecutablePath!);
+
+await Client!.Initialize();
+```
+
+
 
 ## Contributing
 
