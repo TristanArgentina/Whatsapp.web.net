@@ -3,7 +3,7 @@ using PuppeteerSharp;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.scripts;
 
-namespace Whatsapp.web.net;
+namespace Whatsapp.web.net.Managers;
 
 public class ContactManager : IContactManager
 {
@@ -28,7 +28,7 @@ public class ContactManager : IContactManager
     {
         if (contact.IsGroup) return false;
 
-        Block( contact.Id._serialized);
+        Block(contact.Id._serialized);
 
         contact.IsBlocked = true;
         return true;
@@ -95,7 +95,7 @@ public class ContactManager : IContactManager
 
         var dataList = new List<dynamic>((JArray)data);
 
-        return dataList.Select(d => new  Contact(d)).ToArray();
+        return dataList.Select(d => new Contact(d)).ToArray();
     }
 
 }

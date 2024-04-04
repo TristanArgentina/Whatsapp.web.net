@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using PuppeteerSharp;
 using Whatsapp.web.net.Authentication;
 using Whatsapp.web.net.Domains;
+using Whatsapp.web.net.Managers;
 using Whatsapp.web.net.scripts;
 using ErrorEventArgs = PuppeteerSharp.ErrorEventArgs;
 

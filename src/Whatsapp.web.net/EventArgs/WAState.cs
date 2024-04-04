@@ -1,4 +1,4 @@
-﻿namespace Whatsapp.web.net;
+﻿namespace Whatsapp.web.net.EventArgs;
 
 public enum WAState
 {
