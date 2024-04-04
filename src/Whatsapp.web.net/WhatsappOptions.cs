@@ -1,4 +1,5 @@
 ﻿using PuppeteerSharp;
+using Whatsapp.web.net.Authentication;
 
 namespace Whatsapp.web.net;
 

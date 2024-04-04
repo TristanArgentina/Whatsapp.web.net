@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Whatsapp.web.net;
+namespace Whatsapp.web.net.Authentication;
 
 public class LocalLoginWebCache : LoginWebCache
 {
