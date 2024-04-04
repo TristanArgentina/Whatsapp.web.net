@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using NUnit.Framework;
+using Whatsapp.web.net.Authentication;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.EventArgs;
 
@@ -10,16 +11,16 @@ namespace Whatsapp.web.net.test;
 
 public class TestBase
 {
-    protected WhatsappOptions WhatsappOptions;
-    protected EventDispatcher EventDispatcher;
-    protected Client Client;
-    protected DummyOptions DummyOptions;
-    protected ContactId ContactId1;
-    protected ContactId ContactId2;
+    protected IEventDispatcher? EventDispatcher;
+    protected Client? Client;
+    protected ContactId? ContactId1;
+    protected ContactId? ContactId2;
+    private ServiceProvider? _serviceProvider;
 
     [OneTimeSetUp]
     public async Task Setup()
     {
+
         var builder = Host.CreateApplicationBuilder();
         builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile(@"appsettings.json", optional: false, reloadOnChange: true);
@@ -32,21 +33,24 @@ public class TestBase
             .BindConfiguration("Dummy")
             .ValidateOnStart();
 
+        builder.Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.Puppeteer);
+        builder.Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.WebVersionCache);
 
-        await using var serviceProvider = builder.Services.BuildServiceProvider();
+        builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
+        builder.Services.AddSingleton<IRegisterEventService, RegisterEventService>();
+        builder.Services.AddSingleton<IAuthenticatorProvider, AuthenticatorProvider>();
+        builder.Services.AddSingleton<Client>();
 
-        WhatsappOptions = serviceProvider.GetRequiredService<IOptions<WhatsappOptions>>().Value;
-        DummyOptions = serviceProvider.GetRequiredService<IOptions<DummyOptions>>().Value;
-        ContactId1 = new ContactId(DummyOptions.User1.User, DummyOptions.User1.Server);
-        ContactId2 = new ContactId(DummyOptions.User2.User, DummyOptions.User2.Server);
+        _serviceProvider = builder.Services.BuildServiceProvider();
 
-        EventDispatcher = new EventDispatcher();
-        var registerEventService = new RegisterEventService(EventDispatcher, WhatsappOptions);
-        Client = new Client(EventDispatcher, registerEventService, WhatsappOptions);
+        EventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
+        Client = _serviceProvider.GetService<Client>();
+        var dummyOptions = _serviceProvider.GetRequiredService<IOptions<DummyOptions>>().Value;
+        ContactId1 = new ContactId(dummyOptions.User1.User, dummyOptions.User1.Server);
+        ContactId2 = new ContactId(dummyOptions.User2.User, dummyOptions.User2.Server);
+        var puppeteerOptions = _serviceProvider.GetRequiredService<PuppeteerOptions>();
+        TaskUtils.KillProcessesByName("chrome", puppeteerOptions.ExecutablePath!);
 
-        await Client.Initialize().Result;
-        EventDispatcher.EmitReady();
-
-       
+        await Client!.Initialize();
     }
 }

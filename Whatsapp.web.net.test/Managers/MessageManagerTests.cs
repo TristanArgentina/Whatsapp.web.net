@@ -224,7 +224,10 @@ public class MessageManagerTests : TestBase
         Assert.That(msg.Body.Contains("BEGIN:VCARD"));
         Assert.That(msg.VCards is not null);
         Assert.That(msg.VCards.Count == 1);
-        Assert.That(msg.VCards[0].Telephone.Value.Replace("+","").Replace(" ","") == ContactId1.User);
+        Assert.That(msg.VCards[0].Telephone.Value
+            .Replace("+","")
+            .Replace("-","")
+            .Replace(" ","") == ContactId1.User);
     }
 
     [Test]
@@ -242,7 +245,10 @@ public class MessageManagerTests : TestBase
         Assert.That(msg.Id!.FromMe);
         Assert.That(msg.VCards is not null);
         Assert.That(msg.VCards.Count == 2);
-        Assert.That(msg.VCards[0].Telephone.Value.Replace("+", "").Replace(" ", "") == ContactId1.User);
+        Assert.That(msg.VCards[0].Telephone.Value
+            .Replace("+", "")
+            .Replace("-", "")
+            .Replace(" ", "") == ContactId1.User);
     }
 
 }

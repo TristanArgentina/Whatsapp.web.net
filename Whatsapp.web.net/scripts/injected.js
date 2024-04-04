@@ -26,6 +26,11 @@
     window.Store.UserConstructor = window.require('WAWebWid');
     window.Store.Validators = window.require('WALinkify');
     window.Store.VCard = window.require('WAWebFrontendVcardUtils');
+
+    //TODO: Review
+    window.Store.VCardParsing = window.require('WAWebVcardParsingUtils');
+    window.Store.VCardParsing2 = window.require('WAWebVcardGetNameFromParsed');
+
     window.Store.WidFactory = window.require('WAWebWidFactory');
     window.Store.ProfilePic = window.require('WAWebContactProfilePicThumbBridge');
     window.Store.PresenceUtils = window.require('WAWebPresenceChatAction');
@@ -390,11 +395,11 @@ function loadUtils() {
         } else if (options.parseVCards && typeof (content) === 'string' && content.startsWith('BEGIN:VCARD')) {
             delete options.parseVCards;
             try {
-                const parsed = window.Store.VCard.parseVcard(content);
+                const parsed = window.Store.VCardParsing.parseVcard(content);
                 if (parsed) {
                     vcardOptions = {
                         type: 'vcard',
-                        vcardFormattedName: window.Store.VCard.vcardGetNameFromParsed(parsed)
+                        vcardFormattedName: window.Store.VCardParsing2.vcardGetNameFromParsed(parsed)
                     };
                 }
             } catch (err) {
@@ -784,7 +789,7 @@ function loadUtils() {
     window.WWebJS.getContact = async contactId => {
         const wid = window.Store.WidFactory.createWid(contactId);
         const contact = await window.Store.Contact.find(wid);
-        const bizProfile = await window.Store.BusinessProfileCollection.fetchBizProfile(wid);
+        const bizProfile = await window.Store.BusinessProfile.fetchBizProfile(wid);
         bizProfile.profileOptions && (contact.businessProfile = bizProfile);
         return window.WWebJS.getContactModel(contact);
     };

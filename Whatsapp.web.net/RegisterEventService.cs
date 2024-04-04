@@ -6,34 +6,30 @@ namespace Whatsapp.web.net;
 public class RegisterEventService : IRegisterEventService
 {
     private readonly IEventDispatcher? _eventDispatcher;
-    private readonly WhatsappOptions? _options;
-    private IPage _pupPage;
 
-    private Message last_message;
+    private Message _lastMessage;
 
-    public RegisterEventService(IEventDispatcher? eventDispatcher, WhatsappOptions? options)
+    public RegisterEventService(IEventDispatcher? eventDispatcher)
     {
         _eventDispatcher = eventDispatcher;
-        _options = options;
     }
 
-    public async void Register(IPage page)
+    public void Register(IPage page)
     {
-        _pupPage = page;
-        await page.ExposeFunctionAsync("onAddMessageEvent", OnAddMessageEvent());
-        await page.ExposeFunctionAsync("onChangeMessageTypeEvent", OnChangeMessageTypeEvent());
-        await page.ExposeFunctionAsync("onChangeMessageEvent", OnChangeMessageEvent());
-        await page.ExposeFunctionAsync("onRemoveMessageEvent", OnRemoveMessageEvent());
-        await page.ExposeFunctionAsync("onMessageAckEvent", OnMessageAckEvent());
-        await page.ExposeFunctionAsync("onChatUnreadCountEvent", OnChatUnreadCountEvent());
-        await page.ExposeFunctionAsync("onMessageMediaUploadedEvent", OnMessageMediaUploadedEvent());
-        await page.ExposeFunctionAsync("onBatteryStateChangedEvent", OnBatteryStateChangedEvent());
-        await page.ExposeFunctionAsync("onIncomingCall", OnIncomingCall());
-        await page.ExposeFunctionAsync("onReaction", OnReaction());
-        await page.ExposeFunctionAsync("onRemoveChatEvent", OnRemoveChatEvent());
-        await page.ExposeFunctionAsync("onArchiveChatEvent", OnArchiveChatEvent());
-        await page.ExposeFunctionAsync("onEditMessageEvent", OnEditMessageEvent());
-        await page.ExposeFunctionAsync("onAddMessageCiphertextEvent", OnAddMessageCiphertextEvent());
+        page.ExposeFunctionAsync("onAddMessageEvent", OnAddMessageEvent());
+        page.ExposeFunctionAsync("onChangeMessageTypeEvent", OnChangeMessageTypeEvent());
+        page.ExposeFunctionAsync("onChangeMessageEvent", OnChangeMessageEvent());
+        page.ExposeFunctionAsync("onRemoveMessageEvent", OnRemoveMessageEvent());
+        page.ExposeFunctionAsync("onMessageAckEvent", OnMessageAckEvent());
+        page.ExposeFunctionAsync("onChatUnreadCountEvent", OnChatUnreadCountEvent());
+        page.ExposeFunctionAsync("onMessageMediaUploadedEvent", OnMessageMediaUploadedEvent());
+        page.ExposeFunctionAsync("onBatteryStateChangedEvent", OnBatteryStateChangedEvent());
+        page.ExposeFunctionAsync("onIncomingCall", OnIncomingCall());
+        page.ExposeFunctionAsync("onReaction", OnReaction());
+        page.ExposeFunctionAsync("onRemoveChatEvent", OnRemoveChatEvent());
+        page.ExposeFunctionAsync("onArchiveChatEvent", OnArchiveChatEvent());
+        page.ExposeFunctionAsync("onEditMessageEvent", OnEditMessageEvent());
+        page.ExposeFunctionAsync("onAddMessageCiphertextEvent", OnAddMessageCiphertextEvent());
         //TODO: missing implement
         //await page.ExposeFunctionAsync("onAppStateChangedEvent", OnAppStateChangedEvent());
     }
@@ -216,7 +212,7 @@ public class RegisterEventService : IRegisterEventService
         {
             if (msg.type != "revoked")
             {
-                last_message = new Message(msg);
+                _lastMessage = new Message(msg);
             }
 
             // Determine if the message is related to a participant or a contact changing their phone number
@@ -247,10 +243,10 @@ public class RegisterEventService : IRegisterEventService
             Message revoked_msg = null;
 
             // Check if there is a last message and if its ID matches the revoked message ID
-            if (last_message != null && message.Id.Id == last_message.Id.Id)
+            if (_lastMessage != null && message.Id.Id == _lastMessage.Id.Id)
             {
                 // Create a new Message object for the last message
-                revoked_msg = last_message;
+                revoked_msg = _lastMessage;
             }
             _eventDispatcher.EmitRevokedEveryone(message, revoked_msg);
             return true;

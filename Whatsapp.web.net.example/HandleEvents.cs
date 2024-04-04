@@ -1,11 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Drawing;
 using ChatbotAI.net;
+using Microsoft.Extensions.Options;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.EventArgs;
 using Whatsapp.web.net.Extensions;
 
-namespace Whatsapp.web.net.test;
+namespace Whatsapp.web.net.example;
 
 public class HandleEvents
 {
@@ -14,11 +15,11 @@ public class HandleEvents
     private readonly OpenAIOptions _openAiOptions;
     private readonly ConcurrentDictionary<string, IChatBotAI> _ChatBots = new();
 
-    public HandleEvents(Client client, IEventDispatcher? eventDispatcher, OpenAIOptions openAiOptions)
+    public HandleEvents(Client client, IEventDispatcher? eventDispatcher, IOptions<OpenAIOptions> openAiOptions)
     {
         _client = client;
         _eventDispatcher = eventDispatcher;
-        _openAiOptions = openAiOptions;
+        _openAiOptions = openAiOptions.Value;
     }
 
     public void SetHandle()
@@ -286,7 +287,8 @@ public class HandleEvents
                 var audioBase64 = Convert.ToBase64String(audioBytes);
                 var messageMedia = new MessageMedia("audio", audioBase64);
                 await msg.Reply(_client, messageMedia);
-            } else if (msg.Body.StartsWith("AI:"))
+            }
+            else if (msg.Body.StartsWith("AI:"))
             {
                 var response = GetChatBotAI(msg.From.Id).Ask(msg.From.Id, msg.Body.Substring(3)).Result;
                 await msg.Reply(_client, response);
@@ -363,7 +365,7 @@ public class HandleEvents
             else if (msg.Body.StartsWith("!preview "))
             {
                 var text = msg.Body.Substring(9);
-                await msg.Reply(_client, text, null, new MessageOptions {LinkPreview = true});
+                await msg.Reply(_client, text, null, new MessageOptions { LinkPreview = true });
             }
             else if (msg.Body.StartsWith("!desc "))
             {
@@ -405,9 +407,9 @@ public class HandleEvents
             }
             else if (msg.Body.StartsWith("!addmembers"))
             {
-                var group = (GroupChat) await msg.GetChat(_client);
+                var group = (GroupChat)await msg.GetChat(_client);
                 var result =
-                    await group.AddParticipants(_client, new[] {"number1@c.us", "number2@c.us", "number3@c.us"});
+                    await group.AddParticipants(_client, new[] { "number1@c.us", "number2@c.us", "number3@c.us" });
                 Console.WriteLine(result);
             }
             else if (msg.Body == "!creategroup")
@@ -478,13 +480,13 @@ public class HandleEvents
                 {
                     var attachmentData = await quotedMsg.DownloadMedia(_client);
                     await _client.Message.Send(msg.From, attachmentData,
-                        new MessageOptions {Caption = "Here's your requested media."});
+                        new MessageOptions { Caption = "Here's your requested media." });
                 }
 
                 if (quotedMsg.HasMedia && quotedMsg.Type == "audio")
                 {
                     var audio = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, audio, new MessageOptions {SendAudioAsVoice = true});
+                    await _client.Message.Send(msg.From, audio, new MessageOptions { SendAudioAsVoice = true });
                 }
             }
             else if (msg.Body == "!isviewonce" && msg.HasQuotedMsg)
@@ -493,13 +495,13 @@ public class HandleEvents
                 if (quotedMsg.HasMedia)
                 {
                     var media = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, media, new MessageOptions {IsViewOnce = true});
+                    await _client.Message.Send(msg.From, media, new MessageOptions { IsViewOnce = true });
                 }
             }
             else if (msg.Body == "!location")
             {
                 await msg.Reply(_client, new Location(37.422, -122.084));
-                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions {Name = "Googleplex"}));
+                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions { Name = "Googleplex" }));
                 await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions
                 {
                     Address = "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA"
@@ -556,6 +558,6 @@ public class HandleEvents
 
     }
 
-    
-   
+
+
 }

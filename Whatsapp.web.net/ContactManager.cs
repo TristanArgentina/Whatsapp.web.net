@@ -8,7 +8,7 @@ namespace Whatsapp.web.net;
 public class ContactManager : IContactManager
 {
     private readonly IJavaScriptParser _parserFunctions;
-    private IPage _pupPage;
+    private readonly IPage _pupPage;
 
 
     public ContactManager(IJavaScriptParser parserFunctions, IPage pupPage)

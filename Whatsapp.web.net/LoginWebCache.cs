@@ -1,6 +1,6 @@
 ﻿namespace Whatsapp.web.net;
 
-public class WebCache
+public class LoginWebCache : ILoginWebCache
 {
     public virtual Task<string> Resolve(string version)
     {

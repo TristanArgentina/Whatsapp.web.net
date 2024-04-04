@@ -4,6 +4,10 @@ namespace Whatsapp.web.net.EventArgs;
 
 public class EventDispatcher : IEventDispatcher
 {
+    public EventDispatcher()
+    {
+    }
+
     public event EventHandler<MessageCreateEventArgs>? MessageCreateEvent;
     public event EventHandler<MessageReceivedEventArgs>? MessageReceivedEvent;
     public event EventHandler<MessageCiphertextEventArgs>? MessageCiphertextEvent;
@@ -306,16 +310,4 @@ public class EventDispatcher : IEventDispatcher
             MessageReceivedEvent?.Invoke(this, eventArg);
         });
     }
-
-    public void EmitRemoteSessionSaved()
-    {
-        Task.Run(() =>
-        {
-            var eventArg = new DispatcherEventArg(DispatcherEventsType.REMOTE_SESSION_SAVED);
-            DispatchEventGeneric?.Invoke(this, eventArg);
-            RemoteSessionSavedEvent?.Invoke(this, eventArg);
-        });
-    }
-
-
 }

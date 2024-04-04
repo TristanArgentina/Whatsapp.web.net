@@ -7,7 +7,7 @@ namespace Whatsapp.web.net;
 public class CommerceManager : ICommerceManager
 {
     private readonly IJavaScriptParser _parserFunctions;
-    private IPage _pupPage;
+    private readonly IPage _pupPage;
 
 
     public CommerceManager(IJavaScriptParser parserFunctions, IPage pupPage)

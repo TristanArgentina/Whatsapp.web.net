@@ -1,5 +1,4 @@
 ﻿using PuppeteerSharp;
-using Whatsapp.web.net.AuthenticationStrategies;
 
 namespace Whatsapp.web.net;
 
@@ -55,8 +54,4 @@ public class WhatsappOptions
     /// </summary>
     public Credentials? ProxyAuthentication { get; set; } = null;
 
-    /// <summary>
-    /// Determines how to save and restore sessions. Will use LegacySessionAuth if options.session is set. Otherwise, NoAuth will be used.
-    /// </summary>
-    public BaseAuthStrategy AuthStrategy { get; set; } = new NoAuth();
 }

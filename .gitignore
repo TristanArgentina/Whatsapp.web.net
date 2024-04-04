@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Whatsapp.web.net.test/App.config
 /Whatsapp.web.net.test/appsettings.json
+/Whatsapp.web.net.example/appsettings.json

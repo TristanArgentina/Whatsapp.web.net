@@ -1,7 +1,8 @@
 ﻿using System.Net;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using PuppeteerSharp;
-using Whatsapp.web.net.AuthenticationStrategies;
+using Whatsapp.web.net.Authentication;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.scripts;
 using ErrorEventArgs = PuppeteerSharp.ErrorEventArgs;
@@ -27,15 +28,10 @@ public class Client : IDisposable, IAsyncDisposable
     private readonly IRegisterEventService _registerEventService;
     private readonly IJavaScriptParser _parserFunctions;
     private readonly WhatsappOptions _options;
-    private readonly BaseAuthStrategy _authStrategy;
+    private readonly IAuthenticator _authStrategy;
+    
     private IBrowser _pupBrowser;
-
     private IPage _pupPage;
-    public IPage PupPage
-    {
-        get => _pupPage;
-        private set => _pupPage = value;
-    }
 
     public ClientInfo ClientInfo { get; private set; }
 
@@ -47,18 +43,16 @@ public class Client : IDisposable, IAsyncDisposable
     public IMessageManager Message { get; private set; }
     public ICommerceManager Commerce { get; private set; }
 
-    public Client(IEventDispatcher eventDispatcher, IRegisterEventService registerEventService, WhatsappOptions options)
+    public Client(IEventDispatcher eventDispatcher, IRegisterEventService registerEventService, 
+        IOptions<WhatsappOptions> options, IAuthenticatorProvider authenticatorProvider)
     {
         _streamWriter = new StreamWriter("log.txt", true);
         _parserFunctions = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.functions.js");
         _parserInjected = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.injected.js");
         _eventDispatcher = eventDispatcher;
         _registerEventService = registerEventService;
-        _options = options;
-        _authStrategy = _options.AuthStrategy;
-
-        TaskUtils.KillProcessesByName("chrome", options.Puppeteer.ExecutablePath);
-        _authStrategy.Setup(this, options);
+        _options = options.Value;
+        _authStrategy = authenticatorProvider.GetAuthenticator();
     }
 
     public async Task<Task> Initialize()
@@ -70,34 +64,21 @@ public class Client : IDisposable, IAsyncDisposable
         //TODO: missing
         //await PupPage.EvaluateExpressionOnNewDocumentAsync(_parserFunctions.GetMethod("modificarErrorStack"));
 
-        await PupPage.GoToAsync(Constants.WhatsWebURL, new NavigationOptions
+        await _pupPage.GoToAsync(Constants.WhatsWebURL, new NavigationOptions
         {
-            WaitUntil = [WaitUntilNavigation.Load],
+            WaitUntil = [WaitUntilNavigation.DOMContentLoaded],
             Timeout = 0,
             Referer = "https://whatsapp.com/"
         });
 
-        //await PupPage.AddScriptTagAsync(new AddTagOptions()
-        //{
-        //    Url = "https://unpkg.com/moduleraid/dist/moduleraid.iife.js"
-        //});
-
-
-
-
-        await PupPage.AddScriptTagAsync(new AddTagOptions()
-        {
-            Content = "import ModuleRaid from 'moduleRaid';window.mR = new moduleRaid();",
-            Type = "module"
-        });
-        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getElementByXpath"));
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getElementByXpath"));
 
         var lastPercent = default(int?);
         var lastPercentMessage = default(string);
 
-        await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("registerLoadingScreen"));
+        await _pupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("registerLoadingScreen"));
 
-        await PupPage.ExposeFunctionAsync<int, string, bool>("onLoadingScreen", (percent, message) =>
+        await _pupPage.ExposeFunctionAsync<int, string, bool>("onLoadingScreen", (percent, message) =>
         {
             if (lastPercent == percent && lastPercentMessage == message) return true;
 
@@ -108,7 +89,7 @@ public class Client : IDisposable, IAsyncDisposable
             return true;
         });
 
-        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("observeProgress"), new { PROGRESS, PROGRESS_MESSAGE });
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("observeProgress"), new { PROGRESS, PROGRESS_MESSAGE });
 
         var continueTask = await AuthenticationIfNeed();
         if (continueTask != Task.CompletedTask)
@@ -120,20 +101,19 @@ public class Client : IDisposable, IAsyncDisposable
         // this.interface = new InterfaceController(this);
 
 
-        _registerEventService.Register(PupPage);
-        Thread.Sleep(5 * 1000);
-        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("registerEventListeners"));
+        _registerEventService.Register(_pupPage);
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("registerEventListeners"));
         CreateManagers();
         return Task.CompletedTask;
     }
 
     private void CreateManagers()
     {
-        Chat = new ChatManager(_parserFunctions, PupPage);
-        Message = new MessageManager(_parserFunctions, PupPage);
-        Contact = new ContactManager(_parserFunctions, PupPage);
-        Group = new GroupChatManager(_parserFunctions, PupPage);
-        Commerce = new CommerceManager(_parserFunctions, PupPage);
+        Chat = new ChatManager(_parserFunctions, _pupPage);
+        Message = new MessageManager(_parserFunctions, _pupPage);
+        Contact = new ContactManager(_parserFunctions, _pupPage);
+        Group = new GroupChatManager(_parserFunctions, _pupPage);
+        Commerce = new CommerceManager(_parserFunctions, _pupPage);
     }
 
 
@@ -144,8 +124,8 @@ public class Client : IDisposable, IAsyncDisposable
     private async Task<Task> AuthenticationIfNeed()
     {
         // Wait for either selector to appear first
-        var imgSelectorTask = PupPage.WaitForSelectorAsync(INTRO_IMG_SELECTOR, new WaitForSelectorOptions { Timeout = _options.AuthTimeoutMs });
-        var qrSelectorTask = PupPage.WaitForSelectorAsync(INTRO_QRCODE_SELECTOR, new WaitForSelectorOptions { Timeout = _options.AuthTimeoutMs });
+        var imgSelectorTask = _pupPage.WaitForSelectorAsync(INTRO_IMG_SELECTOR, new WaitForSelectorOptions { Timeout = _options.AuthTimeoutMs });
+        var qrSelectorTask = _pupPage.WaitForSelectorAsync(INTRO_QRCODE_SELECTOR, new WaitForSelectorOptions { Timeout = _options.AuthTimeoutMs });
         var needAuthentication = await Task.WhenAny(imgSelectorTask, qrSelectorTask);
 
         needAuthentication.Wait();
@@ -177,7 +157,7 @@ public class Client : IDisposable, IAsyncDisposable
             var continueObserving = true;
 
             // Expose qrChanged function to the page
-            await PupPage.ExposeFunctionAsync("qrChanged", (string qr) =>
+            await _pupPage.ExposeFunctionAsync("qrChanged", (string qr) =>
             {
                 // Emits QR received event
                 _eventDispatcher.EmitQRReceived(qr);
@@ -197,12 +177,12 @@ public class Client : IDisposable, IAsyncDisposable
 
 
             // Observe changes in QR container
-            await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("startQRCodeObserver"),
+            await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("startQRCodeObserver"),
                 JsonConvert.SerializeObject(new { QR_CONTAINER, QR_RETRY_BUTTON }));
 
             try
             {
-                await PupPage.WaitForSelectorAsync(INTRO_IMG_SELECTOR, new WaitForSelectorOptions { Timeout = 0 });
+                await _pupPage.WaitForSelectorAsync(INTRO_IMG_SELECTOR, new WaitForSelectorOptions { Timeout = 0 });
             }
             catch (Exception error)
             {
@@ -214,35 +194,50 @@ public class Client : IDisposable, IAsyncDisposable
         }
 
 
-        var version = PupPage.EvaluateFunctionHandleAsync(_parserFunctions.GetMethod("getWWebVersion")).Result.ToString();
+        var jsHandle = _pupPage.EvaluateFunctionHandleAsync(_parserFunctions.GetMethod("getWWebVersion")).Result;
+        var version = jsHandle.JsonValueAsync<string>().Result;
+
+        if (_options.WebVersionCache.Type == "local" && !string.IsNullOrEmpty(_currentIndexHtml))
+        {
+            await _authStrategy.LoginWebCache.Persist(_currentIndexHtml, version);
+        }
+
+        
 
         var isCometOrAbove = int.Parse(version.Split('.')[1]) >= 3000;
         if (isCometOrAbove)
         {
-            await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("exposeStore"));
+            await _pupPage.AddScriptTagAsync(new AddTagOptions()
+            {
+                Content = "import ModuleRaid from 'moduleRaid';window.mR = new moduleRaid();",
+                Type = "module"
+            });
+            await _pupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("exposeStore"));
         }
         else
         {
-            await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("registerModuleRaid"));
-            await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("exposeStore2_3"));
+            await _pupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("registerModuleRaid"));
+            await _pupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("exposeStore2_3"));
         }
 
         // Evaluate ExposeStore 
-        
+
 
 
         // Wait for window.Store to be defined
-        await PupPage.WaitForFunctionAsync("() => window.Store != undefined");
+        await _pupPage.WaitForFunctionAsync("() => window.Store != undefined");
 
         // Unregister service workers
-        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("unregisterServiceWorkers"));
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("unregisterServiceWorkers"));
 
         // Load utility functions
-        await PupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("loadUtils"));
+        await _pupPage.EvaluateFunctionAsync(_parserInjected.GetMethod("loadUtils"));
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("compareWwebVersions"));
+
 
         // Expose client info
 
-        var clientInfo = await PupPage.EvaluateFunctionAsync<object>(_parserFunctions.GetMethod("serializeConnectionAndUser"));
+        var clientInfo = await _pupPage.EvaluateFunctionAsync<object>(_parserFunctions.GetMethod("serializeConnectionAndUser"));
 
         ClientInfo = new ClientInfo(clientInfo);
 
@@ -257,57 +252,56 @@ public class Client : IDisposable, IAsyncDisposable
 
     private async Task InitializePage()
     {
-        IBrowser browser;
-        IPage page;
+        //IBrowser browser;
+        //IPage PupPage;
 
         await _authStrategy.BeforeBrowserInitialized();
 
         if (_options.Puppeteer is { BrowserWSEndpoint: not null })
         {
-            browser = await Puppeteer.ConnectAsync(new ConnectOptions
+            _pupBrowser = await Puppeteer.ConnectAsync(new ConnectOptions
             {
                 DefaultViewport = _options.Puppeteer.DefaultViewport
             });
-            page = await browser.NewPageAsync();
+            _pupPage = await _pupBrowser.NewPageAsync();
         }
         else
         {
-            var browserArgs = new List<string>(_options.Puppeteer.Args ?? Array.Empty<string>());
-
-            // navigator.webdriver fix
-            browserArgs.Add($"--disable-blink-features=AutomationControlled");
+            var browserArgs = new List<string>(_options.Puppeteer.Args ?? Array.Empty<string>()) {
+                // navigator.webdriver fix
+                $"--disable-blink-features=AutomationControlled"};
 
 
             var launchOptions = new LaunchOptions
             {
                 Args = browserArgs.ToArray(),
                 Headless = _options.Puppeteer.Headless,
-                UserDataDir = _options.Puppeteer.UserDataDir,
+                UserDataDir = _authStrategy.UserDataDir,
                 DefaultViewport = _options.Puppeteer.DefaultViewport,
                 ExecutablePath = _options.Puppeteer.ExecutablePath
             };
 
-            browser = await Puppeteer.LaunchAsync(launchOptions);
-            page = (await browser.PagesAsync())[0];
+            _pupBrowser = await Puppeteer.LaunchAsync(launchOptions);
+            _pupPage = (await _pupBrowser.PagesAsync())[0];
         }
 
         if (_options.ProxyAuthentication is not null)
         {
-            await page.AuthenticateAsync(_options.ProxyAuthentication);
+            await _pupPage.AuthenticateAsync(_options.ProxyAuthentication);
         }
 
-        await page.SetUserAgentAsync(_options.UserAgent);
+        await _pupPage.SetUserAgentAsync(_options.UserAgent);
         if (_options.BypassCSP)
         {
-            await page.SetBypassCSPAsync(true);
+            await _pupPage.SetBypassCSPAsync(true);
         }
 
-        page.Console += ConsoleWrite;
-        page.PageError += PageError;
-        page.Error += PupPageError;
+        _pupPage.Console += ConsoleWrite;
+        _pupPage.PageError += PageError;
+        _pupPage.Error += PupPageError;
 
-        _pupBrowser = browser;
-        PupPage = page;
+        //_pupBrowser = browser;
+        //PupPage = PupPage;
 
 
     }
@@ -323,6 +317,7 @@ public class Client : IDisposable, IAsyncDisposable
     }
 
     private readonly List<string> mensajes = [];
+    private string _currentIndexHtml;
 
     private void ConsoleWrite(object? sender, ConsoleEventArgs e)
     {
@@ -338,16 +333,13 @@ public class Client : IDisposable, IAsyncDisposable
 
     public async Task InitWebVersionCacheAsync()
     {
-        var webCacheOptions = _options.WebVersionCache;
-        var webCache = WebCacheFactory.CreateWebCache(webCacheOptions.Type, webCacheOptions);
-
         var requestedVersion = _options.WebVersion;
-        var versionContent = await webCache.Resolve(requestedVersion);
+        var versionContent = await _authStrategy.LoginWebCache.Resolve(requestedVersion);
 
         if (versionContent != null)
         {
-            await PupPage.SetRequestInterceptionAsync(true);
-            PupPage.Request += async (sender, e) =>
+            await _pupPage.SetRequestInterceptionAsync(true);
+            _pupPage.Request += async (sender, e) =>
             {
                 if (e.Request.Url == Constants.WhatsWebURL)
                 {
@@ -364,27 +356,22 @@ public class Client : IDisposable, IAsyncDisposable
                 }
             };
         }
-        else if (_options.WebVersionCache.Type == "local")
+        if (_options.WebVersionCache.Type == "local")
         {
-            PersistWebCacheLocal(webCache);
+            _pupPage.Response += async (sender, e) =>
+            {
+                if (e.Response.Ok && e.Response.Url == Constants.WhatsWebURL)
+                {
+                    var textAsync = await e.Response.TextAsync();
+                    _currentIndexHtml = textAsync;
+                }
+            };
         }
-    }
-
-    private void PersistWebCacheLocal(WebCache webCache)
-    {
-        PupPage.Response += async (sender, e) =>
-        {
-            if (!e.Response.Ok || e.Response.Url != Constants.WhatsWebURL) return;
-            var currentIndexHtml = await e.Response.TextAsync();
-            if (string.IsNullOrEmpty(currentIndexHtml)) return;
-            var version = PupPage.EvaluateFunctionHandleAsync(_parserFunctions.GetMethod("getWWebVersion")).Result.ToString();
-            await webCache.Persist(currentIndexHtml, version);
-        };
     }
 
     public async Task<object> GetBatteryStatus()
     {
-        return await PupPage.EvaluateExpressionAsync(_parserFunctions.GetMethod("getBatteryStatus"));
+        return await _pupPage.EvaluateExpressionAsync(_parserFunctions.GetMethod("getBatteryStatus"));
     }
 
     private async Task Destroy()
@@ -397,18 +384,18 @@ public class Client : IDisposable, IAsyncDisposable
     {
         _pupBrowser.Dispose();
         _streamWriter.Dispose();
-        PupPage.Dispose();
+        _pupPage.Dispose();
     }
 
     public async ValueTask DisposeAsync()
     {
         await _pupBrowser.DisposeAsync();
         await _streamWriter.DisposeAsync();
-        await PupPage.DisposeAsync();
+        await _pupPage.DisposeAsync();
     }
 
     public async Task Reject(string peerJid, string callId)
     {
-        await PupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectCall"), peerJid, callId);
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectCall"), peerJid, callId);
     }
 }

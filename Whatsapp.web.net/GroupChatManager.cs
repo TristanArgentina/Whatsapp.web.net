@@ -7,7 +7,7 @@ namespace Whatsapp.web.net;
 public class GroupChatManager : IGroupChatManager
 {
     private readonly IJavaScriptParser _parserFunctions;
-    private IPage _pupPage;
+    private readonly IPage _pupPage;
 
     public GroupChatManager(IJavaScriptParser parserFunctions, IPage pupPage)
     {

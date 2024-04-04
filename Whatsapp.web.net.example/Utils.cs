@@ -1,7 +1,7 @@
 ﻿using FFMpegCore.Pipes;
 using Microsoft.Extensions.Configuration;
 
-namespace Whatsapp.web.net.test;
+namespace Whatsapp.web.net.example;
 
 public static class Utils
 {

@@ -1,13 +1,13 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
 
 namespace Whatsapp.web.net;
 
-public class LocalWebCache : WebCache
+public class LocalLoginWebCache : LoginWebCache
 {
     private readonly string _path;
     private readonly bool _strict;
 
-    public LocalWebCache(string path, bool strict = false)
+    public LocalLoginWebCache(string path, bool strict)
     {
         _path = path;
         _strict = strict;
@@ -23,7 +23,7 @@ public class LocalWebCache : WebCache
 
         try
         {
-            return await File.ReadAllTextAsync(filePath);
+            return await File.ReadAllTextAsync(filePath, Encoding.UTF8);
         }
         catch (Exception err)
         {
@@ -37,8 +37,7 @@ public class LocalWebCache : WebCache
 
     public override async Task Persist(string indexHtml, string version)
     {
-
-        var filePath = Path.Combine(_path, $"{version.Replace("JSHandle:","")}.html");
+        var filePath = Path.Combine(_path, $"{version}.html");
         Directory.CreateDirectory(_path);
         await File.WriteAllTextAsync(filePath, indexHtml);
     }

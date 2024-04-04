@@ -5,7 +5,6 @@ namespace Whatsapp.web.net;
 
 public interface IEventDispatcher
 {
-    event EventHandler<DispatcherEventArg>? DispatchEventGeneric;
     event EventHandler<AuthenticatedEventArg>? AuthenticatedEvent;
     event EventHandler<LoadingScreenEventArg>? LoadingScreenEvent;
     event EventHandler<RevokedEveryoneEventArg>? RevokedEveryoneEvent;
@@ -86,8 +85,6 @@ public interface IEventDispatcher
     void EmitMessageCreate(Message message);
 
     void EmitMessageReceived(Message message);
-
-    void EmitRemoteSessionSaved();
 
     void EmitReady();
 }

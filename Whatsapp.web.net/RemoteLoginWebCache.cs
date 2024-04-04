@@ -1,11 +1,11 @@
 ﻿namespace Whatsapp.web.net;
 
-public class RemoteWebCache : WebCache
+public class RemoteLoginWebCache : LoginWebCache
 {
     private readonly string _remotePath;
     private readonly bool _strict;
 
-    public RemoteWebCache(string remotePath, bool strict = false)
+    public RemoteLoginWebCache(string remotePath, bool strict)
     {
         if (string.IsNullOrEmpty(remotePath))
         {
