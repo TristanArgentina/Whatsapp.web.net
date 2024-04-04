@@ -42,7 +42,7 @@ public class RemoteWebCache : WebCache
         return null;
     }
 
-    public override Task Persist(string versionContent)
+    public override Task Persist(string versionContent, string version)
     {
         // Nothing to do here
         return Task.CompletedTask;

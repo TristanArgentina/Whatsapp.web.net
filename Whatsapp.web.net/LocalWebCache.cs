@@ -15,6 +15,10 @@ public class LocalWebCache : WebCache
 
     public override async Task<string> Resolve(string version)
     {
+        if (!Directory.Exists(_path))
+        {
+            Directory.CreateDirectory(_path);
+        }
         var filePath = Path.Combine(_path, $"{version}.html");
 
         try
@@ -31,14 +35,10 @@ public class LocalWebCache : WebCache
         }
     }
 
-    public override async Task Persist(string indexHtml)
+    public override async Task Persist(string indexHtml, string version)
     {
-        // extract version from index (e.g. manifest-2.2206.9.json -> 2.2206.9)
-        var match = Regex.Match(indexHtml, @"manifest-([\d\\.]+)\.json");
-        var version = match.Success ? match.Groups[1].Value : null;
-        if (version == null) return;
 
-        var filePath = Path.Combine(_path, $"{version}.html");
+        var filePath = Path.Combine(_path, $"{version.Replace("JSHandle:","")}.html");
         Directory.CreateDirectory(_path);
         await File.WriteAllTextAsync(filePath, indexHtml);
     }

@@ -77,10 +77,10 @@ public class Client : IDisposable, IAsyncDisposable
             Referer = "https://whatsapp.com/"
         });
 
-        await PupPage.AddScriptTagAsync(new AddTagOptions()
-        {
-            Url = "https://unpkg.com/moduleraid/dist/moduleraid.iife.js"
-        });
+        //await PupPage.AddScriptTagAsync(new AddTagOptions()
+        //{
+        //    Url = "https://unpkg.com/moduleraid/dist/moduleraid.iife.js"
+        //});
 
 
 
@@ -213,7 +213,9 @@ public class Client : IDisposable, IAsyncDisposable
             }
         }
 
+
         var version = PupPage.EvaluateFunctionHandleAsync(_parserFunctions.GetMethod("getWWebVersion")).Result.ToString();
+
         var isCometOrAbove = int.Parse(version.Split('.')[1]) >= 3000;
         if (isCometOrAbove)
         {
@@ -362,16 +364,22 @@ public class Client : IDisposable, IAsyncDisposable
                 }
             };
         }
-        else
+        else if (_options.WebVersionCache.Type == "local")
         {
-            PupPage.Response += async (sender, e) =>
-            {
-                if (e.Response.Ok && e.Response.Url == Constants.WhatsWebURL)
-                {
-                    await webCache.Persist(await e.Response.TextAsync());
-                }
-            };
+            PersistWebCacheLocal(webCache);
         }
+    }
+
+    private void PersistWebCacheLocal(WebCache webCache)
+    {
+        PupPage.Response += async (sender, e) =>
+        {
+            if (!e.Response.Ok || e.Response.Url != Constants.WhatsWebURL) return;
+            var currentIndexHtml = await e.Response.TextAsync();
+            if (string.IsNullOrEmpty(currentIndexHtml)) return;
+            var version = PupPage.EvaluateFunctionHandleAsync(_parserFunctions.GetMethod("getWWebVersion")).Result.ToString();
+            await webCache.Persist(currentIndexHtml, version);
+        };
     }
 
     public async Task<object> GetBatteryStatus()

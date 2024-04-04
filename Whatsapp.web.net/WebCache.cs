@@ -7,7 +7,7 @@ public class WebCache
         return Task.FromResult(string.Empty);
     }
 
-    public virtual Task Persist(string versionContent)
+    public virtual Task Persist(string versionContent, string version)
     {
         return Task.CompletedTask;
     }

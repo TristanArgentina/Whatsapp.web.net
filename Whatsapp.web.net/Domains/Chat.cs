@@ -83,7 +83,7 @@ public class Chat
         Timestamp = data.t is null
             ? null
             : DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime;
-        Archived = data.archive is null ? false : bool.Parse(data.archive);
+        Archived = data.archive is null ? false : bool.Parse(data.archive.ToString());
         Pinned = data.pin != null;
         IsMuted = data.muteExpiration == 0;
         MuteExpiration = data.muteExpiration;

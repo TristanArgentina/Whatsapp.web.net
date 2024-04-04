@@ -67,7 +67,7 @@ function startQRCodeObserver(selectors) {
     });
 }
 
-async function getWWebVersion() {
+function getWWebVersion() {
     return window.Debug.VERSION;
 }
 

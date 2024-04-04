@@ -7,14 +7,14 @@
     window.Store.DownloadManager = window.require('WAWebDownloadManager').downloadManager;
     window.Store.GroupQueryAndUpdate = window.require('WAWebGroupQueryJob').queryAndUpdateGroupMetadataById;
     window.Store.MediaPrep = window.require('WAWebPrepRawMedia');
-    window.Store.MediaObject = window.require('WAWebMediaStorage').getOrCreateMediaObject;
+    window.Store.MediaObject = window.require('WAWebMediaStorage');
     window.Store.MediaTypes = window.require('WAWebMmsMediaTypes');
     window.Store.MediaUpload = window.require('WAWebMediaMmsV4Upload');
     window.Store.MsgKey = window.require('WAWebMsgKey');
     window.Store.NumberInfo = window.require('WAPhoneUtils');
     window.Store.OpaqueData = window.require('WAWebMediaOpaqueData');
     window.Store.QueryProduct = window.require('WAWebBizProductCatalogBridge');
-    window.Store.QueryOrder = window.require('WAWebBizQueryOrderJob');
+    window.Store.QueryOrder = window.require('WAWebBizOrderBridge');
     window.Store.SendClear = window.require('WAWebChatClearBridge');
     window.Store.SendDelete = window.require('WAWebDeleteChatAction');
     window.Store.SendMessage = window.require('WAWebSendMsgChatAction');
@@ -38,7 +38,7 @@
     window.Store.EphemeralFields = window.require('WAWebGetEphemeralFieldsMsgActionsUtils');
     window.Store.MsgActionChecks = window.require('WAWebMsgActionCapability');
     window.Store.QuotedMsg = window.require('WAWebQuotedMsgModelUtils');
-    window.Store.LinkPreview = window.require('WAWebMsgGetters');
+    window.Store.LinkPreview = window.require('WAWebLinkPreviewChatAction');
     window.Store.Socket = window.require('WADeprecatedSendIq');
     window.Store.SocketWap = window.require('WAWap');
     window.Store.SearchContext = window.require('WAWebChatMessageSearch').getSearchContext;
@@ -63,20 +63,20 @@
         ...window.require('WAWebContactProfilePicThumbBridge')
     };
     window.Store.GroupParticipants = {
-        ...window.require('promoteParticipants'),
-        ...window.require('sendAddParticipantsRPC')
+        ...window.require('WAWebModifyParticipantsGroupAction'),
+        ...window.require('WASmaxGroupsAddParticipantsRPC')
     };
     window.Store.GroupInvite = {
-        ...window.require('resetGroupInviteCode'),
-        ...window.require('queryGroupInvite')
+        ...window.require('WAWebGroupInviteJob'),
+        ...window.require('WAWebGroupQueryJob')
     };
     window.Store.GroupInviteV4 = {
-        ...window.require('queryGroupInviteV4'),
-        ...window.require('sendGroupInviteMessage')
+        ...window.require('WAWebGroupInviteV4Job'),
+        ...window.require('WAWebChatSendMessages')
     };
     window.Store.MembershipRequestUtils = {
-        ...window.require('getMembershipApprovalRequests'),
-        ...window.require('sendMembershipRequestsActionRPC')
+        ...window.require('WAWebApiMembershipApprovalRequestStore'),
+        ...window.require('WASmaxGroupsMembershipRequestsActionRPC')
     };
 
     if (!window.Store.Chat._find || !window.Store.Chat.findImpl) {
@@ -110,9 +110,7 @@
     window.injectToFunction({ module: 'WAWebBackendJobsCommon', function: 'mediaTypeFromProtobuf' }, (func, ...args) => { const [proto] = args; return proto.locationMessage ? null : func(...args); });
 
     window.injectToFunction({ module: 'WAWebE2EProtoUtils', function: 'typeAttributeFromProtobuf' }, (func, ...args) => { const [proto] = args; return proto.locationMessage || proto.groupInviteMessage ? 'text' : func(...args); });
-
 };
-
 
 function exposeStore2_3() {
     // eslint-disable-next-line no-undef
@@ -123,7 +121,7 @@ function exposeStore2_3() {
     window.Store.Call = window.mR.findModule((module) => module.default && module.default.Call).default.Call;
     window.Store.Cmd = window.mR.findModule('Cmd').Cmd;
     window.Store.CryptoLib = window.mR.findModule('decryptE2EMedia');
-    window.Store.DownloadManager = window.mR.findModule(941555).downloadManager; 
+    window.Store.DownloadManager = window.mR.findModule(941555).downloadManager;
     //window.Store.DownloadManager = window.mR.findModule('downloadAndDecrypt'); 
     //window.Store.DownloadManager = window.mR.findModule('downloadAndMaybeDecrypt'); 
     //TODO: missing
@@ -476,7 +474,7 @@ function loadUtils() {
 
         const ephemeralFields = window.Store.EphemeralFields.getEphemeralFields(chat);
 
-        
+
         const message = {
             ...options,
             id: newMsgId,
