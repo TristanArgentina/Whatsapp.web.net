@@ -493,10 +493,9 @@ async function reactToMessage(msgId, reaction) {
     return window.Store.sendReactionToMsg(msg, reaction);
 }
 
-async function forwardMessages(msgId, chatId) {
+async function forwardToMessage(msgId, chatId) {
     let msg = window.Store.Msg.get(msgId);
     let chat = window.Store.Chat.get(chatId);
-
     return new Promise((resolve, reject) => {
         chat.forwardMessages([msg]).then(() => {
             resolve();

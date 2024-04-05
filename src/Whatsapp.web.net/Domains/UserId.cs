@@ -46,8 +46,8 @@ public class UserId
     public static UserId? Create(dynamic? data)
     {
         if (data is null) return null;
-        if (data.Type == JTokenType.Null) return null;
-        if (data.Type == JTokenType.String)
+        if (data is not string && data.Type == JTokenType.Null) return null;
+        if (data is string || data.Type == JTokenType.String)
         {
             var dataString = data!.ToString();
             if (string.IsNullOrEmpty(dataString)) return null;

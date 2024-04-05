@@ -149,7 +149,7 @@ public class MessageManager : IMessageManager
     public async Task Forward(MessageId? msgId, string chatId)
     {
         if (msgId is null) return;
-        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("forwardMessages"), msgId, chatId);
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("forwardToMessage"), msgId._serialized, chatId);
     }
 
     public async Task<MessageMedia?> DownloadMedia(MessageId? msgId, bool hasMedia)
