@@ -9,6 +9,7 @@ public class EventDispatcher : IEventDispatcher
     }
 
     public event EventHandler<MessageCreateEventArgs>? MessageCreateEvent;
+    public event EventHandler<MessageChangeEventArgs>? MessageChangeEvent;
     public event EventHandler<MessageReceivedEventArgs>? MessageReceivedEvent;
     public event EventHandler<MessageCiphertextEventArgs>? MessageCiphertextEvent;
     public event EventHandler<MessageReactionEventArgs>? MessageReactionEvent;
@@ -301,6 +302,16 @@ public class EventDispatcher : IEventDispatcher
         });
     }
 
+    public void EmitMessageChanged(Message message)
+    {
+        Task.Run(() =>
+        {
+            var eventArg = new MessageChangeEventArgs(message);
+            DispatchEventGeneric?.Invoke(this, eventArg);
+            MessageChangeEvent?.Invoke(this, eventArg);
+        });
+    }
+
     public void EmitMessageReceived(Message message)
     {
         Task.Run(() =>
@@ -311,3 +322,4 @@ public class EventDispatcher : IEventDispatcher
         });
     }
 }
+

@@ -84,7 +84,10 @@ public interface IEventDispatcher
 
     void EmitMessageCreate(Message message);
 
+    void EmitMessageChanged(Message message);
+
     void EmitMessageReceived(Message message);
 
     void EmitReady();
+    event EventHandler<MessageChangeEventArgs>? MessageChangeEvent;
 }

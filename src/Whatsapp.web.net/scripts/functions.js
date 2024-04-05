@@ -408,11 +408,8 @@ async function setGroupSubject(chatId, subject) {
 }
 
 async function setDescriptionToGroup(chatId, description) {
-    console.log(`setDescriptionToGroup => chatId: ${chatId} - description: ${description}`)
     const chatWid = window.Store.WidFactory.createWid(chatId);
-    console.log(`chatWid: ${JSON.stringify(chatWid)}`)
     const descId = window.Store.GroupMetadata.get(chatWid).descId;
-    console.log(`descId: ${JSON.stringify(descId)}`)
     window.Store.MsgKey.newId().then(newId => {
         try {
             window.Store.GroupUtils.setGroupDescription(chatWid, description, newId, descId);
@@ -632,14 +629,8 @@ async function deleteMessageAsyncWithPermissions(msgId, everyone) {
 }
 
 async function starMessageIfAllowed(msgId) {
-    return new Promise((resolve, reject) => {
-        let msg = window.Store.Msg.get(msgId);
-
-        if (!window.Store.MsgActionChecks.canStarMsg(msg)) {
-            resolve(null);
-            return;
-        }
-
+    let msg = window.Store.Msg.get(msgId);
+    if (window.Store.MsgActionChecks.canStarMsg(msg)) {
         window.Store.Chat.find(msg.id.remote).then(chat => {
             window.Store.Cmd.sendStarMsgs(chat, [msg], false).then(() => {
                 resolve();
@@ -649,7 +640,7 @@ async function starMessageIfAllowed(msgId) {
         }).catch(error => {
             reject(error);
         });
-    });
+    }
 }
 
 async function unstarMessage(msgId) {
@@ -662,11 +653,13 @@ async function unstarMessage(msgId) {
 }
 
 async function pinMessage(msgId, duration) {
-    return await window.WWebJS.pinUnpinMsgAction(msgId, 1, duration);
+    let msg = window.Store.Msg.get(msgId);
+    return window.Store.pinUnpinMsg(msg, 1, duration);
 }
 
 async function unpinMessage(msgId) {
-    return await window.WWebJS.pinUnpinMsgAction(msgId, 2);
+    let msg = window.Store.Msg.get(msgId);
+    return window.Store.pinUnpinMsg(msg, 2);
 }
 
 
@@ -961,24 +954,18 @@ function registerEventListeners() {
 
     });
 
-    //console.log('Agregando eventos a Chat');
     //TODO: missing
     //window.Store.Chat.on('remove', async (chat) => { window.onRemoveChatEvent(await window.WWebJS.getChatModel(chat)); });
     //window.Store.Chat.on('change:archive', async (chat, currState, prevState) => { window.onArchiveChatEvent(await window.WWebJS.getChatModel(chat), currState, prevState); });
     //window.Store.Chat.on('change:unreadCount', (chat) => { window.onChatUnreadCountEvent(chat); });
 
 
-    //console.log('Agregando eventos a Conn');
     window.Store.Conn.on('change:battery', (state) => { window.onBatteryStateChangedEvent(state); });
 
-    //console.log('Agregando eventos a Call');
     window.Store.Call.on('add', (call) => { window.onIncomingCall(call); });
 
     //TODO: missing
-    //console.log('Agregando eventos a AppState');
     //window.Store.AppState.on('change:state', (_AppState, state) => { window.onAppStateChangedEvent(state); });
-
-    //console.log('Agregando eventos a createOrUpdateReactions');
     {
         const module = window.Store.createOrUpdateReactionsModule;
         const ogMethod = module.createOrUpdateReactions;

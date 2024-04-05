@@ -212,6 +212,7 @@ public class RegisterEventService : IRegisterEventService
         {
             // Create a new Message object
             var message = new Message(msg);
+            _eventDispatcher.EmitMessageChanged(message);
             if (msg.type != "revoked")
             {
                 _lastMessage = message;

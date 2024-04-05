@@ -300,6 +300,45 @@ public class MessageManagerTests : TestBase
         msg.Delete(Client, false).Wait();
         Thread.Sleep(10000);
         Assert.That(Client.Message.Get(msg.Id).Result is null);
+    }
 
+    [Test]
+    public void StarAndUnStarTest()
+    {
+        var expectedContent = "This message should be Starred";
+        var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
+        Assert.That(msg is not null);
+        Assert.That(!msg.IsStarred);
+        msg.Star(Client).Wait();
+        msg = Client.Message.Get(msg.Id).Result;
+        Assert.That(msg is not null);
+        Assert.That(msg.IsStarred);
+        msg.Unstar(Client).Wait();
+        msg = Client.Message.Get(msg.Id).Result;
+        Assert.That(msg is not null);
+        Assert.That(!msg.IsStarred);
+    }
+
+    [Test]
+    public void PinAndUnpinTest()
+    {
+        var expectedContent = "This message should be Pinned";
+        var success = false;
+        Message? messageChanged = null;
+        EventDispatcher!.MessageChangeEvent += (_, args) =>
+        {
+            messageChanged = args.Message;
+            if (args.Message.Type == "pinned_message")
+            {
+                success = true;
+            }
+        };
+
+        var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
+        Assert.That(msg is not null);
+        msg.Pin(Client,1000).Wait();
+        Thread.Sleep(1000);
+        Assert.That(success);
+        msg.Unpin(Client).Wait();
     }
 }

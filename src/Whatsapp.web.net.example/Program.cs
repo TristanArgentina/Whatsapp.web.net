@@ -41,6 +41,7 @@ var handleEvents = serviceProvider.GetService<HandleEvents>();
 client!.Console += (_, eventArgs) =>
 {
     Console.WriteLine($"{DateTime.Now:G}:{eventArgs.Message.Text}");
+    if (eventArgs.Message.Args is null ) return;
     for (var i = 0; i < eventArgs.Message.Args.Count; ++i)
     {
         Console.WriteLine($"{i}: {eventArgs.Message.Args[i].JsonValueAsync<string>()}");

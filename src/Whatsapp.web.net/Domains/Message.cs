@@ -218,10 +218,10 @@ public class Message
         InviteV4 = data.type == MessageTypes.GROUP_INVITE
             ? new InviteV4(data)
             : null;
-        MentionedIds = data.mentionedJidList.Type != JTokenType.Null
+        MentionedIds = data.mentionedJidList is not null && data.mentionedJidList.Type != JTokenType.Null
             ? ((JArray)data.mentionedJidList).ToObject<string[]>().ToList()
             : [];
-        GroupMentions = data.groupMentions.Type != JTokenType.Null
+        GroupMentions = data.groupMentions.Type is not null && data.groupMentions.Type != JTokenType.Null
             ? ((JArray)data.groupMentions).ToObject<dynamic[]>().Select(i => new GroupMention(i)).ToList()
             : [];
         OrderId = data.orderId ?? null;

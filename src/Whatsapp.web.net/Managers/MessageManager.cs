@@ -105,16 +105,12 @@ public class MessageManager : IMessageManager
                 break;
         }
 
-
-
-        var serialize = JsonConvert.SerializeObject(internalOptions);
         var method = _parserFunctions.GetMethod("sendMessageAsyncToChat");
 
         var newMessage = await _pupPage.EvaluateFunctionAsync<dynamic>(method, fromId, content, internalOptions, sendSeen);
 
         return new Message(newMessage);
     }
-
 
     private Dictionary<string, object?> BuildInternalOptions(MessageOptions options)
     {
@@ -196,11 +192,13 @@ public class MessageManager : IMessageManager
     /// <summary>
     /// Pins the message (group admins can pin messages of all group members)
     /// </summary>
+    /// <param name="msgId"></param>
     /// <param name="duration"> The duration in seconds the message will be pinned in a chat</param>
     /// <returns>Returns true if the operation completed successfully, false otherwise</returns>
     public async Task<bool> Pin(MessageId msgId, int duration)
     {
-        return await _pupPage.EvaluateFunctionAsync<bool>(_parserFunctions.GetMethod("pinMessage"), msgId._serialized, duration);
+        var result = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("pinMessage"), msgId._serialized, duration);
+        return result.messageSendResult == "Ok";
     }
 
     /// <summary>
@@ -210,9 +208,15 @@ public class MessageManager : IMessageManager
     /// <returns>Returns true if the operation completed successfully, false otherwise</returns>
     public async Task<bool> Unpin(MessageId msgId)
     {
-        return await _pupPage.EvaluateFunctionAsync<bool>(_parserFunctions.GetMethod("unpinMessage"), msgId._serialized);
+        var result = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("unpinMessage"), msgId._serialized);
+        return result.messageSendResult == "Ok";
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="msgId"></param>
+    /// <returns></returns>
     public async Task<MessageInfo?> GetInfo(MessageId msgId)
     {
         var infoJson = await _pupPage.EvaluateFunctionAsync<string>(_parserFunctions.GetMethod("getMessageInfo"), msgId._serialized);

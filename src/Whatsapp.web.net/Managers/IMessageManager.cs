@@ -58,6 +58,7 @@ public interface IMessageManager : IManager
     /// <summary>
     ///     Pins the message (group admins can pin messages of all group members)
     /// </summary>
+    /// <param name="msgId"></param>
     /// <param name="duration"> The duration in seconds the message will be pinned in a chat</param>
     /// <returns>Returns true if the operation completed successfully, false otherwise</returns>
     Task<bool> Pin(MessageId msgId, int duration);
