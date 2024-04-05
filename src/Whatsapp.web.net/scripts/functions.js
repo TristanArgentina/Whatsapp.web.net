@@ -487,12 +487,10 @@ async function joinGroupViaInviteV4(inviteInfo) {
 }
 
 
-async function reactToMessage(messageId, reaction) {
-    if (!messageId) { return Promise.resolve(); }
-    return window.Store.Msg.get(messageId)
-        .then(function (msg) {
-            return window.Store.sendReactionToMsg(msg, reaction);
-        });
+async function reactToMessage(msgId, reaction) {
+    if (!msgId) { return Promise.resolve(); }
+    const msg = window.Store.Msg.get(msgId);
+    return window.Store.sendReactionToMsg(msg, reaction);
 }
 
 async function forwardMessages(msgId, chatId) {

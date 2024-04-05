@@ -140,10 +140,10 @@ public class MessageManager : IMessageManager
         return internalOptions;
     }
 
-    public async Task React(MessageId? msgId, string reaction)
+    public async Task SendReact(MessageId? msgId, string reaction)
     {
         if (msgId is null) return;
-        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("reactToMessage"), msgId, reaction);
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("reactToMessage"), msgId._serialized, reaction);
     }
 
     public async Task Forward(MessageId? msgId, string chatId)

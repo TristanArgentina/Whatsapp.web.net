@@ -18,7 +18,7 @@ public interface IMessageManager : IManager
     /// <param name="msgId"></param>
     /// <param name="reaction">Emoji to react with. Send an empty string to remove the reaction.</param>
     /// <returns></returns>
-    Task React(MessageId? msgId, string reaction);
+    Task SendReact(MessageId? msgId, string reaction);
 
     /// <summary>
     /// Forwards this message to another chat (that you chatted before, otherwise it will fail)

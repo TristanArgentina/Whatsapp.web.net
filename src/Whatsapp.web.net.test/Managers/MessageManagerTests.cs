@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using Whatsapp.web.net.Domains;
+using Whatsapp.web.net.Extensions;
 
 namespace Whatsapp.web.net.test.Managers;
 
@@ -251,4 +252,26 @@ public class MessageManagerTests : TestBase
             .Replace(" ", "") == ContactId1.User);
     }
 
+    [Test]
+    public void SendReactTest()
+    {
+        var msg = Client!.Message.Send(ContactId1, "Hello kitty 2024").Result;
+        Assert.That(msg is not null);
+
+        var expectedReact = "\ud83d\udc4d\ud83c\udffc";
+
+        string? reactionText = null;
+        var manualEvent = new ManualResetEvent(false);
+
+        EventDispatcher!.MessageReactionEvent += (_, args) =>
+        {
+            reactionText = args.Reaction.Text;
+            manualEvent.Set();
+        };
+
+        msg.SendReact(Client , expectedReact);
+        var eventSignaled = manualEvent.WaitOne(5000);
+        Assert.That(eventSignaled);
+        Assert.That(expectedReact.Equals(reactionText));
+    }
 }

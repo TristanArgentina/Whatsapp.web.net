@@ -4,7 +4,6 @@ namespace Whatsapp.web.net.Extensions;
 
 public static class MessageExtensions
 {
-
     public static UserId GetContactId(this Message msg)
     {
         return msg.Id.FromMe ? msg.To : msg.From;
@@ -84,9 +83,9 @@ public static class MessageExtensions
     /// <param name="client"></param>
     /// <param name="redaction">Emoji to react with. Send an empty string to remove the reaction.</param>
     /// <returns></returns>
-    public static async Task<dynamic> React(this Message msg, Client client, string redaction)
+    public static async Task SendReact(this Message msg, Client client, string redaction)
     {
-        return client.Message.React(msg.Id, redaction);
+        await client.Message.SendReact(msg.Id, redaction);
     }
 
     public static async Task Forward(this Message msg, Client client, string chatId)
