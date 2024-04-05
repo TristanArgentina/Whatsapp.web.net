@@ -74,7 +74,7 @@ public class GroupChatManager : IGroupChatManager
 
     public async Task<bool> SetDescription(string groupChatId, string description)
     {
-        var success = await _pupPage.EvaluateFunctionAsync<bool>(_parserFunctions.GetMethod("setGroupDescription"), groupChatId, description);
+        var success = await _pupPage.EvaluateFunctionAsync<bool>(_parserFunctions.GetMethod("setDescriptionToGroup"), groupChatId, description);
         return success;
     }
 

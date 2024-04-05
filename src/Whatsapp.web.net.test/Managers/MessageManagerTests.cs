@@ -226,9 +226,9 @@ public class MessageManagerTests : TestBase
         Assert.That(msg.VCards is not null);
         Assert.That(msg.VCards.Count == 1);
         Assert.That(msg.VCards[0].Telephone.Value
-            .Replace("+","")
-            .Replace("-","")
-            .Replace(" ","") == ContactId1.User);
+            .Replace("+", "")
+            .Replace("-", "")
+            .Replace(" ", "") == ContactId1.User);
     }
 
     [Test]
@@ -269,9 +269,37 @@ public class MessageManagerTests : TestBase
             manualEvent.Set();
         };
 
-        msg.SendReact(Client , expectedReact);
+        msg.SendReact(Client, expectedReact).Wait();
         var eventSignaled = manualEvent.WaitOne(5000);
         Assert.That(eventSignaled);
         Assert.That(expectedReact.Equals(reactionText));
+    }
+
+    [Test]
+    public void ForwardTest()
+    {
+        var expectedContent = "Good morning";
+        var content = string.Empty;
+        var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
+        Assert.That(msg is not null);
+        EventDispatcher!.MessageCreateEvent += (_, args) =>
+        {
+            content = args.Message.Body;
+        };
+        msg.Forward(Client, "120363248319028492@g.us").Wait();
+
+        Assert.That(expectedContent.Equals(content));
+    }
+
+    [Test]
+    public void DeleteTest()
+    {
+        var expectedContent = "This message should be deleted.";
+        var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
+        Assert.That(msg is not null);
+        msg.Delete(Client, false).Wait();
+        Thread.Sleep(10000);
+        Assert.That(Client.Message.Get(msg.Id).Result is null);
+
     }
 }

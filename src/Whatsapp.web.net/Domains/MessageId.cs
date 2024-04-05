@@ -1,4 +1,6 @@
-﻿namespace Whatsapp.web.net.Domains;
+﻿using Newtonsoft.Json.Linq;
+
+namespace Whatsapp.web.net.Domains;
 
 public class MessageId
 {
@@ -9,13 +11,12 @@ public class MessageId
 
     private void Patch(dynamic? data)
     {
-        if (data is null) return;
+        if (data is null || data.Type == JTokenType.Null) return;
         Id = data.id;
         FromMe = data.fromMe;
         Remote = UserId.Create(data.remote);
         Participant = UserId.Create(data.participant);
         _serialized = data._serialized ?? Id;
-
     }
 
     public string _serialized { get; set; }

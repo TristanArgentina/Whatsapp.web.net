@@ -169,7 +169,7 @@ public class MessageManager : IMessageManager
     /// <returns></returns>
     public async Task Delete(MessageId msgId, bool? everyone)
     {
-        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("deleteMessageAsyncWithPermissions"), msgId, everyone);
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("deleteMessageAsyncWithPermissions"), msgId._serialized, everyone);
     }
 
     /// <summary>
@@ -179,7 +179,7 @@ public class MessageManager : IMessageManager
     /// <returns></returns>
     public async Task Star(MessageId msgId)
     {
-        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("starMessageIfAllowed"), msgId);
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("starMessageIfAllowed"), msgId._serialized);
     }
 
     /// <summary>
@@ -189,7 +189,7 @@ public class MessageManager : IMessageManager
     /// <returns></returns>
     public async Task UnStar(MessageId msgId)
     {
-        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("unstarMessage"), msgId);
+        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("unstarMessage"), msgId._serialized);
     }
 
 
@@ -200,7 +200,7 @@ public class MessageManager : IMessageManager
     /// <returns>Returns true if the operation completed successfully, false otherwise</returns>
     public async Task<bool> Pin(MessageId msgId, int duration)
     {
-        return await _pupPage.EvaluateFunctionAsync<bool>(_parserFunctions.GetMethod("pinMessage"), msgId, duration);
+        return await _pupPage.EvaluateFunctionAsync<bool>(_parserFunctions.GetMethod("pinMessage"), msgId._serialized, duration);
     }
 
     /// <summary>
@@ -210,12 +210,12 @@ public class MessageManager : IMessageManager
     /// <returns>Returns true if the operation completed successfully, false otherwise</returns>
     public async Task<bool> Unpin(MessageId msgId)
     {
-        return await _pupPage.EvaluateFunctionAsync<bool>(_parserFunctions.GetMethod("unpinMessage"), msgId);
+        return await _pupPage.EvaluateFunctionAsync<bool>(_parserFunctions.GetMethod("unpinMessage"), msgId._serialized);
     }
 
     public async Task<MessageInfo?> GetInfo(MessageId msgId)
     {
-        var infoJson = await _pupPage.EvaluateFunctionAsync<string>(_parserFunctions.GetMethod("getMessageInfo"), msgId);
+        var infoJson = await _pupPage.EvaluateFunctionAsync<string>(_parserFunctions.GetMethod("getMessageInfo"), msgId._serialized);
 
         return infoJson == null ? null : JsonConvert.DeserializeObject<MessageInfo>(infoJson);
     }
@@ -223,7 +223,7 @@ public class MessageManager : IMessageManager
     public async Task<ReactionList?> GetReactions(MessageId msgId, bool hasReaction)
     {
         if (!hasReaction) return null;
-        var data = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getReactions"), msgId);
+        var data = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getReactions"), msgId._serialized);
         return new ReactionList(data);
     }
 
@@ -246,7 +246,7 @@ public class MessageManager : IMessageManager
         };
 
 
-        var data = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("editMessage"), msgId, content, internalOptions);
+        var data = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("editMessage"), msgId._serialized, content, internalOptions);
 
         return data != null ? new Message(data) : null;
     }
@@ -258,14 +258,14 @@ public class MessageManager : IMessageManager
     /// <returns></returns>
     public async Task<Message?> Get(MessageId msgId)
     {
-        var newData = await _pupPage.EvaluateFunctionAsync<Message>(_parserFunctions.GetMethod("getMessageModelById"), msgId);
+        var newData = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getMessageModelById"), msgId._serialized);
         return newData == null ? null : new Message(newData);
     }
 
     public async Task<Message?> GetQuoted(MessageId msgId, bool hasQuotedMsg = true)
     {
         if (!hasQuotedMsg) return null;
-        var quotedMsg = await _pupPage.EvaluateFunctionAsync<Message>(_parserFunctions.GetMethod("getQuotedMessageModel"), msgId);
+        var quotedMsg = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getQuotedMessageModel"), msgId._serialized);
         return quotedMsg == null ? null : new Message(quotedMsg);
     }
 

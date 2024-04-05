@@ -10,8 +10,42 @@ using ErrorEventArgs = PuppeteerSharp.ErrorEventArgs;
 
 namespace Whatsapp.web.net;
 
-public class Client : IDisposable, IAsyncDisposable
+public class Client(
+    IEventDispatcher eventDispatcher,
+    IRegisterEventService registerEventService,
+    IOptions<WhatsappOptions> options,
+    IAuthenticatorProvider authenticatorProvider)
+    : IDisposable, IAsyncDisposable
 {
+    /// <summary>
+    /// Raised when the page crashes
+    /// </summary>
+    public event EventHandler<ErrorEventArgs>? PageCrashError;
+
+    /// <summary>
+    /// Raised when an uncaught exception happens within the page.
+    /// </summary>
+    public event EventHandler<PageErrorEventArgs>? PageError;
+
+    /// <summary>
+    /// Raised when JavaScript within the page calls one of console API methods, e.g. <c>console.log</c> or <c>console.dir</c>. Also emitted if the page throws an error or a warning.
+    /// The arguments passed into <c>console.log</c> appear as arguments on the event handler.
+    /// </summary>
+    /// <example>
+    /// An example of handling <see cref="Console"/> event:
+    /// <code>
+    /// <![CDATA[
+    /// page.Console += (sender, e) =>
+    /// {
+    ///     for (var i = 0; i < e.Message.Args.Count; ++i)
+    ///     {
+    ///         System.Console.WriteLine($"{i}: {e.Message.Args[i]}");
+    ///     }
+    /// }
+    /// ]]>
+    /// </code>
+    /// </example>
+    public event EventHandler<ConsoleEventArgs>? Console;
 
     const string PROGRESS = "//*[@id='app']/div/div/div[2]/progress";
     const string PROGRESS_MESSAGE = "//*[@id='app']/div/div/div[3]";
@@ -24,42 +58,30 @@ public class Client : IDisposable, IAsyncDisposable
     const string QR_RETRY_BUTTON = "div[data-ref] > span > button";
 
 
-    private readonly IJavaScriptParser _parserInjected;
-    private readonly IEventDispatcher _eventDispatcher;
-    private readonly IRegisterEventService _registerEventService;
-    private readonly IJavaScriptParser _parserFunctions;
-    private readonly WhatsappOptions _options;
-    private readonly IAuthenticator _authStrategy;
+    private readonly IJavaScriptParser _parserInjected = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.injected.js");
+    private readonly IJavaScriptParser _parserFunctions = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.functions.js");
+    private readonly WhatsappOptions _options = options.Value;
+    private readonly IAuthenticator _authStrategy = authenticatorProvider.GetAuthenticator();
     
-    private IBrowser _pupBrowser;
-    private IPage _pupPage;
+    private IBrowser? _pupBrowser;
+    private IPage? _pupPage;
 
-    public ClientInfo ClientInfo { get; private set; }
+    public ClientInfo? ClientInfo { get; private set; }
 
-    private readonly StreamWriter _streamWriter;
+    public IContactManager? Contact { get; private set; }
 
-    public IContactManager Contact { get; private set; }
-    public IChatManager Chat { get; private set; }
-    public IGroupChatManager Group { get; private set; }
-    public IMessageManager Message { get; private set; }
-    public ICommerceManager Commerce { get; private set; }
-
-    public Client(IEventDispatcher eventDispatcher, IRegisterEventService registerEventService, 
-        IOptions<WhatsappOptions> options, IAuthenticatorProvider authenticatorProvider)
-    {
-        _streamWriter = new StreamWriter("log.txt", true);
-        _parserFunctions = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.functions.js");
-        _parserInjected = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.injected.js");
-        _eventDispatcher = eventDispatcher;
-        _registerEventService = registerEventService;
-        _options = options.Value;
-        _authStrategy = authenticatorProvider.GetAuthenticator();
-    }
+    public IChatManager? Chat { get; private set; }
+    
+    public IGroupChatManager? Group { get; private set; }
+    
+    public IMessageManager? Message { get; private set; }
+    
+    public ICommerceManager? Commerce { get; private set; }
 
     public async Task<Task> Initialize()
     {
         await InitializePage();
-
+        if (_pupPage is null) throw new Exception("The page did not initialize");
         await _authStrategy.AfterBrowserInitialized();
         await InitWebVersionCacheAsync();
         //TODO: missing
@@ -83,7 +105,7 @@ public class Client : IDisposable, IAsyncDisposable
         {
             if (lastPercent == percent && lastPercentMessage == message) return true;
 
-            _eventDispatcher.EmitLoadingScreen(percent, message);
+            eventDispatcher.EmitLoadingScreen(percent, message);
             lastPercent = percent;
             lastPercentMessage = message;
 
@@ -102,7 +124,7 @@ public class Client : IDisposable, IAsyncDisposable
         // this.interface = new InterfaceController(this);
 
 
-        _registerEventService.Register(_pupPage);
+        registerEventService.Register(_pupPage);
         await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("registerEventListeners"));
         CreateManagers();
         return Task.CompletedTask;
@@ -110,6 +132,7 @@ public class Client : IDisposable, IAsyncDisposable
 
     private void CreateManagers()
     {
+        if (_pupPage is null) throw new Exception("The page did not initialize");
         Chat = new ChatManager(_parserFunctions, _pupPage);
         Message = new MessageManager(_parserFunctions, _pupPage);
         Contact = new ContactManager(_parserFunctions, _pupPage);
@@ -124,6 +147,7 @@ public class Client : IDisposable, IAsyncDisposable
     /// <returns></returns>
     private async Task<Task> AuthenticationIfNeed()
     {
+        if (_pupPage is null) throw new Exception("The page did not initialize");
         // Wait for either selector to appear first
         var imgSelectorTask = _pupPage.WaitForSelectorAsync(INTRO_IMG_SELECTOR, new WaitForSelectorOptions { Timeout = _options.AuthTimeoutMs });
         var qrSelectorTask = _pupPage.WaitForSelectorAsync(INTRO_QRCODE_SELECTOR, new WaitForSelectorOptions { Timeout = _options.AuthTimeoutMs });
@@ -140,7 +164,7 @@ public class Client : IDisposable, IAsyncDisposable
             {
                 // Handle authentication failure
                 // Emits authentication failure event
-                _eventDispatcher.EmitAuthenticationFailure(result.FailureEventPayload);
+                eventDispatcher.EmitAuthenticationFailure(result.FailureEventPayload);
 
                 await Destroy();
                 if (!result.Restart) return needAuthentication;
@@ -161,14 +185,14 @@ public class Client : IDisposable, IAsyncDisposable
             await _pupPage.ExposeFunctionAsync("qrChanged", (string qr) =>
             {
                 // Emits QR received event
-                _eventDispatcher.EmitQRReceived(qr);
+                eventDispatcher.EmitQRReceived(qr);
                 if (_options.QrMaxRetries > 0)
                 {
                     qrRetries++;
                     if (qrRetries > _options.QrMaxRetries)
                     {
                         // Emits disconnected event
-                        _eventDispatcher.EmitDisconnected("Max qrcode retries reached");
+                        eventDispatcher.EmitDisconnected("Max qrcode retries reached");
                         continueObserving = false;
                     }
                 }
@@ -241,16 +265,13 @@ public class Client : IDisposable, IAsyncDisposable
         var authEventPayload = await _authStrategy.GetAuthEventPayload();
 
         // Emit authenticated event
-        _eventDispatcher.EmitAuthenticated(ClientInfo, authEventPayload);
+        eventDispatcher.EmitAuthenticated(ClientInfo, authEventPayload);
 
         return Task.CompletedTask;
     }
 
     private async Task InitializePage()
     {
-        //IBrowser browser;
-        //IPage PupPage;
-
         await _authStrategy.BeforeBrowserInitialized();
 
         if (_options.Puppeteer is { BrowserWSEndpoint: not null })
@@ -292,50 +313,24 @@ public class Client : IDisposable, IAsyncDisposable
             await _pupPage.SetBypassCSPAsync(true);
         }
 
-        _pupPage.Console += ConsoleWrite;
+        _pupPage.Console += Console;
         _pupPage.PageError += PageError;
-        _pupPage.Error += PupPageError;
-
-        //_pupBrowser = browser;
-        //PupPage = PupPage;
-
-
+        _pupPage.Error += PageCrashError;
     }
 
-    private void PupPageError(object? sender, ErrorEventArgs e)
-    {
-        Console.WriteLine($"PupPageError: {e.Error}");
-    }
-
-    private void PageError(object? sender, PageErrorEventArgs e)
-    {
-        Console.WriteLine($"PageError: {e.Message}");
-    }
-
-    private readonly List<string> mensajes = [];
-    private string _currentIndexHtml;
-
-    private void ConsoleWrite(object? sender, ConsoleEventArgs e)
-    {
-        var value = e.Message.Text;
-        if (!mensajes.Contains(value))
-        {
-            //mensajes.Add(value);
-            Console.WriteLine(value);
-            _streamWriter.WriteLine(value);
-        }
-
-    }
+    private string? _currentIndexHtml;
 
     public async Task InitWebVersionCacheAsync()
     {
+        if (_pupPage is null) throw new Exception("The page did not initialize");
+
         var requestedVersion = _options.WebVersion;
         var versionContent = await _authStrategy.LoginWebCache.Resolve(requestedVersion);
 
         if (versionContent != null)
         {
             await _pupPage.SetRequestInterceptionAsync(true);
-            _pupPage.Request += async (sender, e) =>
+            _pupPage.Request += async (_, e) =>
             {
                 if (e.Request.Url == Constants.WhatsWebURL)
                 {
@@ -354,7 +349,7 @@ public class Client : IDisposable, IAsyncDisposable
         }
         if (_options.WebVersionCache.Type == "local")
         {
-            _pupPage.Response += async (sender, e) =>
+            _pupPage.Response += async (_, e) =>
             {
                 if (e.Response.Ok && e.Response.Url == Constants.WhatsWebURL)
                 {
@@ -367,31 +362,48 @@ public class Client : IDisposable, IAsyncDisposable
 
     public async Task<object> GetBatteryStatus()
     {
+        if (_pupPage is null) throw new Exception("The page did not initialize");
         return await _pupPage.EvaluateExpressionAsync(_parserFunctions.GetMethod("getBatteryStatus"));
     }
 
     private async Task Destroy()
     {
-        await _pupBrowser.CloseAsync();
+        if(_pupBrowser is not null)
+        {
+            await _pupBrowser.CloseAsync();
+        }
         await _authStrategy.Destroy();
     }
 
     public void Dispose()
     {
-        _pupBrowser.Dispose();
-        _streamWriter.Dispose();
-        _pupPage.Dispose();
+        if (_pupBrowser is not null)
+        {
+            _pupBrowser.Dispose();
+        }
+        if (_pupPage is not null)
+        {
+            _pupPage.Dispose();
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _pupBrowser.DisposeAsync();
-        await _streamWriter.DisposeAsync();
-        await _pupPage.DisposeAsync();
+        if (_pupBrowser is not null)
+        {
+           await _pupBrowser.DisposeAsync();
+        }
+        if (_pupPage is not null)
+        {
+          await  _pupPage.DisposeAsync();
+        }
     }
 
     public async Task Reject(string peerJid, string callId)
     {
-        await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectCall"), peerJid, callId);
+        if (_pupPage is not null)
+        {
+            await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("rejectCall"), peerJid, callId);
+        }
     }
 }

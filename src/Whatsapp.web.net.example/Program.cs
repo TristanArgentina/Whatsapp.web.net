@@ -38,7 +38,14 @@ var handleEvents = serviceProvider.GetService<HandleEvents>();
 
 //TaskUtils.KillProcessesByName("chrome", whatsappOptions.Puppeteer.ExecutablePath);
 
-
+client!.Console += (_, eventArgs) =>
+{
+    Console.WriteLine($"{DateTime.Now:G}:{eventArgs.Message.Text}");
+    for (var i = 0; i < eventArgs.Message.Args.Count; ++i)
+    {
+        Console.WriteLine($"{i}: {eventArgs.Message.Args[i].JsonValueAsync<string>()}");
+    }
+};
 await client.Initialize();
 
 

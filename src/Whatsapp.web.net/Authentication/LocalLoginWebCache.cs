@@ -13,7 +13,7 @@ public class LocalLoginWebCache : LoginWebCache
         _strict = strict;
     }
 
-    public override async Task<string> Resolve(string version)
+    public override async Task<string?> Resolve(string version)
     {
         if (!Directory.Exists(_path))
         {

@@ -39,60 +39,46 @@ public class HandleEvents
         // Change to false if you don't want to reject incoming calls
         var rejectCalls = true;
 
-        _eventDispatcher.IncomingCallEvent += OnIncomingCallEvent(rejectCalls);
-        _eventDispatcher.DisconnectedEvent += OnDisconnectedEvent();
-        _eventDispatcher.ContactChangedEvent += OnContactChangedEvent();
-        _eventDispatcher.GroupAdminChangedEvent += OnGroupAdminChangedEvent();
-        _eventDispatcher.GroupMembershipRequestEvent += OnGroupMembershipRequestEvent();
+        _eventDispatcher.IncomingCallEvent += OnIncomingCall(rejectCalls);
+        _eventDispatcher.DisconnectedEvent += OnDisconnected();
+        _eventDispatcher.ContactChangedEvent += OnContactChanged();
+        _eventDispatcher.GroupAdminChangedEvent += OnGroupAdminChanged();
+        _eventDispatcher.GroupMembershipRequestEvent += OnGroupMembershipRequest();
 
     }
 
     private EventHandler<MessageReactionEventArgs>? OnMessageReaction()
     {
-        return (sender, args) => { Console.WriteLine($"Reaction: {args.Reaction.Text}"); };
+        return (_, args) =>
+        {
+            ConsoleWriteLineEvent("MessageReaction", args.Reaction);
+        };
     }
+
 
 
     private static EventHandler<ReadyEventArgs>? OnReady()
     {
-        return (sender, args) => { Console.WriteLine("READY"); };
+        return (_, _) => { ConsoleWriteLineEvent("READY"); };
     }
 
 
-    private EventHandler<GroupMembershipRequestEventArgs>? OnGroupMembershipRequestEvent()
+    private EventHandler<GroupMembershipRequestEventArgs>? OnGroupMembershipRequest()
     {
-        return async (sender, args) =>
+        return async (_, args) =>
         {
-            /**
-             * The example of the {@link notification} output:
-             * {
-             *     Id: {
-             *         FromMe: false,
-             *         Remote: "groupId@g.us",
-             *         Id: "123123123132132132",
-             *         Participant: "number@c.us",
-             *         Serialized: "false_groupId@g.us_123123123132132132_number@c.us"
-             *     },
-             *     Body: "",
-             *     Type: "created_membership_requests",
-             *     Timestamp: 1694456538,
-             *     ChatId: "groupId@g.us",
-             *     Author: "number@c.us",
-             *     RecipientIds: []
-             * }
-             *
-             */
-            Console.WriteLine(args.Notification);
-            /** You can approve or reject the newly appeared membership request: */
+            ConsoleWriteLineEvent("GroupMembershipRequest", args.Notification);
+            // You can approve or reject the newly appeared membership request: 
             await _client.Chat.ApproveMembership(args.Notification.ChatId.Id, args.Notification.Author.Id);
             await _client.Chat.RejectMembership(args.Notification.ChatId.Id, args.Notification.Author.Id);
         };
     }
 
-    private static EventHandler<GroupAdminChangedEventArgs>? OnGroupAdminChangedEvent()
+    private static EventHandler<GroupAdminChangedEventArgs>? OnGroupAdminChanged()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
+            ConsoleWriteLineEvent("GroupAdminChanged", args.Notification);
             if (args.Notification.Type == "promote")
             {
                 /**
@@ -109,10 +95,11 @@ public class HandleEvents
         };
     }
 
-    private EventHandler<ContactChangedEventArg>? OnContactChangedEvent()
+    private EventHandler<ContactChangedEventArg>? OnContactChanged()
     {
-        return async (sender, args) =>
+        return async (_, args) =>
         {
+            ConsoleWriteLineEvent("GroupAdminChanged", args.Message);
             var message = args.Message;
             var oldId = args.OldId;
             var newId = args.NewId;
@@ -156,14 +143,18 @@ public class HandleEvents
         };
     }
 
-    private static EventHandler<DisconnectedEventArgs>? OnDisconnectedEvent()
+    private static EventHandler<DisconnectedEventArgs>? OnDisconnected()
     {
-        return (sender, args) => { Console.WriteLine("Client was logged out " + args.State); };
+        return (_, args) =>
+        {
+            ConsoleWriteLineEvent("Disconnected", args.State);
+        };
     }
 
-    private EventHandler<IncomingCallEventArgs>? OnIncomingCallEvent(bool rejectCalls)
+
+    private EventHandler<IncomingCallEventArgs>? OnIncomingCall(bool rejectCalls)
     {
-        return async (sender, args) =>
+        return async (_, args) =>
         {
             Console.WriteLine("Call received, rejecting. GOTO Line 261 to disable " + args.Call);
             if (rejectCalls) args.Call.Reject(_client);
@@ -174,12 +165,12 @@ public class HandleEvents
 
     private static EventHandler<StateChangedEventArg>? OnStateChanged()
     {
-        return (sender, args) => { Console.WriteLine("CHANGE STATE " + args.State); };
+        return (_, args) => { Console.WriteLine("CHANGE STATE " + args.State); };
     }
 
     private static EventHandler<GroupUpdateEventArgs>? OnGroupUpdate()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
             // Group picture, subject or description has been updated.
             Console.WriteLine("update " + args.Notification);
@@ -188,7 +179,7 @@ public class HandleEvents
 
     private EventHandler<GroupLeaveEventArgs>? OnGroupLeave()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
             // User has left or been kicked from the group.
             Console.WriteLine("leave " + args.Notification);
@@ -198,7 +189,7 @@ public class HandleEvents
 
     private EventHandler<GroupJoinEventArgs>? OnGroupJoin()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
             // User has joined or been added to the group.
             Console.WriteLine("join " + args.Notification);
@@ -208,7 +199,7 @@ public class HandleEvents
 
     private EventHandler<MessageACKEventArg>? OnMessageACK()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
             if (args.MessageAsk == MessageAck.ACK_READ)
             {
@@ -219,7 +210,7 @@ public class HandleEvents
 
     private EventHandler<RevokedMeEventArg>? OnRevokedMe()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
             // Fired whenever a message is only deleted in your own view.
             Console.WriteLine(args.Message.Body); // message before it was deleted.
@@ -228,7 +219,7 @@ public class HandleEvents
 
     private EventHandler<RevokedEveryoneEventArg>? OnRevokedEveryone()
     {
-        return async (sender, args) =>
+        return async (_, args) =>
         {
             // Fired whenever a message is deleted by anyone (including you)
             Console.WriteLine(args.Message); // message after it was deleted.
@@ -241,7 +232,7 @@ public class HandleEvents
 
     private EventHandler<MessageCiphertextEventArgs>? OnMessageCiphertext()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
             var msg = args.Message;
             // Receiving new incoming messages that have been encrypted
@@ -254,13 +245,10 @@ public class HandleEvents
 
     private EventHandler<MessageCreateEventArgs>? OnMessageCreate()
     {
-        return async (sender, args) =>
+        return async (_, args) =>
         {
+            ConsoleWriteLineEvent("MessageCreate",  args.Message);
             var msg = args.Message;
-
-            Console.WriteLine($"MESSAGE CREATE: {msg}");
-
-            // Fired on all message creations, including your own
 
             // Unpins a message
             if (msg.Id.FromMe && msg.Body.StartsWith("!unpin"))
@@ -278,21 +266,15 @@ public class HandleEvents
 
     private static EventHandler<LoadingScreenEventArg>? OnLoadingScreen()
     {
-        return (sender, args) => { Console.WriteLine($"LOADING SCREEN {args.Percent}% {args.Message}"); };
+        return (_, args) => { Console.WriteLine($"LOADING SCREEN {args.Percent}% {args.Message}"); };
     }
 
     private EventHandler<MessageReceivedEventArgs>? OnMessageReceived()
     {
-        return async (sender, args) =>
+        return async (_, args) =>
         {
             var msg = args.Message;
-            Console.WriteLine("MESSAGE RECEIVED " + msg);
-
-            //if (msg.Body.StartsWith("AI:"))
-            //{
-            //    var response = _ai.Ask(msg.From.Id, msg.Body.Substring(3)).Result;
-            //    await msg.Reply(_client, response);
-            //}
+            ConsoleWriteLineEvent("MESSAGE RECEIVED",msg);
 
             if (msg.Body == "!ping reply")
             {
@@ -487,16 +469,37 @@ public class HandleEvents
         };
     }
 
+    private static void ConsoleWriteLineEvent(string eventType)
+    {
+        Console.WriteLine($"{DateTime.Now:G}: {eventType}");
+    }
+    private static void ConsoleWriteLineEvent(string eventType, Message msg)
+    {
+        Console.WriteLine($"{DateTime.Now:G}: {eventType} -> From: '{msg.From}'  To: '{msg.To}' Content: {msg.Body}");
+    }
 
+    private static void ConsoleWriteLineEvent(string eventType, GroupNotification notification)
+    {
+        Console.WriteLine($"{DateTime.Now:G}: {eventType} -> From: '{notification.Author}'  To: '{notification.ChatId}' Content: {notification.Body}");
+    }
 
+    private void ConsoleWriteLineEvent(string eventType, Reaction reaction)
+    {
+        Console.WriteLine($"{DateTime.Now:G}: {eventType} -> From: '{reaction.SenderId}'  To: '{reaction.Key.Remote}' Reaction: {reaction.Text}");
+    }
+
+    private static void ConsoleWriteLineEvent(string eventType, WAState argsState)
+    {
+        Console.WriteLine($"{DateTime.Now:G}: {eventType} -> Client was logged out {argsState}");
+    }
     private static EventHandler<AuthenticationFailureEventArgs>? OnAuthenticationFailure()
     {
-        return (sender, args) => { Console.Error.WriteLine("AUTHENTICATION FAILURE " + args.Payload); };
+        return (_, args) => { Console.Error.WriteLine("AUTHENTICATION FAILURE " + args.Payload); };
     }
 
     private static EventHandler<AuthenticatedEventArg>? OnAuthenticated()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
             Console.WriteLine("AUTHENTICATED");
             Console.WriteLine("USER:");
@@ -506,7 +509,7 @@ public class HandleEvents
 
     private static EventHandler<QRReceivedEventArgs>? OnQRReceived()
     {
-        return (sender, args) =>
+        return (_, args) =>
         {
 
             Console.WriteLine("QR RECEIVED " + args.Qr);

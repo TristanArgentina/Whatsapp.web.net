@@ -11,7 +11,7 @@ public class Message
     /// <summary>
     ///  MediaKey that represents the sticker 'ID'
     /// </summary>
-    public string MediaKey { get; private set; }
+    public string? MediaKey { get; private set; }
 
     /// <summary>
     /// ID that represents the message
@@ -161,7 +161,7 @@ public class Message
     public string? Description { get; private set; }
     public string? BusinessOwnerJid { get; private set; }
     public string? ProductId { get; private set; }
-    public long LatestEditSenderTimestampMs { get; private set; }
+    public DateTime? LatestEditSenderTimestampMs { get; private set; }
     public MessageId? LatestEditMsgKey { get; private set; }
 
     public dynamic? DynamicReplyButtons { get; private set; }
@@ -183,13 +183,16 @@ public class Message
 
     protected void Patch(dynamic data)
     {
-        MediaKey = data.mediaKey;
+        if (data.Type == JTokenType.Null) return;
         Id = new MessageId(data.id);
         Ack = data.ack;
-        HasMedia = data.mediaKey != null && data.directPath != null;
+        MediaKey = data.mediaKey;
+        HasMedia = data.mediaKey != null && data.mediaKey.Type != JTokenType.Null
+                && data.directPath != null && data.directPath.Type != JTokenType.Null;
+
         Body = HasMedia ? data.caption ?? string.Empty : data.body ?? data.pollName ?? string.Empty;
         Type = data.type;
-        Timestamp = data.t is not null ? DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime : null;
+        Timestamp = Util.ConvertToDate(data.t);
         From = UserId.Create(data.from);
         To = UserId.Create(data.to);
         Author = UserId.Create(data.author);
@@ -208,9 +211,9 @@ public class Message
             ? new Location(data)
             : null;
         VCards = data.type == MessageTypes.CONTACT_CARD_MULTI
-            ? ((JArray)data.vcardList).Select((Func<dynamic, VCard>)(c =>new VCard(c.vcard))).ToList()
+            ? ((JArray)data.vcardList).Select((Func<dynamic, VCard>)(c => new VCard(c.vcard))).ToList()
             : data.type == MessageTypes.CONTACT_CARD
-                ? new List<VCard> { new VCard( data.body) }
+                ? new List<VCard> { new VCard(data.body) }
                 : null;
         InviteV4 = data.type == MessageTypes.GROUP_INVITE
             ? new InviteV4(data)
@@ -229,9 +232,7 @@ public class Message
         Description = data.description ?? null;
         BusinessOwnerJid = data.businessOwnerJid ?? null;
         ProductId = data.productId ?? null;
-        LatestEditSenderTimestampMs = data.latestEditSenderTimestampMs is not null && data.latestEditSenderTimestampMs.Type != JTokenType.Null
-            ? (long)data.latestEditSenderTimestampMs
-            : 0;
+        LatestEditSenderTimestampMs = Util.ConvertToDate(data.latestEditSenderTimestampMs);
         LatestEditMsgKey = data.latestEditMsgKey is not null && data.latestEditMsgKey.Type != JTokenType.Null
             ? new MessageId(data.latestEditMsgKey)
             : null;
@@ -239,12 +240,12 @@ public class Message
         DynamicReplyButtons = data.dynamicReplyButtons ?? null;
         SelectedButtonId = data.selectedButtonId ?? null;
         SelectedRowId = data.listResponse?.singleSelectReply?.selectedRowId ?? null;
-        Recipients = data.recipients is not null 
-            ? ((JArray)data.recipients).Select(r=> UserId.Create(r)).ToList() 
+        Recipients = data.recipients is not null
+            ? ((JArray)data.recipients).Select(r => UserId.Create(r)).ToList()
             : new List<UserId>();
         TemplateParams = data.templateParams is not null
-            ? ((JArray)data.templateParams).Select(t=> t.ToString()).ToList()
-            :new List<string>();
+            ? ((JArray)data.templateParams).Select(t => t.ToString()).ToList()
+            : new List<string>();
         if (Type == MessageTypes.POLL_CREATION)
         {
             Poll = new Poll(data.pollName, data.pollOptions, new PollSendOptions()

@@ -210,9 +210,11 @@ public class RegisterEventService : IRegisterEventService
     {
         return msg =>
         {
+            // Create a new Message object
+            var message = new Message(msg);
             if (msg.type != "revoked")
             {
-                _lastMessage = new Message(msg);
+                _lastMessage = message;
             }
 
             // Determine if the message is related to a participant or a contact changing their phone number
@@ -220,8 +222,7 @@ public class RegisterEventService : IRegisterEventService
             bool isContact = msg.type == "notification_template" && msg.subtype == "change_number";
 
             if (!isParticipant && !isContact) return false;
-            // Create a new Message object
-            var message = new Message(msg);
+           
 
             // Extract old and new IDs
             string newId = isParticipant ? message.Recipients[0].Id : msg.to;

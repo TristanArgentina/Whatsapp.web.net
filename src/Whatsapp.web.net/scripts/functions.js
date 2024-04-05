@@ -407,16 +407,20 @@ async function setGroupSubject(chatId, subject) {
     }
 }
 
-async function setGroupDescription(chatId, description) {
+async function setDescriptionToGroup(chatId, description) {
+    console.log(`setDescriptionToGroup => chatId: ${chatId} - description: ${description}`)
     const chatWid = window.Store.WidFactory.createWid(chatId);
-    let descId = window.Store.GroupMetadata.get(chatWid).descId;
-    let newId = await window.Store.MsgKey.newId();
-    try {
-        await window.Store.GroupUtils.setGroupDescription(chatWid, description, newId, descId);
-        return true;
-    } catch (err) {
-        if (err.name === 'ServerStatusCodeError') return false;
-        throw err;
+    console.log(`chatWid: ${JSON.stringify(chatWid)}`)
+    const descId = window.Store.GroupMetadata.get(chatWid).descId;
+    console.log(`descId: ${JSON.stringify(descId)}`)
+    window.Store.MsgKey.newId().then(newId => {
+        try {
+            window.Store.GroupUtils.setGroupDescription(chatWid, description, newId, descId);
+            return true;
+        } catch (err) {
+            if (err.name === 'ServerStatusCodeError') return false;
+            throw err;
+        }
     }
 }
 
@@ -616,14 +620,15 @@ async function retrieveAndConvertMedia(msgId) {
 
 async function deleteMessageAsyncWithPermissions(msgId, everyone) {
     let msg = window.Store.Msg.get(msgId);
-    let chat = await window.Store.Chat.find(msg.id.remote);
+    window.Store.Chat.find(msg.id.remote)
+        .then(chat => {
+            const canRevoke = window.Store.MsgActionChecks.canSenderRevokeMsg(msg) || window.Store.MsgActionChecks.canAdminRevokeMsg(msg);
+            if (everyone && canRevoke) {
+                return window.Store.Cmd.sendRevokeMsgs(chat, [msg], { clearMedia: true, type: msg.id.fromMe ? 'Sender' : 'Admin' });
+            }
 
-    const canRevoke = window.Store.MsgActionChecks.canSenderRevokeMsg(msg) || window.Store.MsgActionChecks.canAdminRevokeMsg(msg);
-    if (everyone && canRevoke) {
-        return window.Store.Cmd.sendRevokeMsgs(chat, [msg], { clearMedia: true, type: msg.id.fromMe ? 'Sender' : 'Admin' });
-    }
-
-    return window.Store.Cmd.sendDeleteMsgs(chat, [msg], true);
+            return window.Store.Cmd.sendDeleteMsgs(chat, [msg], true);
+        });
 }
 
 async function starMessageIfAllowed(msgId) {

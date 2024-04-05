@@ -49,9 +49,9 @@ public class Reaction
     {
         Key = new MsgKey(data.msgKey);
         ParentKey = new MsgKey(data.parentMsgKey);
-        SenderId = UserId.Create(data.senderId);
+        SenderId = UserId.Create(data.senderUserJid);
         Text = data.reactionText;
-        Timestamp = Util.ConvertToDate( data.timestamp);
+        Timestamp = Util.ConvertToDate(data.timestamp);
         Orphan = data.orphan;
         Read = data.read;
     }

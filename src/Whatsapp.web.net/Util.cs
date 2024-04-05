@@ -3,6 +3,7 @@ using System.Text.Json;
 using FFMpegCore;
 using FFMpegCore.Arguments;
 using FFMpegCore.Pipes;
+using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
@@ -13,8 +14,11 @@ namespace Whatsapp.web.net;
 
 public class Util
 {
-    public static DateTime ConvertToDate(dynamic timestampDynamic)
+    public static DateTime? ConvertToDate(dynamic timestampDynamic)
     {
+        if (timestampDynamic == null) return null;
+        if (timestampDynamic.Type == JTokenType.Null) return null;
+        if (string.IsNullOrEmpty(timestampDynamic.ToString())) return null;
         var timestamp = (long) timestampDynamic;
 
         if (timestamp < -62135596800)

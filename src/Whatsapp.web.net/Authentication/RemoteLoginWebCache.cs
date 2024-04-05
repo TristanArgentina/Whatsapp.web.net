@@ -16,7 +16,7 @@ public class RemoteLoginWebCache : LoginWebCache
         _strict = strict;
     }
 
-    public override async Task<string> Resolve(string version)
+    public override async Task<string?> Resolve(string version)
     {
         var remotePath = _remotePath.Replace("{version}", version);
 

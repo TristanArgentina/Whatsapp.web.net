@@ -2,7 +2,7 @@
 
 public class LoginWebCache : ILoginWebCache
 {
-    public virtual Task<string> Resolve(string version)
+    public virtual Task<string?> Resolve(string version)
     {
         return Task.FromResult(string.Empty);
     }

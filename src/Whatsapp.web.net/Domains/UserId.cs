@@ -40,7 +40,7 @@ public class UserId
 
     public override string ToString()
     {
-        return $"User: {Id}";
+        return $"{Id}";
     }
 
     public static UserId? Create(dynamic? data)
