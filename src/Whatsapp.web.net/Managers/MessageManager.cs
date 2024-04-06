@@ -273,17 +273,12 @@ public class MessageManager : IMessageManager
         return quotedMsg == null ? null : new Message(quotedMsg);
     }
 
-    public async Task<Message> Reply(Message msg, object content, string? contactId = null, MessageOptions? options = null)
+    public async Task<Message> Reply(Message msg, object content, UserId chatId, MessageOptions? options = null)
     {
-        if (string.IsNullOrEmpty(contactId))
-        {
-            contactId = msg.GetContactId().Id;
-        }
-
         options ??= new MessageOptions();
         options.QuotedMessageId = msg.Id;
 
-        return await Send(contactId, content, options);
+        return await Send(chatId._serialized, content, options);
     }
 
 }

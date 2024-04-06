@@ -114,8 +114,8 @@ public interface IMessageManager : IManager
     /// </summary>
     /// <param name="msg"></param>
     /// <param name="content"></param>
-    /// <param name="contactId"></param>
+    /// <param name="chatId"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    Task<Message> Reply(Message msg, object content, string? contactId = null, MessageOptions? options = null);
+    Task<Message> Reply(Message msg, object content, UserId chatId, MessageOptions? options = null);
 }

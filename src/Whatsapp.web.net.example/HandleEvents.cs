@@ -315,7 +315,7 @@ public class HandleEvents
             else if (msg.Body.StartsWith("!preview "))
             {
                 var text = msg.Body.Substring(9);
-                await msg.Reply(_client, text, null, new MessageOptions { LinkPreview = true });
+                await msg.Reply(_client, null, text, new MessageOptions { LinkPreview = true });
             }
             else if (msg.Body.StartsWith("!desc "))
             {

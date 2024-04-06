@@ -378,4 +378,17 @@ public class MessageManagerTests : TestBase
         msg = Client.Message.Get(msg.Id).Result;
         Assert.That(msg.Body.Equals(expectedContent));
     }
+
+    [Test]
+    public void ReplayMessageTest()
+    {
+        var originalContent = "This message to be replayed test";
+        var expectedContent = "This message replayed.";
+        var msg = Client!.Message.Send(ContactId1, originalContent).Result;
+
+        var chatId = msg.GetChat(Client).Result.Id;
+        var msgReplay = msg.Reply(Client, chatId, expectedContent).Result;
+        msgReplay = Client.Message.Get(msgReplay.Id).Result;
+        Assert.That(msgReplay.Body.Equals(expectedContent));
+    }
 }

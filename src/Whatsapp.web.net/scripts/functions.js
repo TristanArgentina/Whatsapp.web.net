@@ -178,17 +178,11 @@ async function getProductMetadataById(productId) {
 }
 
 function clearMessagesById(chatId) {
-    return window.WWebJS(chatId);
+    return window.WWebJS.sendClearChat(chatId);
 }
 
 function getChatById(chatId) {
-    return window.WWebJS.getChat(chatId)
-        .then(model => {
-            return model;
-        })
-        .catch((err) => {
-            console.log(`Error: ${err}`);
-        });
+    return window.WWebJS.getChat(chatId);
 }
 
 function sendClearChatById(chatId) {

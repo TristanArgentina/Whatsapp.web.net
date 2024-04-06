@@ -80,9 +80,7 @@ public class Chat
         IsGroup = data.isGroup;
         IsReadOnly = data.isReadOnly is null ? false : data.isReadOnly;
         UnreadCount = data.unreadCount;
-        Timestamp = data.t is null
-            ? null
-            : DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime;
+        Timestamp = Util.ConvertToDate(data.t);
         Archived = data.archive is null ? false : bool.Parse(data.archive.ToString());
         Pinned = data.pin != null;
         IsMuted = data.muteExpiration == 0;
