@@ -157,7 +157,7 @@ public static class MessageExtensions
         return await client.Commerce.GetPayment(msg.Id, msg.Type);
     }
 
-    public static async Task<ReactionList?> GetReactions(this Message msg, Client client)
+    public static async Task<ReactionList[]> GetReactions(this Message msg, Client client)
     {
         return await client.Message.GetReactions(msg.Id, msg.HasReaction);
     }

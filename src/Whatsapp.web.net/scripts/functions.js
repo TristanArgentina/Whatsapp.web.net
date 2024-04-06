@@ -702,9 +702,10 @@ async function getMessageSerialized(msgId) {
 }
 
 async function getReactions(msgId) {
-    const msgReactions = await window.Store.Reactions.find(msgId);
-    if (!msgReactions || !msgReactions.reactions.length) return null;
-    return msgReactions.reactions.serialize();
+    return window.Store.Reactions.find(msgId).then(msgReactions => {
+        if (!msgReactions || !msgReactions.reactions.length) return null;
+        return msgReactions.reactions.serialize();
+    });
 }
 
 

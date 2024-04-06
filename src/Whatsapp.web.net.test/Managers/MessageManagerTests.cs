@@ -336,7 +336,7 @@ public class MessageManagerTests : TestBase
 
         var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
         Assert.That(msg is not null);
-        msg.Pin(Client,1000).Wait();
+        msg.Pin(Client, 1000).Wait();
         Thread.Sleep(1000);
         Assert.That(success);
         msg.Unpin(Client).Wait();
@@ -350,5 +350,22 @@ public class MessageManagerTests : TestBase
         var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
         var info = Client.Message.GetInfo(msg.Id).Result;
         //TODO: Missing assert
+    }
+
+    [Test]
+    public void GetReactionsTest()
+    {
+        var expectedReact = "\ud83d\udc4d\ud83c\udffc";
+        var expectedContent = "This message to get reactions test";
+        var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
+        msg.SendReact(Client, expectedReact).Wait();
+        msg = Client.Message.Get(msg.Id).Result;
+        var reactionLists = msg.GetReactions(Client).Result;
+        Assert.That(reactionLists is not null);
+        Assert.That(reactionLists.Length == 1);
+        Assert.That(reactionLists[0].Senders is not null);
+        Assert.That(reactionLists[0].Senders.Count == 1);
+        Assert.That(reactionLists[0].Senders[0].Text.Equals(expectedReact));
+        
     }
 }

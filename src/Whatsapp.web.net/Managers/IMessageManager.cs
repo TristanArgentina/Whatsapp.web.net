@@ -83,7 +83,7 @@ public interface IMessageManager : IManager
     /// <param name="msgId"></param>
     /// <param name="hasReaction"></param>
     /// <returns></returns>
-    Task<ReactionList?> GetReactions(MessageId msgId, bool hasReaction);
+    Task<ReactionList[]> GetReactions(MessageId msgId, bool hasReaction);
 
     /// <summary>
     /// Edits the current message.

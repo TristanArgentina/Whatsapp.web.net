@@ -1,4 +1,5 @@
-﻿using PuppeteerSharp;
+﻿using Newtonsoft.Json.Linq;
+using PuppeteerSharp;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.Extensions;
 using Whatsapp.web.net.scripts;
@@ -222,11 +223,12 @@ public class MessageManager : IMessageManager
         return infoJson == null ? null : new MessageInfo(infoJson);
     }
 
-    public async Task<ReactionList?> GetReactions(MessageId msgId, bool hasReaction)
+    public async Task<ReactionList[]> GetReactions(MessageId msgId, bool hasReaction)
     {
-        if (!hasReaction) return null;
+        if (!hasReaction) return [];
         var data = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getReactions"), msgId._serialized);
-        return new ReactionList(data);
+        if (data is null) return [];
+        return ((JArray)data).Select(rl=>  new ReactionList(rl)).ToArray();
     }
 
     public async Task<Message?> Edit(MessageId msgId, string content, MessageOptions? options = null)

@@ -5,8 +5,12 @@
 /// </summary>
 public class Reaction
 {
+    public MessageId Id { get; set; }
+
+    public MessageAck Ack { get; set; }
+
     /// <summary>
-    /// Reaction ID
+    /// MsgKey
     /// </summary>
     public MsgKey Key { get; set; }
 
@@ -47,6 +51,8 @@ public class Reaction
 
     private void Patch(dynamic data)
     {
+        Id = new MessageId(data.id);
+        Ack = Enum.Parse(typeof(MessageAck), data.ack.ToString());
         Key = new MsgKey(data.msgKey);
         ParentKey = new MsgKey(data.parentMsgKey);
         SenderId = UserId.Create(data.senderUserJid);

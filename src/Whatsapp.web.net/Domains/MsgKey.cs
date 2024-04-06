@@ -1,4 +1,6 @@
-﻿namespace Whatsapp.web.net.Domains;
+﻿using Newtonsoft.Json.Linq;
+
+namespace Whatsapp.web.net.Domains;
 
 public class MsgKey
 {
@@ -10,11 +12,19 @@ public class MsgKey
     private void Patch(dynamic? data)
     {
         if (data is null) return;
-        Id = data.id;
-        FromMe = data.fromMe;
-        Remote = UserId.Create(data.remote);
-        Self = data.self;
-        _serialized = data._serialized ?? Id;
+        if (data.Type == JTokenType.String)
+        {
+            Id = data;
+            _serialized = data;
+        }
+        else
+        {
+            Id = data.id;
+            FromMe = data.fromMe;
+            Remote = UserId.Create(data.remote);
+            Self = data.self;
+            _serialized = data._serialized ?? Id;
+        }
     }
 
     public string _serialized { get; set; }
