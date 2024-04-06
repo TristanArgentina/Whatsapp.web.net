@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using PuppeteerSharp;
+﻿using PuppeteerSharp;
 using Whatsapp.web.net.Domains;
 using Whatsapp.web.net.Extensions;
 using Whatsapp.web.net.scripts;
@@ -219,9 +218,8 @@ public class MessageManager : IMessageManager
     /// <returns></returns>
     public async Task<MessageInfo?> GetInfo(MessageId msgId)
     {
-        var infoJson = await _pupPage.EvaluateFunctionAsync<string>(_parserFunctions.GetMethod("getMessageInfo"), msgId._serialized);
-
-        return infoJson == null ? null : JsonConvert.DeserializeObject<MessageInfo>(infoJson);
+        var infoJson = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getMessageInfo"), msgId._serialized);
+        return infoJson == null ? null : new MessageInfo(infoJson);
     }
 
     public async Task<ReactionList?> GetReactions(MessageId msgId, bool hasReaction)

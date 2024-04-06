@@ -340,5 +340,15 @@ public class MessageManagerTests : TestBase
         Thread.Sleep(1000);
         Assert.That(success);
         msg.Unpin(Client).Wait();
+        //TODO: Missing assert
+    }
+
+    [Test]
+    public void GetInfoTest()
+    {
+        var expectedContent = "This message to get info test";
+        var msg = Client!.Message.Send(ContactId1, expectedContent).Result;
+        var info = Client.Message.GetInfo(msg.Id).Result;
+        //TODO: Missing assert
     }
 }
