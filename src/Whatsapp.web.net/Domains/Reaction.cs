@@ -1,4 +1,6 @@
-﻿namespace Whatsapp.web.net.Domains;
+﻿using Newtonsoft.Json.Linq;
+
+namespace Whatsapp.web.net.Domains;
 
 /// <summary>
 /// Represents a Reaction on WhatsApp
@@ -7,7 +9,7 @@ public class Reaction
 {
     public MessageId Id { get; set; }
 
-    public MessageAck Ack { get; set; }
+    public MessageAck? Ack { get; set; }
 
     /// <summary>
     /// MsgKey
@@ -52,7 +54,7 @@ public class Reaction
     private void Patch(dynamic data)
     {
         Id = new MessageId(data.id);
-        Ack = Enum.Parse(typeof(MessageAck), data.ack.ToString());
+        Ack = data.ack is not null && data.ack.Type != JTokenType.Null ? Enum.Parse(typeof(MessageAck), data.ack.ToString()) : null;
         Key = new MsgKey(data.msgKey);
         ParentKey = new MsgKey(data.parentMsgKey);
         SenderId = UserId.Create(data.senderUserJid);

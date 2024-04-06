@@ -62,7 +62,7 @@ public class Client(
     private readonly IJavaScriptParser _parserFunctions = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.functions.js");
     private readonly WhatsappOptions _options = options.Value;
     private readonly IAuthenticator _authStrategy = authenticatorProvider.GetAuthenticator();
-    
+
     private IBrowser? _pupBrowser;
     private IPage? _pupPage;
 
@@ -71,16 +71,19 @@ public class Client(
     public IContactManager? Contact { get; private set; }
 
     public IChatManager? Chat { get; private set; }
-    
+
     public IGroupChatManager? Group { get; private set; }
-    
+
     public IMessageManager? Message { get; private set; }
-    
+
     public ICommerceManager? Commerce { get; private set; }
 
     public async Task<Task> Initialize()
     {
-        await InitializePage();
+        var result = await InitializePage();
+        _pupBrowser = result.PupBrowser;
+        _pupPage = result.PupPage;
+
         if (_pupPage is null) throw new Exception("The page did not initialize");
         await _authStrategy.AfterBrowserInitialized();
         await InitWebVersionCacheAsync();
@@ -227,7 +230,7 @@ public class Client(
             await _authStrategy.LoginWebCache.Persist(_currentIndexHtml, version);
         }
 
-        
+
 
         var isCometOrAbove = int.Parse(version.Split('.')[1]) >= 3000;
         if (isCometOrAbove)
@@ -270,17 +273,20 @@ public class Client(
         return Task.CompletedTask;
     }
 
-    private async Task InitializePage()
+    private async Task<(IBrowser PupBrowser, IPage PupPage)> InitializePage()
     {
+        IBrowser? pupBrowser;
+        IPage? pupPage;
+
         await _authStrategy.BeforeBrowserInitialized();
 
         if (_options.Puppeteer is { BrowserWSEndpoint: not null })
         {
-            _pupBrowser = await Puppeteer.ConnectAsync(new ConnectOptions
+            pupBrowser = await Puppeteer.ConnectAsync(new ConnectOptions
             {
                 DefaultViewport = _options.Puppeteer.DefaultViewport
             });
-            _pupPage = await _pupBrowser.NewPageAsync();
+            pupPage = await pupBrowser.NewPageAsync();
         }
         else
         {
@@ -298,24 +304,26 @@ public class Client(
                 ExecutablePath = _options.Puppeteer.ExecutablePath
             };
 
-            _pupBrowser = await Puppeteer.LaunchAsync(launchOptions);
-            _pupPage = (await _pupBrowser.PagesAsync())[0];
+            pupBrowser = await Puppeteer.LaunchAsync(launchOptions);
+            pupPage = (await pupBrowser.PagesAsync())[0];
         }
 
         if (_options.ProxyAuthentication is not null)
         {
-            await _pupPage.AuthenticateAsync(_options.ProxyAuthentication);
+            await pupPage.AuthenticateAsync(_options.ProxyAuthentication);
         }
 
-        await _pupPage.SetUserAgentAsync(_options.UserAgent);
+        await pupPage.SetUserAgentAsync(_options.UserAgent);
         if (_options.BypassCSP)
         {
-            await _pupPage.SetBypassCSPAsync(true);
+            await pupPage.SetBypassCSPAsync(true);
         }
 
-        _pupPage.Console += Console;
-        _pupPage.PageError += PageError;
-        _pupPage.Error += PageCrashError;
+        pupPage.Console += Console;
+        pupPage.PageError += PageError;
+        pupPage.Error += PageCrashError;
+
+        return (pupBrowser, pupPage);
     }
 
     private string? _currentIndexHtml;
@@ -368,7 +376,7 @@ public class Client(
 
     private async Task Destroy()
     {
-        if(_pupBrowser is not null)
+        if (_pupBrowser is not null)
         {
             await _pupBrowser.CloseAsync();
         }
@@ -391,11 +399,11 @@ public class Client(
     {
         if (_pupBrowser is not null)
         {
-           await _pupBrowser.DisposeAsync();
+            await _pupBrowser.DisposeAsync();
         }
         if (_pupPage is not null)
         {
-          await  _pupPage.DisposeAsync();
+            await _pupPage.DisposeAsync();
         }
     }
 

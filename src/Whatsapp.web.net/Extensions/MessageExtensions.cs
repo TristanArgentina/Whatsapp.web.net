@@ -66,6 +66,13 @@ public static class MessageExtensions
         return quotedMsg == null ? null : new Message(quotedMsg);
     }
 
+    public static async Task<Message> Reply(this Message msg, Client client, object content,
+        MessageOptions? options = null)
+    {
+        var chatId = msg.GetChatId();
+        return await client.Message.Reply(msg, content, chatId, options);
+    }
+
     public static async Task<Message> Reply(this Message msg, Client client, UserId chatId, object content,
         MessageOptions? options = null)
     {

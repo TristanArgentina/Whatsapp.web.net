@@ -386,9 +386,9 @@ public class MessageManagerTests : TestBase
         var expectedContent = "This message replayed.";
         var msg = Client!.Message.Send(ContactId1, originalContent).Result;
 
-        var chatId = msg.GetChat(Client).Result.Id;
-        var msgReplay = msg.Reply(Client, chatId, expectedContent).Result;
+        var msgReplay = msg.Reply(Client, expectedContent).Result;
         msgReplay = Client.Message.Get(msgReplay.Id).Result;
         Assert.That(msgReplay.Body.Equals(expectedContent));
+        //TODO: missing replay
     }
 }

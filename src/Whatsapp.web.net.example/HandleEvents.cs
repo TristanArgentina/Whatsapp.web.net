@@ -247,7 +247,7 @@ public class HandleEvents
     {
         return async (_, args) =>
         {
-            ConsoleWriteLineEvent("MessageCreate",  args.Message);
+            ConsoleWriteLineEvent("MessageCreate", args.Message);
             var msg = args.Message;
 
             // Unpins a message
@@ -274,11 +274,12 @@ public class HandleEvents
         return async (_, args) =>
         {
             var msg = args.Message;
-            ConsoleWriteLineEvent("MESSAGE RECEIVED",msg);
+            ConsoleWriteLineEvent("MESSAGE RECEIVED", msg);
 
             if (msg.Body == "!ping reply")
             {
-                await msg.Reply(_client, "pong");
+                var chatId = msg.GetChatId();
+                await msg.Reply(_client, chatId, "pong");
             }
             else if (msg.Body == "!ping")
             {
@@ -305,6 +306,7 @@ public class HandleEvents
                 }
                 else
                 {
+                    var chatId = msg.GetChatId();
                     await msg.Reply(_client, "This command can only be used in a group!");
                 }
             }
