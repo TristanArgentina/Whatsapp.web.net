@@ -715,8 +715,7 @@ async function editMessage(msgId, message, options) {
 
     let catEdit = window.Store.MsgActionChecks.canEditText(msg) || window.Store.MsgActionChecks.canEditCaption(msg);
     if (catEdit) {
-        const msgEdit = await window.WWebJS.editMessage(msg, message, options);
-        return msgEdit.serialize();
+        return window.WWebJS.editMessage(msg, message, options).then(msgEdit => msgEdit.serialize());
     }
     return null;
 }

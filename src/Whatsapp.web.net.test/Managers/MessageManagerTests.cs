@@ -366,6 +366,16 @@ public class MessageManagerTests : TestBase
         Assert.That(reactionLists[0].Senders is not null);
         Assert.That(reactionLists[0].Senders.Count == 1);
         Assert.That(reactionLists[0].Senders[0].Text.Equals(expectedReact));
-        
+    }
+
+    [Test]
+    public void EditMessageTest()
+    {
+        var originalContent = "This message to be edit test";
+        var expectedContent = "This message edited.";
+        var msg = Client!.Message.Send(ContactId1, originalContent).Result;
+        msg.Edit(Client, expectedContent).Wait();
+        msg = Client.Message.Get(msg.Id).Result;
+        Assert.That(msg.Body.Equals(expectedContent));
     }
 }
