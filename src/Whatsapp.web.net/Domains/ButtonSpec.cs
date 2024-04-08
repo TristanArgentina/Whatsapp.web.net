@@ -8,10 +8,10 @@ public class ButtonSpec
     /// <summary>
     /// Custom ID to set on the button. A random one will be generated if one is not passed.
     /// </summary>
-    public string Id { get; set; }
+    public string Id { get; private set; }
 
     /// <summary>
     /// The text to show on the button.
     /// </summary>
-    public string Body { get; set; }
+    public string Body { get; private set; }
 }

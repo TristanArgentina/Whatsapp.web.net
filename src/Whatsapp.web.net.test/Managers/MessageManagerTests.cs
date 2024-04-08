@@ -160,15 +160,15 @@ public class MessageManagerTests : TestBase
     public void SendVCardTest()
     {
 
-        var expectedVCard = new VCard()
-        {
-            Version = "3.0",
-            FullName = "Johnson Don",
-            Names = ["Don", "Johnson"],
-            Email = new Email("Johnson@don.com"),
-            Telephone = new Phone("3107140202"),
-            Revision = DateTime.Now.ToUniversalTime()
-        };
+        var expectedVCard = new VCard(
+
+            version: "3.0",
+            fullName: "Johnson Don",
+            names: ["Don", "Johnson"],
+            email: new Email("Johnson@don.com"),
+            telephone: new Phone("3107140202"),
+            revision: DateTime.Now.ToUniversalTime()
+        );
 
         var msg = Client!.Message.Send(ContactId1, expectedVCard.ToString()).Result;
 
@@ -190,15 +190,15 @@ public class MessageManagerTests : TestBase
     public void SendVCardTurnOffParsingTest()
     {
 
-        var expectedVCard = new VCard()
-        {
-            Version = "3.0",
-            FullName = "Johnson Don",
-            Names = ["Don", "Johnson"],
-            Email = new Email("Johnson@don.com"),
-            Telephone = new Phone("3107140202"),
-            Revision = DateTime.Now.ToUniversalTime()
-        };
+        var expectedVCard = new VCard(
+
+            version: "3.0",
+            fullName: "Johnson Don",
+            names: ["Don", "Johnson"],
+            email: new Email("Johnson@don.com"),
+            telephone: new Phone("3107140202"),
+            revision: DateTime.Now.ToUniversalTime()
+        );
 
         var msg = Client!.Message.Send(ContactId1, expectedVCard.ToString(), new MessageOptions { ParseVCards = false }).Result;
 

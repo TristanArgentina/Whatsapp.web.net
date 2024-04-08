@@ -80,7 +80,7 @@ public class ChatManager : IChatManager
     {
         var messages = await _pupPage.EvaluateFunctionAsync<List<dynamic>>(_parserFunctions.GetMethod("getMessagesFromChat"), chatId, searchOptions);
 
-        return messages.ConvertAll(m => new Message(m));
+        return messages.ConvertAll(Message.Create).Where(m=> m is not null).OfType<Message>().ToList();
     }
 
     public async Task<bool> ClearMessages(string chatId)

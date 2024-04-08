@@ -31,7 +31,7 @@ public class Message
     /// <summary>
     /// Message content
     /// </summary>
-    public string Body { get; set; }
+    public string Body { get; private set; }
 
     /// <summary>
     /// Message type
@@ -157,33 +157,38 @@ public class Message
     /// Array of {link: string, isSuspicious: boolean}
     /// </summary>
     public List<dynamic> Links { get; private set; }
+
     public string? Title { get; private set; }
+
     public string? Description { get; private set; }
+
     public string? BusinessOwnerJid { get; private set; }
+
     public string? ProductId { get; private set; }
+
     public DateTime? LatestEditSenderTimestampMs { get; private set; }
+
     public MessageId? LatestEditMsgKey { get; private set; }
 
     public dynamic? DynamicReplyButtons { get; private set; }
+
     public string? SelectedButtonId { get; private set; }
+
     public string? SelectedRowId { get; private set; }
 
     public Poll Poll { get; private set; }
-    public List<UserId> Recipients { get; set; } = [];
-    public List<string> TemplateParams { get; set; } = [];
 
-    [JsonConstructor]
-    public Message(dynamic data)
+    public List<UserId> Recipients { get; private set; } = [];
+
+    public List<string> TemplateParams { get; private set; } = [];
+
+    private Message(dynamic data)
     {
-        if (data != null)
-        {
-            Patch(data);
-        }
+        Patch(data);
     }
 
-    protected void Patch(dynamic data)
+    private void Patch(dynamic data)
     {
-        if (data.Type == JTokenType.Null) return;
         Id = new MessageId(data.id);
         Ack = data.ack;
         MediaKey = data.mediaKey;
@@ -260,5 +265,21 @@ public class Message
     public override string ToString()
     {
         return $"{From} : {Body}";
+    }
+
+    public static Message? Create(dynamic? data)
+    {
+        if (data is null) return null;
+        if (data.Type == JTokenType.Null) return null;
+        if (data is string) return null;
+        try
+        {
+            return new Message(data);
+        }
+        catch (Exception e)
+        {
+            throw new ExceptionDataDeserialization(data, e);
+        }
+       
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
 using Whatsapp.web.net.Domains;
-using Whatsapp.web.net.Extensions;
 using Whatsapp.web.net.scripts;
 
 namespace Whatsapp.web.net.Managers;
@@ -17,7 +16,7 @@ public class MessageManager : IMessageManager
         _pupPage = pupPage;
     }
 
-    public static UserId GetContactId(Message msg)
+    public UserId GetContactId(Message msg)
     {
         return msg.Id.FromMe ? msg.To : msg.From;
     }
@@ -49,7 +48,7 @@ public class MessageManager : IMessageManager
             internalOptions["attachment"] = messageMedia;
             content = "";
             if (internalOptions.ContainsKey("sendMediaAsSticker")
-                && (bool)internalOptions["sendMediaAsSticker"] 
+                && (bool)internalOptions["sendMediaAsSticker"]
                 && internalOptions.ContainsKey("attachment"))
             {
                 internalOptions["attachment"] = await Util.FormatToWebpSticker(
@@ -71,45 +70,45 @@ public class MessageManager : IMessageManager
             content = "";
         }
         else switch (content)
-        {
-            case Location:
-                internalOptions["location"] = content;
-                content = "";
-                break;
-            case Poll:
-                internalOptions["poll"] = content;
-                content = "";
-                break;
-            case Contact contactCard:
-                internalOptions["contactCard"] = contactCard.Id._serialized;
-                content = "";
-                break;
-            case IList<Contact> contactList when contactList.Any():
-                internalOptions["contactCardList"] = contactList.Select(contact => contact.Id._serialized).ToList();
-                content = "";
-                break;
-            case Contact[] contactList when contactList.Any():
-                internalOptions["contactCardList"] = contactList.Select(contact => contact.Id._serialized).ToList();
-                content = "";
-                break;
-                case Buttons buttons:
-                {
-                    if (buttons.Type != "chat") internalOptions["attachment"] = buttons.Body;
-                    internalOptions["buttons"] = buttons;
+            {
+                case Location:
+                    internalOptions["location"] = content;
                     content = "";
                     break;
-                }
-            case List:
-                internalOptions["list"] = content;
-                content = "";
-                break;
-        }
+                case Poll:
+                    internalOptions["poll"] = content;
+                    content = "";
+                    break;
+                case Contact contactCard:
+                    internalOptions["contactCard"] = contactCard.Id._serialized;
+                    content = "";
+                    break;
+                case IList<Contact> contactList when contactList.Any():
+                    internalOptions["contactCardList"] = contactList.Select(contact => contact.Id._serialized).ToList();
+                    content = "";
+                    break;
+                case Contact[] contactList when contactList.Any():
+                    internalOptions["contactCardList"] = contactList.Select(contact => contact.Id._serialized).ToList();
+                    content = "";
+                    break;
+                case Buttons buttons:
+                    {
+                        if (buttons.Type != "chat") internalOptions["attachment"] = buttons.Body;
+                        internalOptions["buttons"] = buttons;
+                        content = "";
+                        break;
+                    }
+                case List:
+                    internalOptions["list"] = content;
+                    content = "";
+                    break;
+            }
 
         var method = _parserFunctions.GetMethod("sendMessageAsyncToChat");
 
         var newMessage = await _pupPage.EvaluateFunctionAsync<dynamic>(method, fromId, content, internalOptions, sendSeen);
 
-        return new Message(newMessage);
+        return Message.Create(newMessage);
     }
 
     private Dictionary<string, object?> BuildInternalOptions(MessageOptions options)
@@ -228,7 +227,7 @@ public class MessageManager : IMessageManager
         if (!hasReaction) return [];
         var data = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getReactions"), msgId._serialized);
         if (data is null) return [];
-        return ((JArray)data).Select(rl=>  new ReactionList(rl)).ToArray();
+        return ((JArray)data).Select(rl => new ReactionList(rl)).ToArray();
     }
 
     public async Task<Message?> Edit(MessageId msgId, string content, MessageOptions? options = null)
@@ -252,7 +251,7 @@ public class MessageManager : IMessageManager
 
         var data = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("editMessage"), msgId._serialized, content, internalOptions);
 
-        return data != null ? new Message(data) : null;
+        return Message.Create(data);
     }
 
     /// <summary>
@@ -263,14 +262,14 @@ public class MessageManager : IMessageManager
     public async Task<Message?> Get(MessageId msgId)
     {
         var newData = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getMessageModelById"), msgId._serialized);
-        return newData == null ? null : new Message(newData);
+        return Message.Create(newData);
     }
 
     public async Task<Message?> GetQuoted(MessageId msgId, bool hasQuotedMsg = true)
     {
         if (!hasQuotedMsg) return null;
         var quotedMsg = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("getQuotedMessageModel"), msgId._serialized);
-        return quotedMsg == null ? null : new Message(quotedMsg);
+        return Message.Create(quotedMsg);
     }
 
     public async Task<Message> Reply(Message msg, object content, UserId chatId, MessageOptions? options = null)

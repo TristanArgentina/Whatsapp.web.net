@@ -118,4 +118,6 @@ public interface IMessageManager : IManager
     /// <param name="options"></param>
     /// <returns></returns>
     Task<Message> Reply(Message msg, object content, UserId chatId, MessageOptions? options = null);
+
+    UserId GetContactId(Message msg);
 }

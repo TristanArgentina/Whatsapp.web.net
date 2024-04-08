@@ -64,30 +64,6 @@ public class List
             throw new Exception("[LT05] You can't have more than one empty title.");
         }
 
-        return sections.ConvertAll(section => new ListSection
-        {
-            Title = section.Title,
-            Rows = FormatRows(section.Rows)
-        });
-    }
-
-    /// <summary>
-    /// Formats the rows of a section
-    /// </summary>
-    /// <param name="rows">The rows to format.</param>
-    /// <returns>The formatted list rows.</returns>
-    private List<ListRow> FormatRows(List<ListRow> rows)
-    {
-        if (rows.Count == 0)
-        {
-            throw new Exception("[LT03] Section without rows");
-        }
-
-        return rows.ConvertAll(row => new ListRow
-        {
-            RowId = string.IsNullOrEmpty(row.RowId) ? Util.GenerateHash(6) : row.RowId,
-            Title = row.Title,
-            Description = string.IsNullOrEmpty(row.Description) ? "" : row.Description
-        });
+        return sections.ConvertAll(section => new ListSection(section));
     }
 }

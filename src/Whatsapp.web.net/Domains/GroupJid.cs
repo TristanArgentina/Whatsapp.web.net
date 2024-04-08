@@ -2,6 +2,11 @@
 
 public class GroupJid
 {
+    public string Server { get; private set; }
+
+    public string User { get; private set; }
+
+
     public GroupJid(dynamic data)
     {
         Patch(data);
@@ -14,9 +19,6 @@ public class GroupJid
         User = data.user;
     }
 
-    public string Server { get; set; }
-
-    public string User { get; set; }
 
     public static GroupJid? Create(dynamic? data)
     {

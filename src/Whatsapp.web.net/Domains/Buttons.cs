@@ -68,11 +68,6 @@ public class Buttons
     private List<FormattedButtonSpec> FormatButtons(List<ButtonSpec> buttons)
     {
         buttons = buttons.GetRange(0, Math.Min(buttons.Count, 3)); // Phone users can only see 3 buttons, so let's limit this
-        return buttons.ConvertAll(btn => new FormattedButtonSpec
-        {
-            ButtonId = !string.IsNullOrEmpty(btn.Id) ? btn.Id : Util.GenerateHash(6),
-            ButtonText = new Dictionary<string, string> { { "displayText", btn.Body } },
-            Type = 1
-        });
+        return buttons.ConvertAll(btn => new FormattedButtonSpec(btn));
     }
 }

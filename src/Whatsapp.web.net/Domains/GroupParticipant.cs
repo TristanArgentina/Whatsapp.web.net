@@ -2,6 +2,13 @@
 
 public class GroupParticipant
 {
+
+    public UserId Id { get; private set; }
+
+    public bool IsAdmin { get; private set; }
+
+    public bool IsSuperAdmin { get; private set; }
+
     public GroupParticipant(dynamic data)
     {
         Patch(data);
@@ -14,9 +21,5 @@ public class GroupParticipant
         IsSuperAdmin = data.isSuperAdmin;
     }
 
-    public UserId Id { get; set; }
 
-    public bool IsAdmin { get; set; }
-
-    public bool IsSuperAdmin { get; set; }
 }

@@ -8,7 +8,7 @@ public class BusinessContact : Contact
     /// <summary>
     /// The contact's business profile
     /// </summary>
-    public object BusinessProfile { get; set; }
+    public object BusinessProfile { get; private set; }
 
     private BusinessContact() 
     {

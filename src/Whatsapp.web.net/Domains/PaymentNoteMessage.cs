@@ -2,5 +2,5 @@
 
 public class PaymentNoteMessage
 {
-    public string Body { get; set; }
+    public string Body { get; private set; }
 }

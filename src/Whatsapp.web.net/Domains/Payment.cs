@@ -2,15 +2,15 @@
 
 public class Payment
 {
-    public object Id { get; set; }
+    public object Id { get; private set; }
 
-    public string PaymentCurrency { get; set; }
+    public string PaymentCurrency { get; private set; }
 
-    public double PaymentAmount1000 { get; set; }
+    public double PaymentAmount1000 { get; private set; }
 
-    public object PaymentMessageReceiverJid { get; set; }
+    public object PaymentMessageReceiverJid { get; private set; }
 
-    public long PaymentTransactionTimestamp { get; set; }
+    public long PaymentTransactionTimestamp { get; private set; }
 
     /// <summary>
     ///    * Possible Status
@@ -27,11 +27,11 @@ public class Payment
     /// 10:WAITING_FOR_PAYER
     /// 11:WAITING
     /// </summary>
-    public int PaymentStatus { get; set; }
+    public int PaymentStatus { get; private set; }
 
-    public int PaymentTxnStatus { get; set; }
+    public int PaymentTxnStatus { get; private set; }
 
-    public PaymentNoteMessage PaymentNoteMsg { get; set; }
+    public PaymentNoteMessage PaymentNoteMsg { get; private set; }
 
     public Payment(dynamic? data)
     {

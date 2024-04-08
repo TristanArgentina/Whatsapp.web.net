@@ -1,9 +1,11 @@
-﻿namespace Whatsapp.web.net.Domains;
+﻿using Newtonsoft.Json.Linq;
+
+namespace Whatsapp.web.net.Domains;
 
 /// <summary>
 /// Represents a Chat on WhatsApp
 /// </summary>
-public class Chat
+public abstract class Chat
 {
     /// <summary>
     /// ID that represents the chat
@@ -13,7 +15,7 @@ public class Chat
     /// <summary>
     /// Title of the chat
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; private set; }
 
     /// <summary>
     /// Indicates if the Chat is a Group Chat
@@ -61,16 +63,6 @@ public class Chat
     public Message? LastMessage { get; private set; }
 
 
-    protected Chat()
-    {
-
-    }
-
-    public Chat(dynamic? data)
-    {
-        Patch(data);
-    }
-
     protected void Patch(dynamic? data)
     {
         if (data is null) return;
@@ -85,7 +77,7 @@ public class Chat
         Pinned = data.pin != null;
         IsMuted = data.muteExpiration == 0;
         MuteExpiration = data.muteExpiration;
-        LastMessage = data.lastMessage != null ? new Message(data.lastMessage) : null;
+        LastMessage = Message.Create(data.lastMessage);
     }
 
     public override string ToString()
@@ -106,9 +98,18 @@ public class Chat
     public static Chat? Create(dynamic data)
     {
         if (data == null) return null;
-        return (bool)data.isGroup
-            ? new GroupChat(data)
-            : new PrivateChat(data);
+        if (data.Type == JTokenType.Null) return null;
+        if (data is string) return null;
+        try
+        {
+            return (bool)data.isGroup
+                ? new GroupChat(data)
+                : new PrivateChat(data);
+        }
+        catch (Exception e)
+        {
+            throw new ExceptionDataDeserialization(data, e);
+        }
     }
 
 }

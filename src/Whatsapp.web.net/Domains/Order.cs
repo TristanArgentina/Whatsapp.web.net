@@ -5,27 +5,27 @@
 /// </summary>
 public class Order
 {
-    public List<Product> Products { get; set; }
+    public List<Product> Products { get; private set; }
 
     /// <summary>
     /// Order Subtotal
     /// </summary>
-    public string Subtotal { get; set; }
+    public string Subtotal { get; private set; }
 
     /// <summary>
     /// Order Total
     /// </summary>
-    public string Total { get; set; }
+    public string Total { get; private set; }
 
     /// <summary>
     /// Order Currency
     /// </summary>
-    public string Currency { get; set; }
+    public string Currency { get; private set; }
 
     /// <summary>
     /// Order Created At
     /// </summary>
-    public long CreatedAt { get; set; }
+    public long CreatedAt { get; private set; }
 
     public Order(dynamic? data)
     {

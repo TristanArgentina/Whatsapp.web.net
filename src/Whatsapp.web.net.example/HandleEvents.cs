@@ -237,7 +237,7 @@ public class HandleEvents
             var msg = args.Message;
             // Receiving new incoming messages that have been encrypted
             // msg.Type == "ciphertext"
-            msg.Body = "Waiting for this message. Check your phone.";
+            // msg.Body = "Waiting for this message. Check your phone.";
 
             // do stuff here
         };
@@ -278,7 +278,7 @@ public class HandleEvents
 
             if (msg.Body == "!ping reply")
             {
-                var chatId = msg.GetChatId();
+                var chatId = msg.GetChatId(_client);
                 await msg.Reply(_client, chatId, "pong");
             }
             else if (msg.Body == "!ping")
@@ -306,7 +306,6 @@ public class HandleEvents
                 }
                 else
                 {
-                    var chatId = msg.GetChatId();
                     await msg.Reply(_client, "This command can only be used in a group!");
                 }
             }
@@ -453,17 +452,11 @@ public class HandleEvents
             else if (msg.Body == "!location")
             {
                 await msg.Reply(_client, new Location(37.422, -122.084));
-                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions { Name = "Googleplex" }));
-                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions
-                {
-                    Address = "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA"
-                }));
-                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions
-                {
-                    Name = "Googleplex",
-                    Address = "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA",
-
-                }));
+                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions("Googleplex")));
+                await msg.Reply(_client, new Location(37.422, -122.084, 
+                    new LocationOptions(null, "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA")));
+                await msg.Reply(_client, new Location(37.422, -122.084, 
+                    new LocationOptions("Googleplex","1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA")));
             }
             else if (msg.Location != null)
             {

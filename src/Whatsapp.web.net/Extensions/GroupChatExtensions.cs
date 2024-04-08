@@ -28,9 +28,8 @@ public static class GroupChatExtensions
     public static async Task<bool> SetSubject(this GroupChat groupChat, Client client, string subject)
     {
         var success = await client.Group.SetSubject(groupChat.Id.Id, subject);
-        if (!success) return false;
-        groupChat.Name = subject;
-        return true;
+        //groupChat.Name = subject;
+        return success;
     }
 
     public static async Task<bool> SetDescription(this GroupChat groupChat, Client client, string description)

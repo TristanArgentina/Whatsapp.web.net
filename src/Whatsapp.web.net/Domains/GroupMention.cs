@@ -7,11 +7,11 @@ public class GroupMention
         Patch(data);
     }
 
-    public string Subject { get; set; }
+    public string Subject { get; private set; }
 
-    public string Id { get; set; }
+    public string Id { get; private set; }
 
-    public GroupJid GroupJid { get; set; }
+    public GroupJid GroupJid { get; private set; }
 
     private void Patch(dynamic data)
     {

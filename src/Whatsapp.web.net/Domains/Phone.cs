@@ -2,6 +2,9 @@
 
 public class Phone : ValueTypes
 {
+
+    public string Waid { get; private set; }
+
     public Phone(string value, string key = "TEL"): base(key, value)
     {
         var dataSplit = key.Split(';');
@@ -12,7 +15,6 @@ public class Phone : ValueTypes
         }
     }
 
-    public string Waid { get; set; }
 
     public override string ToString()
     {

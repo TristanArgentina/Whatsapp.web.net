@@ -2,10 +2,10 @@
 
 public class ProductData
 {
-    public string Id { get; set; }
-    public string Price { get; set; }
-    public string ThumbnailUrl { get; set; }
-    public string Currency { get; set; }
-    public string Name { get; set; }
-    public int Quantity { get; set; }
+    public string Id { get; private set; }
+    public string Price { get; private set; }
+    public string ThumbnailUrl { get; private set; }
+    public string Currency { get; private set; }
+    public string Name { get; private set; }
+    public int Quantity { get; private set; }
 }

@@ -11,6 +11,15 @@ It uses Puppeteer to run a real instance of Whatsapp Web to avoid getting blocke
 **It is experimental and is not intended for use in production.**
 ## Example usage
 
+Example of how the service can be started
+
+```c#
+var bootstrapper = new Bootstrapper();
+var client = bootstrapper.Start();
+```
+
+Example of a configuration file appsettings.json
+
 ```json
 {
   "Whatsapp": {
@@ -39,6 +48,8 @@ It uses Puppeteer to run a real instance of Whatsapp Web to avoid getting blocke
 }
 
 ```
+
+
 
 
 ```c#

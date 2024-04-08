@@ -28,7 +28,7 @@ public class Location
     /// <summary>
     /// URL address to be shown within a location message
     /// </summary>
-    public string? Url { get; set; }
+    public string? Url { get; private set; }
 
 
     public Location(double latitude, double longitude, LocationOptions? locationOptions = null, string? url = null)
@@ -46,9 +46,8 @@ public class Location
     }
 
     public Location(double latitude, double longitude, string description)
-    : this(latitude, longitude, new LocationOptions { Name = description })
+    : this(latitude, longitude, new LocationOptions(description))
     {
-
     }
 
     private void Patch(dynamic? data)
@@ -58,8 +57,6 @@ public class Location
         Latitude = (double)data.lat;
         Longitude = (double)data.lng;
         Url = data.clientUrl;
-        _locationOptions = data.loc is not null && data.loc.Type == JTokenType.String && !string.IsNullOrEmpty(data.loc.ToString())
-            ? new LocationOptions { Name = data.loc.Value.Split('\n')[0], Address = data.loc.Value.Split('\n')[1] }
-            : null;
+        _locationOptions = LocationOptions.Create(data.loc);
     }
 }

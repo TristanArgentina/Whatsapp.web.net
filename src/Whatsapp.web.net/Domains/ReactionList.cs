@@ -21,8 +21,8 @@ public class ReactionList
         }
     }
 
-    public string Id { get; set; }
-    public string AggregateEmoji { get; set; }
-    public bool HasReactionByMe { get; set; }
-    public List<Reaction> Senders { get; set; } = [];
+    public string Id { get; private set; }
+    public string AggregateEmoji { get; private set; }
+    public bool HasReactionByMe { get; private set; }
+    public List<Reaction> Senders { get; private set; } = [];
 }

@@ -8,37 +8,37 @@ public class Product
     /// <summary>
     /// Product ID
     /// </summary>
-    public string Id { get; set; }
+    public string Id { get; private set; }
 
     /// <summary>
     /// Price
     /// </summary>
-    public string Price { get; set; }
+    public string Price { get; private set; }
 
     /// <summary>
     /// Product Thumbnail
     /// </summary>
-    public string ThumbnailUrl { get; set; }
+    public string ThumbnailUrl { get; private set; }
 
     /// <summary>
     /// Currency
     /// </summary>
-    public string Currency { get; set; }
+    public string Currency { get; private set; }
 
     /// <summary>
     /// Product Name
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; private set; }
 
     /// <summary>
     /// Product Quantity
     /// </summary>
-    public int Quantity { get; set; }
+    public int Quantity { get; private set; }
 
     /// <summary>
     /// Product metadata
     /// </summary>
-    public ProductMetadata? Data { get; set; }
+    public ProductMetadata? Data { get; private set; }
 
     public Product(dynamic data)
     {

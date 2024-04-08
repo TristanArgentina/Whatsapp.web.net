@@ -41,7 +41,7 @@ public class RegisterEventService : IRegisterEventService
     //{
     //    return (dynamic state) =>
     //    {
-    //        _eventDispatcher.EmitStateChanged(state);
+    //        _eventDispatcher!.EmitStateChanged(state);
 
     //        var ACCEPTED_STATES = new List<WAState>
     //        {
@@ -70,7 +70,7 @@ public class RegisterEventService : IRegisterEventService
     //             * @param {WAState|"NAVIGATION"} reason reason that caused the disconnect
     //             */
     //            await _options.AuthStrategy.Disconnect();
-    //            _eventDispatcher.EmitDisconnected(state);
+    //            _eventDispatcher!.EmitDisconnected(state);
     //            Destroy();
     //        }
     //    };
@@ -81,7 +81,7 @@ public class RegisterEventService : IRegisterEventService
         return msg =>
         {
 
-            _eventDispatcher.EmitMessageCiphertext(new Message(msg));
+            _eventDispatcher!.EmitMessageCiphertext(Message.Create(msg));
             return true;
         };
     }
@@ -96,7 +96,7 @@ public class RegisterEventService : IRegisterEventService
                 return false;
             }
 
-            _eventDispatcher.EmitMessageEdit(new Message(msg), newBody, prevBody);
+            _eventDispatcher!.EmitMessageEdit(Message.Create(msg), newBody, prevBody);
 
             return true;
         };
@@ -106,7 +106,7 @@ public class RegisterEventService : IRegisterEventService
     {
         return (chatId, currState, prevState) =>
         {
-            _eventDispatcher.EmitChatArchived(chatId, currState, prevState);
+            _eventDispatcher!.EmitChatArchived(chatId, currState, prevState);
             return true;
         };
     }
@@ -115,7 +115,7 @@ public class RegisterEventService : IRegisterEventService
     {
         return (chatId) =>
         {
-            _eventDispatcher.EmitChatRemoved(chatId);
+            _eventDispatcher!.EmitChatRemoved(chatId);
             return true;
         };
     }
@@ -126,7 +126,7 @@ public class RegisterEventService : IRegisterEventService
         {
             foreach (var reaction in reactions)
             {
-                _eventDispatcher.EmitMessageReaction(new Reaction(reaction));
+                _eventDispatcher!.EmitMessageReaction(new Reaction(reaction));
             }
 
             return true;
@@ -138,7 +138,7 @@ public class RegisterEventService : IRegisterEventService
         return call =>
         {
             var cll = new Call(call);
-            _eventDispatcher.EmitIncomingCall(cll);
+            _eventDispatcher!.EmitIncomingCall(cll);
             return true;
         };
     }
@@ -151,7 +151,7 @@ public class RegisterEventService : IRegisterEventService
             bool? plugged = state.plugged;
             if (battery is null) return false;
 
-            _eventDispatcher.EmitBatteryChanged(battery.Value, plugged.Value);
+            _eventDispatcher!.EmitBatteryChanged(battery.Value, plugged.Value);
             return true;
         };
     }
@@ -160,8 +160,7 @@ public class RegisterEventService : IRegisterEventService
     {
         return (msg) =>
         {
-            var message = new Message(msg);
-            _eventDispatcher.EmitMediaUploaded(message);
+            _eventDispatcher!.EmitMediaUploaded(Message.Create(msg));
             return true;
         };
     }
@@ -172,7 +171,7 @@ public class RegisterEventService : IRegisterEventService
         {
             if (data is null || data.id is null) return false;
 
-            _eventDispatcher.EmitUnreadCount(data.id.ToString());
+            _eventDispatcher!.EmitUnreadCount(data.id.ToString());
 
             return true;
         };
@@ -182,11 +181,8 @@ public class RegisterEventService : IRegisterEventService
     {
         return (msg, ack) =>
         {
-
-            var message = new Message(msg);
             var messageAsk = (MessageAck)Enum.Parse<MessageAck>(ack.ToString(), true);
-
-            _eventDispatcher.EmitMessageACK(message, messageAsk);
+            _eventDispatcher!.EmitMessageACK(Message.Create(msg), messageAsk);
             return true;
 
         };
@@ -197,11 +193,7 @@ public class RegisterEventService : IRegisterEventService
         return msg =>
         {
             if (!(bool)msg.isNewMsg) return false;
-
-            // Create a new Message object
-            var message = new Message(msg);
-
-            _eventDispatcher.EmitRevokedMe(message);
+            _eventDispatcher!.EmitRevokedMe(Message.Create(msg));
             return true;
         };
     }
@@ -211,15 +203,15 @@ public class RegisterEventService : IRegisterEventService
         return msg =>
         {
             // Create a new Message object
-            var message = new Message(msg);
-            _eventDispatcher.EmitMessageChanged(message);
+            Message message = Message.Create(msg);
+            _eventDispatcher!.EmitMessageChanged(message);
             if (msg.type != "revoked")
             {
                 _lastMessage = message;
             }
 
             // Determine if the message is related to a participant or a contact changing their phone number
-            bool isParticipant = msg.type == "gp2" && msg.subtype == "modify";
+            bool isParticipant = msg.type == MessageTypes.GP2 && msg.subtype == "modify";
             bool isContact = msg.type == "notification_template" && msg.subtype == "change_number";
 
             if (!isParticipant && !isContact) return false;
@@ -229,7 +221,7 @@ public class RegisterEventService : IRegisterEventService
             string newId = isParticipant ? message.Recipients[0].Id : msg.to;
             var oldId = isParticipant ? message.Author.Id : message.TemplateParams.FirstOrDefault(id => id != newId);
 
-            _eventDispatcher.EmitContactChanged(message, oldId, newId, isContact);
+            _eventDispatcher!.EmitContactChanged(message, oldId, newId, isContact);
             return true;
         };
     }
@@ -240,7 +232,7 @@ public class RegisterEventService : IRegisterEventService
         {
             if ((string)msg.type != "revoked") return false;
             // Create a new Message object
-            var message = new Message(msg);
+            var message = Message.Create(msg);
 
             Message revoked_msg = null;
 
@@ -250,7 +242,7 @@ public class RegisterEventService : IRegisterEventService
                 // Create a new Message object for the last message
                 revoked_msg = _lastMessage;
             }
-            _eventDispatcher.EmitRevokedEveryone(message, revoked_msg);
+            _eventDispatcher!.EmitRevokedEveryone(message, revoked_msg);
             return true;
 
         };
@@ -260,7 +252,7 @@ public class RegisterEventService : IRegisterEventService
     {
         return (dynamic msg) =>
         {
-            if (msg.type == "gp2")
+            if (msg.type == MessageTypes.GP2)
             {
                 var notification = new GroupNotification(msg);
                 var strings = new[] { "add", "invite", "linked_group_join" };
@@ -271,7 +263,7 @@ public class RegisterEventService : IRegisterEventService
                  * @event Client#group_join
                  * @param {GroupNotification} notification GroupNotification with more information about the action
                  */
-                    _eventDispatcher.EmitGroupJoin(notification);
+                    _eventDispatcher!.EmitGroupJoin(notification);
                 }
                 else if (msg.subtype == "remove" || msg.subtype == "leave")
                 {
@@ -280,7 +272,7 @@ public class RegisterEventService : IRegisterEventService
                  * @event Client#group_leave
                  * @param {GroupNotification} notification GroupNotification with more information about the action
                  */
-                    _eventDispatcher.EmitGroupLeave(notification);
+                    _eventDispatcher!.EmitGroupLeave(notification);
                 }
                 else if (msg.subtype == "promote" || msg.subtype == "demote")
                 {
@@ -289,7 +281,7 @@ public class RegisterEventService : IRegisterEventService
                  * @event Client#group_admin_changed
                  * @param {GroupNotification} notification GroupNotification with more information about the action
                  */
-                    _eventDispatcher.EmitGroupAdminChanged(notification);
+                    _eventDispatcher!.EmitGroupAdminChanged(notification);
                 }
                 else if (msg.subtype == "created_membership_requests")
                 {
@@ -302,7 +294,7 @@ public class RegisterEventService : IRegisterEventService
                  * @param {string} notification.author The user ID that made a request
                  * @param {number} notification.timestamp The timestamp the request was made at
                  */
-                    _eventDispatcher.EmitGroupMembershipRequest(notification);
+                    _eventDispatcher!.EmitGroupMembershipRequest(notification);
                 }
                 else
                 {
@@ -311,24 +303,24 @@ public class RegisterEventService : IRegisterEventService
                  * @event Client#group_update
                  * @param {GroupNotification} notification GroupNotification with more information about the action
                  */
-                    _eventDispatcher.EmitGroupUpdate(notification);
+                    _eventDispatcher!.EmitGroupUpdate(notification);
                 }
 
                 return true;
             }
 
-            var message = new Message(msg);
+            var message = Message.Create(msg);
 
 
             // Emitted when a new message is created, which may include the current user's own messages.
             //The message that was created
-            _eventDispatcher.EmitMessageCreate(message);
+            _eventDispatcher!.EmitMessageCreate(message);
 
             if (message.Id.FromMe)
             {
                 // Emitted when a new message is received.
                 // The message that was received
-                _eventDispatcher.EmitMessageReceived(message);
+                _eventDispatcher!.EmitMessageReceived(message);
             }
 
             return true;

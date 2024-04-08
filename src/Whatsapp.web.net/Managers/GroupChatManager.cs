@@ -123,6 +123,6 @@ public class GroupChatManager : IGroupChatManager
         }
 
         dynamic data = _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("createGroup"), title, participants, options).Result;
-        return new GroupChat(data);
+        return Chat.Create(data);
     }
 }

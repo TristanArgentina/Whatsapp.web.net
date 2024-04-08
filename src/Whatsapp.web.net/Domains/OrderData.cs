@@ -2,9 +2,9 @@
 
 public class OrderData
 {
-    public List<ProductData> Products { get; set; }
-    public string Subtotal { get; set; }
-    public string Total { get; set; }
-    public string Currency { get; set; }
-    public long CreatedAt { get; set; }
+    public List<ProductData> Products { get; private set; }
+    public string Subtotal { get; private set; }
+    public string Total { get; private set; }
+    public string Currency { get; private set; }
+    public long CreatedAt { get; private set; }
 }

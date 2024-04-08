@@ -4,12 +4,22 @@ namespace Whatsapp.web.net.Domains;
 
 public class VCard
 {
-    public string Version { get; set; }
-    public string FullName { get; set; }
-    public string[] Names { get; set; }
-    public Email Email { get; set; }
-    public Phone Telephone { get; set; }
-    public DateTime Revision { get; set; }
+    public VCard(string version, string fullName, string[] names, Email email, Phone telephone, DateTime revision)
+    {
+        Version = version;
+        FullName = fullName;
+        Names = names;
+        Email = email;
+        Telephone = telephone;
+        Revision = revision;
+    }
+
+    public string Version { get; private set; }
+    public string FullName { get; private set; }
+    public string[] Names { get; private set; }
+    public Email Email { get; private set; }
+    public Phone Telephone { get; private set; }
+    public DateTime Revision { get; private set; }
 
     [JsonConstructor]
     public VCard(dynamic data)

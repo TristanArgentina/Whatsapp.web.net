@@ -2,11 +2,11 @@
 
 public class ValueTypes
 {
-    public string Value { get; set; }
+    public string Value { get; private set; }
 
-    public string[] Types { get; set; }
+    public string[] Types { get; private set; }
 
-    public string CharSet { get; set; } = "CHARSET=UTF-8";
+    public string CharSet { get; private set; } = "CHARSET=UTF-8";
 
 
     public ValueTypes(string key, string value)

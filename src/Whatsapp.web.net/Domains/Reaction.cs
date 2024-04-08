@@ -7,41 +7,41 @@ namespace Whatsapp.web.net.Domains;
 /// </summary>
 public class Reaction
 {
-    public MessageId Id { get; set; }
+    public MessageId Id { get; private set; }
 
-    public MessageAck? Ack { get; set; }
+    public MessageAck? Ack { get; private set; }
 
     /// <summary>
     /// MsgKey
     /// </summary>
-    public MsgKey Key { get; set; }
+    public MsgKey Key { get; private set; }
 
-    public MsgKey ParentKey { get; set; }
+    public MsgKey ParentKey { get; private set; }
 
     /// <summary>
     /// Orphan
     /// </summary>
-    public int Orphan { get; set; }
+    public int Orphan { get; private set; }
 
     /// <summary>
     /// Unix timestamp for when the reaction was created
     /// </summary>
-    public DateTime Timestamp { get; set; }
+    public DateTime Timestamp { get; private set; }
 
     /// <summary>
     /// Reaction
     /// </summary>
-    public string Text { get; set; }
+    public string Text { get; private set; }
 
     /// <summary>
     /// Read
     /// </summary>
-    public bool Read { get; set; }
+    public bool Read { get; private set; }
 
     /// <summary>
     /// Sender ID
     /// </summary>
-    public UserId SenderId { get; set; }
+    public UserId SenderId { get; private set; }
 
     public Reaction(dynamic data)
     {

@@ -4,14 +4,24 @@ namespace Whatsapp.web.net.Domains;
 
 public class UserId
 {
+    public string Id { get; private set; }
+
+    public string Server { get; private set; }
+
+    public string User { get; private set; }
+
+    public string _serialized { get; set; }
+
+    protected UserId()
+    {
+    }
+
     protected UserId(dynamic? data)
     {
         Patch(data);
     }
 
-    protected UserId()
-    {
-    }
+  
 
     protected UserId(string user, string server)
     {
@@ -30,13 +40,7 @@ public class UserId
         Id = $"{User}@{Server}";
     }
 
-    public string Id { get; private set; }
-
-    public string Server { get; private set; }
-
-    public string User { get; private set; }
-
-    public string _serialized { get; set; }
+   
 
     public override string ToString()
     {

@@ -11,7 +11,7 @@ public class MessageMedia
     /// MIME type of the attachment
     /// image, video, webp, audio 
     /// </summary>
-    public string Mimetype { get; set; }
+    public string Mimetype { get; private set; }
 
     /// <summary>
     /// Base64 encoded data that represents the file

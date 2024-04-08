@@ -8,47 +8,47 @@ public class Call
     /// <summary>
     /// Call ID
     /// </summary>
-    public string Id { get; set; }
+    public string Id { get; private set; }
 
     /// <summary>
     /// From
     /// </summary>
-    public string From { get; set; }
+    public string From { get; private set; }
 
     /// <summary>
     /// Unix timestamp for when the call was created
     /// </summary>
-    public DateTime Timestamp { get; set; }
+    public DateTime Timestamp { get; private set; }
 
     /// <summary>
     /// Is video
     /// </summary>
-    public bool IsVideo { get; set; }
+    public bool IsVideo { get; private set; }
 
     /// <summary>
     /// Is Group
     /// </summary>
-    public bool IsGroup { get; set; }
+    public bool IsGroup { get; private set; }
 
     /// <summary>
     /// Indicates if the call was sent by the current user
     /// </summary>
-    public bool FromMe { get; set; }
+    public bool FromMe { get; private set; }
 
     /// <summary>
     /// Indicates if the call can be handled in waweb
     /// </summary>
-    public bool CanHandleLocally { get; set; }
+    public bool CanHandleLocally { get; private set; }
 
     /// <summary>
     /// Indicates if the call Should be handled in waweb
     /// </summary>
-    public bool WebClientShouldHandle { get; set; }
+    public bool WebClientShouldHandle { get; private set; }
 
     /// <summary>
     /// Object with participants
     /// </summary>
-    public object Participants { get; set; }
+    public object Participants { get; private set; }
 
     public Call(dynamic data)
     {

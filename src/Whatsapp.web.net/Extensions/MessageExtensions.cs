@@ -4,9 +4,9 @@ namespace Whatsapp.web.net.Extensions;
 
 public static class MessageExtensions
 {
-    public static UserId GetChatId(this Message msg)
+    public static UserId GetChatId(this Message msg, Client client)
     {
-        return msg.Id.FromMe ? msg.To : msg.From;
+        return client.Message.GetContactId(msg);
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public static class MessageExtensions
     /// <returns></returns>
     public static async Task<Chat> GetChat(this Message msg, Client client)
     {
-        var chatId = msg.GetChatId();
+        var chatId = msg.GetChatId(client);
         return client.Chat.Get(chatId._serialized).Result;
     }
 
@@ -62,14 +62,13 @@ public static class MessageExtensions
 
     public static async Task<Message?> GetQuotedMessage(this Message msg, Client client)
     {
-        var quotedMsg = await client.Message.GetQuoted(msg.Id, msg.HasQuotedMsg);
-        return quotedMsg == null ? null : new Message(quotedMsg);
+        return await client.Message.GetQuoted(msg.Id, msg.HasQuotedMsg);
     }
 
     public static async Task<Message> Reply(this Message msg, Client client, object content,
         MessageOptions? options = null)
     {
-        var chatId = msg.GetChatId();
+        var chatId = msg.GetChatId(client);
         return await client.Message.Reply(msg, content, chatId, options);
     }
 
@@ -157,7 +156,7 @@ public static class MessageExtensions
 
     public static async Task<Order?> GetOrder(this Message msg, Client client)
     {
-        return await client.Commerce.GetOrderAsync(msg.Type, msg.OrderId, msg.Token, msg.GetChatId().Id);
+        return await client.Commerce.GetOrderAsync(msg.Type, msg.OrderId, msg.Token, msg.GetChatId(client).Id);
     }
 
     public static async Task<Payment> GetPayment(this Message msg, Client client)

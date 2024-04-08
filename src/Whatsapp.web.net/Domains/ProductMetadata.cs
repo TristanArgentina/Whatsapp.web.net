@@ -11,10 +11,10 @@ public class ProductMetadata
 
     }
 
-    public string Id { get; set; }
-    public string RetailerId { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public string Id { get; private set; }
+    public string RetailerId { get; private set; }
+    public string Name { get; private set; }
+    public string Description { get; private set; }
 
     public void Patch(dynamic data)
     {

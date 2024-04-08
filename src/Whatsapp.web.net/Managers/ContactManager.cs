@@ -27,10 +27,8 @@ public class ContactManager : IContactManager
     public async Task<bool> Block(Contact contact)
     {
         if (contact.IsGroup) return false;
-
         Block(contact.Id._serialized);
-
-        contact.IsBlocked = true;
+        // contact.IsBlocked = true;
         return true;
     }
 
@@ -52,10 +50,8 @@ public class ContactManager : IContactManager
     public async Task<bool> Unblock(Contact contact)
     {
         if (contact.IsGroup) return false;
-
         await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("unblockContactById"), contact.Id._serialized);
-
-        contact.IsBlocked = false;
+        //contact.IsBlocked = false;
         return true;
     }
 

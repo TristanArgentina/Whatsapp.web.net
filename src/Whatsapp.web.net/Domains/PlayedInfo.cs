@@ -4,6 +4,10 @@ namespace Whatsapp.web.net.Domains;
 
 public class PlayedInfo
 {
+    public string Id { get; private set; }
+
+    public DateTime? T { get; private set; }
+
     public PlayedInfo(dynamic? data)
     {
         Patch(data);
@@ -17,7 +21,4 @@ public class PlayedInfo
         T = Util.ConvertToDate(data.t);
     }
 
-    public string Id { get; set; }
-    
-    public DateTime? T { get; set; }
 }

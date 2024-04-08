@@ -2,6 +2,19 @@
 
 public class InviteV4
 {
+
+    public string InviteCode { get; private set; }
+
+    public long InviteCodeExp { get; private set; }
+
+    public string GroupId { get; private set; }
+
+    public string GroupName { get; private set; }
+
+    public UserId FromId { get; private set; }
+
+    public UserId ToId { get; private set; }
+
     public InviteV4(dynamic? data)
     {
         Patch(data);
@@ -18,15 +31,4 @@ public class InviteV4
         ToId = UserId.Create(data.to);
     }
 
-    public string InviteCode { get; set; }
-
-    public long InviteCodeExp { get; set; }
-    
-    public string GroupId { get; set; }
-    
-    public string GroupName { get; set; }
-    
-    public UserId FromId { get; set; }
-    
-    public UserId ToId { get; set; }
 }
