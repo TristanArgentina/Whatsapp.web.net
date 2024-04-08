@@ -7,12 +7,11 @@ namespace Whatsapp.web.net.example;
 
 public class HandleEvents
 {
-    private readonly Client _client;
+    public Client Client { get; set; }
     private readonly IEventDispatcher? _eventDispatcher;
 
-    public HandleEvents(Client client, IEventDispatcher? eventDispatcher)
+    public HandleEvents( IEventDispatcher? eventDispatcher)
     {
-        _client = client;
         _eventDispatcher = eventDispatcher;
     }
 
@@ -69,8 +68,8 @@ public class HandleEvents
         {
             ConsoleWriteLineEvent("GroupMembershipRequest", args.Notification);
             // You can approve or reject the newly appeared membership request: 
-            await _client.Chat.ApproveMembership(args.Notification.ChatId.Id, args.Notification.Author.Id);
-            await _client.Chat.RejectMembership(args.Notification.ChatId.Id, args.Notification.Author.Id);
+            await Client.Chat.ApproveMembership(args.Notification.ChatId.Id, args.Notification.Author.Id);
+            await Client.Chat.RejectMembership(args.Notification.ChatId.Id, args.Notification.Author.Id);
         };
     }
 
@@ -112,7 +111,7 @@ public class HandleEvents
             Console.WriteLine(
                 $"The contact {oldId.Substring(0, oldId.Length - 5)}" +
                 $"{(!isContact ? " that participates in group " +
-                                 $"{_client.Chat.Get(fromId).Result.Name} " : " ")}" +
+                                 $"{Client.Chat.Get(fromId).Result.Name} " : " ")}" +
                 $"changed their phone number\nat {eventTime}.\n" +
                 $"Their new phone number is {newId.Substring(0, newId.Length - 5)}.\n");
 
@@ -157,8 +156,8 @@ public class HandleEvents
         return async (_, args) =>
         {
             Console.WriteLine("Call received, rejecting. GOTO Line 261 to disable " + args.Call);
-            if (rejectCalls) args.Call.Reject(_client);
-            await _client.Message.Send(args.Call.From,
+            if (rejectCalls) args.Call.Reject(Client);
+            await Client.Message.Send(args.Call.From,
                 $"[{(args.Call.FromMe ? "Outgoing" : "Incoming")}] Phone call from {args.Call.From}, type {(args.Call.IsGroup ? "group" : "")} {(args.Call.IsVideo ? "video" : "audio")} call. {(rejectCalls ? "This call was automatically rejected by the script." : "")}");
         };
     }
@@ -183,7 +182,7 @@ public class HandleEvents
         {
             // User has left or been kicked from the group.
             Console.WriteLine("leave " + args.Notification);
-            args.Notification.Reply(_client, "User left.");
+            args.Notification.Reply(Client, "User left.");
         };
     }
 
@@ -193,7 +192,7 @@ public class HandleEvents
         {
             // User has joined or been added to the group.
             Console.WriteLine("join " + args.Notification);
-            args.Notification.Reply(_client, "User joined.");
+            args.Notification.Reply(Client, "User joined.");
         };
     }
 
@@ -253,11 +252,11 @@ public class HandleEvents
             // Unpins a message
             if (msg.Id.FromMe && msg.Body.StartsWith("!unpin"))
             {
-                var pinnedMsg = await msg.GetQuotedMessage(_client);
+                var pinnedMsg = await msg.GetQuotedMessage(Client);
                 if (pinnedMsg != null)
                 {
                     // Will unpin a message
-                    var result = await pinnedMsg.Unpin(_client);
+                    var result = await pinnedMsg.Unpin(Client);
                     Console.WriteLine(result); // True if the operation completed successfully, false otherwise
                 }
             }
@@ -278,12 +277,12 @@ public class HandleEvents
 
             if (msg.Body == "!ping reply")
             {
-                var chatId = msg.GetChatId(_client);
-                await msg.Reply(_client, chatId, "pong");
+                var chatId = msg.GetChatId(Client);
+                await msg.Reply(Client, chatId, "pong");
             }
             else if (msg.Body == "!ping")
             {
-                await _client.Message.Send(msg.From, "pong");
+                await Client.Message.Send(msg.From, "pong");
             }
             else if (msg.Body.StartsWith("!sendto "))
             {
@@ -292,55 +291,55 @@ public class HandleEvents
                 var messageIndex = msg.Body.IndexOf(number) + number.Length;
                 var message = msg.Body.Substring(messageIndex);
                 number = number.Contains("@c.us") ? number : $"{number}@c.us";
-                var chat = await msg.GetChat(_client);
-                chat.SendSeen(_client);
-                await _client.Message.Send(number, message);
+                var chat = await msg.GetChat(Client);
+                chat.SendSeen(Client);
+                await Client.Message.Send(number, message);
             }
             else if (msg.Body.StartsWith("!subject "))
             {
-                var chat = await msg.GetChat(_client);
+                var chat = await msg.GetChat(Client);
                 if (chat is GroupChat groupChat)
                 {
                     var newSubject = msg.Body.Substring(9);
-                    groupChat.SetSubject(_client, newSubject);
+                    groupChat.SetSubject(Client, newSubject);
                 }
                 else
                 {
-                    await msg.Reply(_client, "This command can only be used in a group!");
+                    await msg.Reply(Client, "This command can only be used in a group!");
                 }
             }
             else if (msg.Body.StartsWith("!echo "))
             {
-                await msg.Reply(_client, msg.Body.Substring(6));
+                await msg.Reply(Client, msg.Body.Substring(6));
             }
             else if (msg.Body.StartsWith("!preview "))
             {
                 var text = msg.Body.Substring(9);
-                await msg.Reply(_client, null, text, new MessageOptions { LinkPreview = true });
+                await msg.Reply(Client, null, text, new MessageOptions { LinkPreview = true });
             }
             else if (msg.Body.StartsWith("!desc "))
             {
-                var chat = await msg.GetChat(_client);
+                var chat = await msg.GetChat(Client);
                 if (chat is GroupChat groupChat)
                 {
                     var newDescription = msg.Body.Substring(6);
-                    groupChat.SetDescription(_client, newDescription);
+                    groupChat.SetDescription(Client, newDescription);
                 }
                 else
                 {
-                    await msg.Reply(_client, "This command can only be used in a group!");
+                    await msg.Reply(Client, "This command can only be used in a group!");
                 }
             }
             else if (msg.Body == "!leave")
             {
-                var chat = await msg.GetChat(_client);
+                var chat = await msg.GetChat(Client);
                 if (chat is GroupChat groupChat)
                 {
-                    groupChat.Leave(_client);
+                    groupChat.Leave(Client);
                 }
                 else
                 {
-                    await msg.Reply(_client, "This command can only be used in a group!");
+                    await msg.Reply(Client, "This command can only be used in a group!");
                 }
             }
             else if (msg.Body.StartsWith("!join "))
@@ -348,33 +347,33 @@ public class HandleEvents
                 var inviteCode = msg.Body.Split(' ')[1];
                 try
                 {
-                    await _client.Group.AcceptInvite(new InviteV4(inviteCode));
-                    await msg.Reply(_client, "Joined the group!");
+                    await Client.Group.AcceptInvite(new InviteV4(inviteCode));
+                    await msg.Reply(Client, "Joined the group!");
                 }
                 catch (Exception e)
                 {
-                    await msg.Reply(_client, "That invite code seems to be invalid.");
+                    await msg.Reply(Client, "That invite code seems to be invalid.");
                 }
             }
             else if (msg.Body.StartsWith("!addmembers"))
             {
-                var group = (GroupChat)await msg.GetChat(_client);
+                var group = (GroupChat)await msg.GetChat(Client);
                 var result =
-                    await group.AddParticipants(_client, new[] { "number1@c.us", "number2@c.us", "number3@c.us" });
+                    await group.AddParticipants(Client, new[] { "number1@c.us", "number2@c.us", "number3@c.us" });
                 Console.WriteLine(result);
             }
             else if (msg.Body == "!creategroup")
             {
                 string[] participantsToAdd = ["number1@c.us", "number2@c.us", "number3@c.us"];
-                var result = await _client.Group.CreateGroup("Group Title", participantsToAdd);
+                var result = await Client.Group.CreateGroup("Group Title", participantsToAdd);
                 Console.WriteLine(result);
             }
             else if (msg.Body == "!groupinfo")
             {
-                var chat = await msg.GetChat(_client);
+                var chat = await msg.GetChat(Client);
                 if (chat is GroupChat groupChat)
                 {
-                    await msg.Reply(_client, $@"
+                    await msg.Reply(Client, $@"
                             *Group Details*
                             Name: {chat.Name}
                             Description: {groupChat.Description}
@@ -385,18 +384,18 @@ public class HandleEvents
                 }
                 else
                 {
-                    await msg.Reply(_client, "This command can only be used in a group!");
+                    await msg.Reply(Client, "This command can only be used in a group!");
                 }
             }
             else if (msg.Body == "!chats")
             {
-                var chats = await _client.Chat.Get();
-                await _client.Message.Send(msg.From, $"The bot has {chats.Length} chats open.");
+                var chats = await Client.Chat.Get();
+                await Client.Message.Send(msg.From, $"The bot has {chats.Length} chats open.");
             }
             else if (msg.Body == "!info")
             {
-                var info = _client.ClientInfo;
-                await _client.Message.Send(msg.From, $@"
+                var info = Client.ClientInfo;
+                await Client.Message.Send(msg.From, $@"
                         *Connection info*
                         User name: {info.PushName}
                         My number: {info.Id.User}
@@ -405,8 +404,8 @@ public class HandleEvents
             }
             else if (msg.Body == "!mediainfo" && msg.HasMedia)
             {
-                var attachmentData = await msg.DownloadMedia(_client);
-                await msg.Reply(_client, $@"
+                var attachmentData = await msg.DownloadMedia(Client);
+                await msg.Reply(Client, $@"
                         *Media info*
                         MimeType: {attachmentData.Mimetype}
                         Filename: {attachmentData.Filename}
@@ -415,8 +414,8 @@ public class HandleEvents
             }
             else if (msg.Body == "!quoteinfo" && msg.HasQuotedMsg)
             {
-                var quotedMsg = await msg.GetQuotedMessage(_client);
-                await quotedMsg.Reply(_client, $@"
+                var quotedMsg = await msg.GetQuotedMessage(Client);
+                await quotedMsg.Reply(Client, $@"
                         ID: {quotedMsg.Id.Id}
                         Type: {quotedMsg.Type}
                         Author: {quotedMsg.Author ?? quotedMsg.From}
@@ -426,36 +425,36 @@ public class HandleEvents
             }
             else if (msg.Body == "!resendmedia" && msg.HasQuotedMsg)
             {
-                var quotedMsg = await msg.GetQuotedMessage(_client);
+                var quotedMsg = await msg.GetQuotedMessage(Client);
                 if (quotedMsg.HasMedia)
                 {
-                    var attachmentData = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, attachmentData,
+                    var attachmentData = await quotedMsg.DownloadMedia(Client);
+                    await Client.Message.Send(msg.From, attachmentData,
                         new MessageOptions { Caption = "Here's your requested media." });
                 }
 
                 if (quotedMsg.HasMedia && quotedMsg.Type == "audio")
                 {
-                    var audio = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, audio, new MessageOptions { SendAudioAsVoice = true });
+                    var audio = await quotedMsg.DownloadMedia(Client);
+                    await Client.Message.Send(msg.From, audio, new MessageOptions { SendAudioAsVoice = true });
                 }
             }
             else if (msg.Body == "!isviewonce" && msg.HasQuotedMsg)
             {
-                var quotedMsg = await msg.GetQuotedMessage(_client);
+                var quotedMsg = await msg.GetQuotedMessage(Client);
                 if (quotedMsg.HasMedia)
                 {
-                    var media = await quotedMsg.DownloadMedia(_client);
-                    await _client.Message.Send(msg.From, media, new MessageOptions { IsViewOnce = true });
+                    var media = await quotedMsg.DownloadMedia(Client);
+                    await Client.Message.Send(msg.From, media, new MessageOptions { IsViewOnce = true });
                 }
             }
             else if (msg.Body == "!location")
             {
-                await msg.Reply(_client, new Location(37.422, -122.084));
-                await msg.Reply(_client, new Location(37.422, -122.084, new LocationOptions("Googleplex")));
-                await msg.Reply(_client, new Location(37.422, -122.084, 
+                await msg.Reply(Client, new Location(37.422, -122.084));
+                await msg.Reply(Client, new Location(37.422, -122.084, new LocationOptions("Googleplex")));
+                await msg.Reply(Client, new Location(37.422, -122.084, 
                     new LocationOptions(null, "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA")));
-                await msg.Reply(_client, new Location(37.422, -122.084, 
+                await msg.Reply(Client, new Location(37.422, -122.084, 
                     new LocationOptions("Googleplex","1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA")));
             }
             else if (msg.Location != null)
@@ -511,10 +510,10 @@ public class HandleEvents
 
             try
             {
-                var qr = new GenerateQR();
-                var ms = qr.Generate(args.Qr.ToString());
-                var sw = Image.FromStream(ms.Result);
-                sw.Save("testQR.png");
+                if (args.Qr is null) return;
+                var code = args.Qr.ToString();
+                var img = QRHelper.Generate(code!);
+                QRHelper.ConsoleWrite(img);
             }
             catch (Exception e)
             {
@@ -523,7 +522,4 @@ public class HandleEvents
         };
 
     }
-
-
-
 }

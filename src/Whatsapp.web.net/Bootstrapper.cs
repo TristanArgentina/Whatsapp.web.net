@@ -65,7 +65,6 @@ public class Bootstrapper
 
     public Client Start()
     {
-        EventDispatcher = ServiceProvider.GetService<IEventDispatcher>();
         Client = ServiceProvider.GetService<Client>();
         Client!.Initialize().Wait();
         EventDispatcher!.EmitReady();
@@ -93,6 +92,7 @@ public class Bootstrapper
         Services.AddSingleton<Client>();
 
         ServiceProvider = Services.BuildServiceProvider();
+        EventDispatcher = ServiceProvider.GetService<IEventDispatcher>();
     }
 
 

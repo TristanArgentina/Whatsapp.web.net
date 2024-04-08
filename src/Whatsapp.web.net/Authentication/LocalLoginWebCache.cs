@@ -20,19 +20,16 @@ public class LocalLoginWebCache : LoginWebCache
             Directory.CreateDirectory(_path);
         }
         var filePath = Path.Combine(_path, $"{version}.html");
-
-        try
+        if (File.Exists(filePath))
         {
             return await File.ReadAllTextAsync(filePath, Encoding.UTF8);
         }
-        catch (Exception err)
+
+        if (_strict)
         {
-            if (_strict)
-            {
-                throw new Exception($"Couldn't load version {version} from the cache", err);
-            }
-            return null;
+            throw new Exception($"Couldn't load version {version} from the cache");
         }
+        return null;
     }
 
     public override async Task Persist(string indexHtml, string version)
