@@ -74,8 +74,8 @@ public abstract class Chat
         UnreadCount = data.unreadCount;
         Timestamp = Util.ConvertToDate(data.t);
         Archived = data.archive is null ? false : bool.Parse(data.archive.ToString());
-        Pinned = data.pin != null;
-        IsMuted = data.muteExpiration == 0;
+        Pinned = data.pin != 0;
+        IsMuted = data.muteExpiration != 0;
         MuteExpiration = data.muteExpiration;
         LastMessage = Message.Create(data.lastMessage);
     }

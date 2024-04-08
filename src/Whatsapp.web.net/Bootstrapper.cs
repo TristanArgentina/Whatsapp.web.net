@@ -32,7 +32,10 @@ public class Bootstrapper
     /// </summary>
     public ConfigurationManager ConfigurationManager { get; }
 
-
+    /// <summary>
+    /// 
+    /// </summary>
+    public ServiceProvider ServiceProvider { get; set; }
     /// <summary>
     /// 
     /// </summary>
@@ -62,11 +65,8 @@ public class Bootstrapper
 
     public Client Start()
     {
-        using var serviceProvider = Services.BuildServiceProvider();
-
-        EventDispatcher = serviceProvider.GetService<IEventDispatcher>();
-        Client = serviceProvider.GetService<Client>();
-
+        EventDispatcher = ServiceProvider.GetService<IEventDispatcher>();
+        Client = ServiceProvider.GetService<Client>();
         Client!.Initialize().Wait();
         EventDispatcher!.EmitReady();
         return Client;
@@ -91,5 +91,9 @@ public class Bootstrapper
         Services.AddSingleton<IRegisterEventService, RegisterEventService>();
         Services.AddSingleton<IAuthenticatorProvider, AuthenticatorProvider>();
         Services.AddSingleton<Client>();
+
+        ServiceProvider = Services.BuildServiceProvider();
     }
+
+
 }

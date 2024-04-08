@@ -286,7 +286,7 @@ public class MessageManagerTests : TestBase
         {
             content = args.Message.Body;
         };
-        msg.Forward(Client, "120363248319028492@g.us").Wait();
+        msg.Forward(Client, GroupId1.Id).Wait();
 
         Assert.That(expectedContent.Equals(content));
     }
@@ -310,10 +310,12 @@ public class MessageManagerTests : TestBase
         Assert.That(msg is not null);
         Assert.That(!msg.IsStarred);
         msg.Star(Client).Wait();
+        Thread.Sleep(2000);
         msg = Client.Message.Get(msg.Id).Result;
         Assert.That(msg is not null);
         Assert.That(msg.IsStarred);
         msg.Unstar(Client).Wait();
+        Thread.Sleep(2000);
         msg = Client.Message.Get(msg.Id).Result;
         Assert.That(msg is not null);
         Assert.That(!msg.IsStarred);

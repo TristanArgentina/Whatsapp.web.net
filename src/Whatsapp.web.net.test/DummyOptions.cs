@@ -5,6 +5,8 @@ public class DummyOptions
     public UserDummy User1 { get; set; }
 
     public UserDummy User2 { get; set; }
+
+    public UserDummy Group1 { get; set;}
 }
 
 

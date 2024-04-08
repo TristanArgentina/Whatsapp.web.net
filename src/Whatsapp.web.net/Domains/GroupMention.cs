@@ -11,7 +11,7 @@ public class GroupMention
 
     public string Id { get; private set; }
 
-    public GroupJid GroupJid { get; private set; }
+    public GroupId GroupJid { get; private set; }
 
     private void Patch(dynamic data)
     {
@@ -19,6 +19,6 @@ public class GroupMention
 
         Subject = data.subject;
         Id = data.id;
-        GroupJid = new GroupJid(data.groupJid);
+        GroupJid = GroupId.Create(data.groupJid);
     }
 }

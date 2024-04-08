@@ -489,15 +489,9 @@ async function reactToMessage(msgId, reaction) {
 }
 
 async function forwardToMessage(msgId, chatId) {
-    let msg = window.Store.Msg.get(msgId);
-    let chat = window.Store.Chat.get(chatId);
-    return new Promise((resolve, reject) => {
-        chat.forwardMessages([msg]).then(() => {
-            resolve();
-        }).catch(error => {
-            reject(error);
-        });
-    });
+    const msg = window.Store.Msg.get(msgId);
+    const chat = window.Store.Chat.get(chatId);
+    chat.forwardMessages([msg]);
 }
 
 function getMessageMedia(msgId) {
@@ -625,23 +619,15 @@ async function deleteMessageAsyncWithPermissions(msgId, everyone) {
 async function starMessageIfAllowed(msgId) {
     let msg = window.Store.Msg.get(msgId);
     if (window.Store.MsgActionChecks.canStarMsg(msg)) {
-        window.Store.Chat.find(msg.id.remote).then(chat => {
-            window.Store.Cmd.sendStarMsgs(chat, [msg], false).then(() => {
-                resolve();
-            }).catch(error => {
-                reject(error);
-            });
-        }).catch(error => {
-            reject(error);
-        });
+        const chat = window.Store.Chat.get(msg.id.remote);
+        window.Store.Cmd.sendStarMsgs(chat, [msg], false);
     }
 }
 
 async function unstarMessage(msgId) {
     let msg = window.Store.Msg.get(msgId);
-
     if (window.Store.MsgActionChecks.canStarMsg(msg)) {
-        let chat = await window.Store.Chat.find(msg.id.remote);
+        const chat = window.Store.Chat.get(msg.id.remote);
         return window.Store.Cmd.sendUnstarMsgs(chat, [msg], false);
     }
 }
@@ -774,153 +760,58 @@ async function sendSeen(chatId) {
 }
 
 async function archiveChat(chatId) {
-    return new Promise((resolve, reject) => {
-        window.Store.Chat.get(chatId)
-            .then(chat => {
-                window.Store.Cmd.archiveChat(chat, true)
-                    .then(() => {
-                        resolve(true);
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            })
-            .catch(error => {
-                reject(error);
-            });
-    });
+    const chat = window.Store.Chat.get(chatId);
+    window.Store.Cmd.archiveChat(chat, true);
 }
 
 function unarchiveChat(chatId) {
-    return new Promise((resolve, reject) => {
-        window.Store.Chat.get(chatId)
-            .then(chat => {
-                window.Store.Cmd.archiveChat(chat, false)
-                    .then(() => {
-                        resolve(false);
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            })
-            .catch(error => {
-                reject(error);
-            });
-    });
+    const chat = window.Store.Chat.get(chatId);
+    window.Store.Cmd.archiveChat(chat, false);
 }
 
 
 function pinChat(chatId) {
-    return new Promise((resolve, reject) => {
-        let chat = window.Store.Chat.get(chatId);
-        if (chat.pin) {
-            resolve(true);
-        } else {
-            const MAX_PIN_COUNT = 3;
-            const chatModels = window.Store.Chat.getModelsArray();
-            if (chatModels.length > MAX_PIN_COUNT) {
-                let maxPinned = chatModels[MAX_PIN_COUNT - 1].pin;
-                if (maxPinned) {
-                    resolve(false);
-                } else {
-                    window.Store.Cmd.pinChat(chat, true)
-                        .then(() => {
-                            resolve(true);
-                        })
-                        .catch(error => {
-                            reject(error);
-                        });
-                }
-            } else {
-                window.Store.Cmd.pinChat(chat, true)
-                    .then(() => {
-                        resolve(true);
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
+    const chat = window.Store.Chat.get(chatId);
+    if (!chat.pin) {
+        const MAX_PIN_COUNT = 3;
+        const chatModels = window.Store.Chat.getModelsArray();
+        if (chatModels.length > MAX_PIN_COUNT) {
+            let maxPinned = chatModels[MAX_PIN_COUNT - 1].pin;
+            if (!maxPinned) {
+                window.Store.Cmd.pinChat(chat, true);
             }
+        } else {
+            window.Store.Cmd.pinChat(chat, true);
         }
-    });
+    }
 }
 
 
 function unpinChat(chatId) {
-    return new Promise((resolve, reject) => {
-        let chat = window.Store.Chat.get(chatId);
-        if (!chat.pin) {
-            resolve(false);
-        } else {
-            window.Store.Cmd.pinChat(chat, false)
-                .then(() => {
-                    resolve(false);
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        }
-    });
+    const chat = window.Store.Chat.get(chatId);
+    if (chat.pin) {
+        window.Store.Cmd.pinChat(chat, false);
+    }
 }
 
 function muteChat(chatId, timestamp) {
-    return new Promise((resolve, reject) => {
-        window.Store.Chat.get(chatId)
-            .then(chat => {
-                chat.mute.mute({ expiration: timestamp, sendDevice: true })
-                    .then(() => {
-                        resolve();
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            })
-            .catch(error => {
-                reject(error);
-            });
-    });
+    const chat = window.Store.Chat.get(chatId);
+    chat.mute.mute({ expiration: timestamp, sendDevice: true });
 }
 
 function unmuteChat(chatId) {
-    return new Promise((resolve, reject) => {
-        window.Store.Chat.get(chatId)
-            .then(chat => {
-                window.Store.Cmd.muteChat(chat, false)
-                    .then(() => {
-                        resolve();
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            })
-            .catch(error => {
-                reject(error);
-            });
-    });
+    const chat = window.Store.Chat.get(chatId);
+    window.Store.Cmd.muteChat(chat, false);
 }
 
 function markChatUnread(chatId) {
-    return new Promise((resolve, reject) => {
-        window.Store.Chat.get(chatId)
-            .then(chat => {
-                window.Store.Cmd.markChatUnread(chat, true)
-                    .then(() => {
-                        resolve();
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            })
-            .catch(error => {
-                reject(error);
-            });
-    });
+    const chat = window.Store.Chat.get(chatId);
+    window.Store.Cmd.markChatUnread(chat, true);
 }
 
 async function getChatLabels(chatId) {
     return window.WWebJS.getChatLabels(chatId);
 }
-
-
 
 function registerEventListeners() {
     //    console.log('add event of Msg');

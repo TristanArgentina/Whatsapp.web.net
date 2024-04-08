@@ -11,6 +11,8 @@ public class TestBase
     protected Client? Client;
     protected ContactId? ContactId1;
     protected ContactId? ContactId2;
+    protected GroupId? GroupId1;
+
 
     [OneTimeSetUp]
     public async Task Setup()
@@ -20,8 +22,8 @@ public class TestBase
         bootstrapper.Services.AddOptions<DummyOptions>()
             .BindConfiguration("Dummy")
             .ValidateOnStart();
-
-        Client = bootstrapper.Start();
+        bootstrapper.Start();
+        Client = bootstrapper.Client;
         EventDispatcher = bootstrapper.EventDispatcher;
 
         var serviceProvider = bootstrapper.Services.BuildServiceProvider();
@@ -29,11 +31,9 @@ public class TestBase
         
         ContactId1 = new ContactId(dummyOptions.User1.User, dummyOptions.User1.Server);
         ContactId2 = new ContactId(dummyOptions.User2.User, dummyOptions.User2.Server);
-        
-        var puppeteerOptions = serviceProvider.GetRequiredService<PuppeteerOptions>();
-        
-        TaskUtils.KillProcessesByName("chrome", puppeteerOptions.ExecutablePath!);
+        GroupId1 = new GroupId(dummyOptions.Group1.User, dummyOptions.Group1.Server);
 
-        await Client!.Initialize();
+        //var puppeteerOptions = serviceProvider.GetRequiredService<PuppeteerOptions>();
+        //TaskUtils.KillProcessesByName("chrome", puppeteerOptions.ExecutablePath!);
     }
 }

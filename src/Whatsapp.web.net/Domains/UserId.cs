@@ -84,5 +84,8 @@ public class UserId
         return new UserId(data);
 
     }
-
+    protected void SetId(string id)
+    {
+        Id = id;
+    }
 }

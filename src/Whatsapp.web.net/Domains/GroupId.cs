@@ -2,11 +2,9 @@
 
 public class GroupId : UserId
 {
-    public string Id { get; set; }
-
     public string FromId { get; set; }
 
-    public GroupId(string user, string server): base(user, server)
+    public GroupId(string user, string server) : base(user, server)
     {
         SetId();
     }
@@ -15,9 +13,9 @@ public class GroupId : UserId
     {
         if (!User.Contains('-')) return;
         var userSplit = User.Split('-');
-
+        if (userSplit.Length !=  2) return;
         FromId = userSplit[0];
-        Id = userSplit[1];
+        SetId(userSplit[1]);
     }
 
     private GroupId()
