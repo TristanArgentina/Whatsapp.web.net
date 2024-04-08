@@ -36,7 +36,7 @@ public static class ContactExtensions
 
     public static async Task<string?> GetAbout(this Contact contact, Client client)
     {
-        return client.Contact.GetAbout(contact).Result;
+        return client.Contact.GetAbout(contact.Id._serialized).Result;
     }
 
     public static async Task<List<string>> GetCommonGroups(this Contact contact, Client client)

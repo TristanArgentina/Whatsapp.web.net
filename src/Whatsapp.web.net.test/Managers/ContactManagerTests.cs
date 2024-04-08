@@ -49,4 +49,40 @@ public class ContactManagerTests : TestBase
         Assert.That(contacts is not null);
         Assert.That(contacts.Any());
     }
+
+    [Test]
+    public void GetCountryCodeTest()
+    {
+        var country = Client!.Contact.GetCountryCode(ContactId1.User).Result;
+        Assert.That(country is not null);
+        Assert.That(country == ContactId1.User.Substring(0,2));
+    }
+
+    [Test]
+    public void GetFormattedNumberTest()
+    {
+        var result = Client!.Contact.GetFormattedNumber(ContactId1.User).Result;
+        Assert.That(result is not null);
+        Assert.That(result.StartsWith("+"));
+        Assert.That(result.Contains("-"));
+        Assert.That(result.Contains(" "));
+
+    }
+
+    [Test]
+    public void GetAboutTest()
+    {
+        var result = Client!.Contact.GetAbout(ContactId1._serialized).Result;
+        Assert.That(result is not null);
+        Assert.That(result.Equals("to be or not to be", StringComparison.InvariantCultureIgnoreCase));
+    }
+
+
+    [Test]
+    public void GetProfilePicUrlTest()
+    {
+        var result = Client!.Contact.GetProfilePicUrl(ContactId1._serialized).Result;
+        Assert.That(result is not null);
+    }
+
 }

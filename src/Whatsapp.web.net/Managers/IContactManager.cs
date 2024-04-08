@@ -12,7 +12,7 @@ public interface IContactManager : IManager
 
     Task<bool> Unblock(Contact contact);
 
-    Task<string?> GetAbout(Contact contact);
+    Task<string?> GetAbout(string contactId);
 
     Task<string?> GetProfilePicUrl(string contactId);
 

@@ -55,9 +55,9 @@ public class ContactManager : IContactManager
         return true;
     }
 
-    public async Task<string?> GetAbout(Contact contact)
+    public async Task<string?> GetAbout(string contactId)
     {
-        var about = await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getStatusContactById"), contact.Id._serialized);
+        var about = await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getStatusContactById"), contactId);
 
         if (about?["status"] is null || about["status"]!.Type != JTokenType.String)
         {
@@ -69,7 +69,7 @@ public class ContactManager : IContactManager
 
     public async Task<string?> GetProfilePicUrl(string contactId)
     {
-        dynamic profilePic = _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getProfilePic"), contactId);
+        dynamic profilePic = await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("getProfilePic"), contactId);
 
         return profilePic is not null ? profilePic.eurl : null;
     }
