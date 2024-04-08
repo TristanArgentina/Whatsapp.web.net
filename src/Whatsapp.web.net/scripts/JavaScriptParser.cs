@@ -27,6 +27,10 @@ public class JavaScriptParser : IJavaScriptParser
             var methodName = match.Groups[1].Value;
             var methodStartIndex = match.Index;
             var methodEndIndex = FindEndOfMethod(content, methodStartIndex);
+            if (methodEndIndex == -1)
+            {
+                throw new Exception($"method '{methodName}' not found");
+            }
             var methodContent = content.Substring(methodStartIndex, methodEndIndex - methodStartIndex + 1);
             _methods.Add(methodName, methodContent);
         }

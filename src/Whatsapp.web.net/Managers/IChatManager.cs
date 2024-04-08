@@ -36,7 +36,7 @@ public interface IChatManager : IManager
 
     Task AddOrRemoveLabels(List<object> labelIds, List<string> chatIds);
 
-    Task<List<Message>> FetchMessages(string chatId, SearchOptions searchOptions);
+    Task<List<Message>> GetMessages(string chatId, SearchOptions searchOptions);
 
     Task<bool> SendSeen(string chatId);
 

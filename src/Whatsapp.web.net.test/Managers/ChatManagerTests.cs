@@ -123,4 +123,20 @@ public class ChatManagerTests : TestBase
         Assert.That(!chat.IsMuted);
     }
 
+    [Test]
+    public void GetMessagesTest()
+    {
+        var text1 = "The series was originally published in English by Bloomsbury in the United Kingdom and Scholastic Press in the United States.";
+        var text2 = "A series of many genres, including fantasy, drama, coming-of-age fiction, and the British school story (which includes elements of mystery, thriller, adventure, horror, and romance), the world of Harry Potter explores numerous themes and includes many cultural meanings and references.";
+        var text3 = "Major themes in the series include prejudice, corruption, madness, and death.";
+        Client!.Message.Send(GroupId1, text1).Wait();
+        Client!.Message.Send(GroupId1, text2).Wait();
+        Client!.Message.Send(GroupId1, text3).Wait();
+        Thread.Sleep(5000);
+        var messages = Client!.Chat.GetMessages(GroupId1.Id, new SearchOptions()).Result;
+
+        Assert.That(messages[^3].Body.Equals(text1));
+        Assert.That(messages[^2].Body.Equals(text2));
+        Assert.That(messages[^1].Body.Equals(text3));
+    }
 }

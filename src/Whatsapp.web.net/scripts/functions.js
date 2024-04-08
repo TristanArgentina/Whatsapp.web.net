@@ -205,6 +205,20 @@ function sendChatStateStopById(chatId) {
 }
 
 async function getMessagesFromChat(chatId, searchOptions) {
+    loadEarlierMsgsRecursively = (chat, messages, msgFilter, searchOptions) => {
+        return window.Store.ConversationMsgs.loadEarlierMsgs(chat).then(loadedMessages => {
+            if (!loadedMessages || !loadedMessages.length) {
+                return messages;
+            }
+            let msgs = [...loadedMessages.filter(msgFilter), ...messages];
+            if (msgs.length > searchOptions.limit) {
+                msgs.sort((a, b) => (a.t > b.t) ? 1 : -1);
+                msgs = msgs.splice(msgs.length - searchOptions.limit);
+            }
+            return loadEarlierMsgsRecursively(chat, msgs, msgFilter, searchOptions);
+        });
+    }
+
     const msgFilter = (m) => {
         if (m.isNotification) {
             return false; // dont include notification messages
@@ -219,20 +233,18 @@ async function getMessagesFromChat(chatId, searchOptions) {
     let msgs = chat.msgs.getModelsArray().filter(msgFilter);
 
     if (searchOptions && searchOptions.limit > 0) {
-        while (msgs.length < searchOptions.limit) {
-            const loadedMessages = await window.Store.ConversationMsgs.loadEarlierMsgs(chat);
-            if (!loadedMessages || !loadedMessages.length) break;
-            msgs = [...loadedMessages.filter(msgFilter), ...msgs];
-        }
-
-        if (msgs.length > searchOptions.limit) {
-            msgs.sort((a, b) => (a.t > b.t) ? 1 : -1);
-            msgs = msgs.splice(msgs.length - searchOptions.limit);
-        }
+        return loadEarlierMsgsRecursively(chat, msgs, msgFilter, searchOptions)
+            .then(message => message.map(m => window.WWebJS.getMessageModel(m)));
+    }
+    else {
+        return msgs.map(m => window.WWebJS.getMessageModel(m));
     }
 
-    return msgs.map(m => window.WWebJS.getMessageModel(m));
+    
 }
+
+
+
 
 async function getContactById(contactId) {
     return window.WWebJS.getContact(contactId)

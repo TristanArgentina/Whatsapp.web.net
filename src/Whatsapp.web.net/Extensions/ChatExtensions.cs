@@ -76,7 +76,7 @@ public static class ChatExtensions
 
     public static async Task<List<Message>> FetchMessages(this Chat chat, Client client, SearchOptions searchOptions)
     {
-        return await client.Chat.FetchMessages(chat.Id.Id, searchOptions);
+        return await client.Chat.GetMessages(chat.Id.Id, searchOptions);
     }
 
     public static async Task<Contact> GetContact(this Chat chat, Client client)

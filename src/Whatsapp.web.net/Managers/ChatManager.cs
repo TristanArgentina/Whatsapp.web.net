@@ -76,11 +76,13 @@ public class ChatManager : IChatManager
         await _pupPage.EvaluateFunctionAsync(_parserFunctions.GetMethod("manageLabelsInChats"), labelIds, chatIds);
     }
 
-    public async Task<List<Message>> FetchMessages(string chatId, SearchOptions searchOptions)
+    public async Task<List<Message>> GetMessages(string chatId, SearchOptions? searchOptions = null)
     {
+        searchOptions ??= new SearchOptions();
+
         var messages = await _pupPage.EvaluateFunctionAsync<List<dynamic>>(_parserFunctions.GetMethod("getMessagesFromChat"), chatId, searchOptions);
 
-        return messages.ConvertAll(Message.Create).Where(m=> m is not null).OfType<Message>().ToList();
+        return messages.ConvertAll(Message.Create).Where(m => m is not null).OfType<Message>().ToList();
     }
 
     public async Task<bool> ClearMessages(string chatId)
