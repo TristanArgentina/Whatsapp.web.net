@@ -107,11 +107,11 @@ public class HandleEvents
             // The time the event occurred.
             var eventTime = message.Timestamp.Value;
 
-            var fromId = message.To?.Id ?? message.From?.Id;
+            var fromId = message.To ?? message.From;
             Console.WriteLine(
                 $"The contact {oldId.Substring(0, oldId.Length - 5)}" +
                 $"{(!isContact ? " that participates in group " +
-                                 $"{Client.Chat.Get(fromId).Result.Name} " : " ")}" +
+                                 $"{Client.Chat.Get(fromId._serialized).Result.Name} " : " ")}" +
                 $"changed their phone number\nat {eventTime}.\n" +
                 $"Their new phone number is {newId.Substring(0, newId.Length - 5)}.\n");
 

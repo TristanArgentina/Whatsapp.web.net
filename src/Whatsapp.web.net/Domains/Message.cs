@@ -46,14 +46,14 @@ public class Message
     /// <summary>
     /// ID for the Chat that this message was sent to, except if the message was sent by the current user.
     /// </summary>
-    public UserId From { get; private set; }
+    public UserId? From { get; private set; }
 
     /// <summary>
     /// ID for who this message is for.
     /// If the message is sent by the current user, it will be the Chat to which the message is being sent.
     /// If the message is sent by another user, it will be the ID for the current user.
     /// </summary>
-    public UserId To { get; private set; }
+    public UserId? To { get; private set; }
 
     /// <summary>
     /// If the message was sent to a group, this field will contain the user that sent the message.
@@ -218,7 +218,7 @@ public class Message
         VCards = data.type == MessageTypes.CONTACT_CARD_MULTI
             ? ((JArray)data.vcardList).Select((Func<dynamic, VCard>)(c => new VCard(c.vcard))).ToList()
             : data.type == MessageTypes.CONTACT_CARD
-                ? new List<VCard> { new VCard(data.body) }
+                ? [new VCard(data.body)]
                 : null;
         InviteV4 = data.type == MessageTypes.GROUP_INVITE
             ? new InviteV4(data)
@@ -247,10 +247,10 @@ public class Message
         SelectedRowId = data.listResponse?.singleSelectReply?.selectedRowId ?? null;
         Recipients = data.recipients is not null
             ? ((JArray)data.recipients).Select(r => UserId.Create(r)).ToList()
-            : new List<UserId>();
+            : [];
         TemplateParams = data.templateParams is not null
             ? ((JArray)data.templateParams).Select(t => t.ToString()).ToList()
-            : new List<string>();
+            : [];
         if (Type == MessageTypes.POLL_CREATION)
         {
             Poll = new Poll(data.pollName, data.pollOptions, new PollSendOptions()
