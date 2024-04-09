@@ -9,6 +9,8 @@ It uses Puppeteer to run a real instance of Whatsapp Web to avoid getting blocke
 **NOTE:** It is based on the whatsapp-web.js project.
 
 
+**It is experimental and is not intended for use in production.**
+
 # How it works
 The process begins by opening a browser and navigating to the WhatsApp website. This task is carried out using a class called Client (the name of this class could be improved). The Client is equipped with various managers (such as Messages, Chats, Contacts, among others), through which interaction with WhatsApp is possible. Additionally, the Client has a set of events that are triggered in response to WhatsApp actions, which are used through the event dispatcher. Internally, the browser to be used is configurable. For example, you can use a lightweight browser like Chromium or simply use Google Chrome. You can also choose to make it visible on screen or run it in the background.
 
@@ -19,12 +21,10 @@ For authentication, the QRReceivedEvent event is triggered, which provides the Q
 I have crafted a Bootstrapper class to streamline the registration of essential components required for building the WhatsApp client.
 
 # Documentation
-
 Since it's based on whatsapp.web.js, you can use that as a reference to understand the scope, with the caveat that in this version, it relies on managers and events. Additionally, I've created some manager extensions to streamline certain tasks.
 
 
 ## Example usage
-
 Example of how the service can be started
 
 ```c#
