@@ -8,7 +8,21 @@ It uses Puppeteer to run a real instance of Whatsapp Web to avoid getting blocke
 
 **NOTE:** It is based on the whatsapp-web.js project.
 
-**It is experimental and is not intended for use in production.**
+
+# How it works
+The process begins by opening a browser and navigating to the WhatsApp website. This task is carried out using a class called Client (the name of this class could be improved). The Client is equipped with various managers (such as Messages, Chats, Contacts, among others), through which interaction with WhatsApp is possible. Additionally, the Client has a set of events that are triggered in response to WhatsApp actions, which are used through the event dispatcher. Internally, the browser to be used is configurable. For example, you can use a lightweight browser like Chromium or simply use Google Chrome. You can also choose to make it visible on screen or run it in the background.
+
+# Authentication
+For authentication, the QRReceivedEvent event is triggered, which provides the QR code to be scanned as an argument. I have provided an example to convert it into an image and save it to a file, or to display it as characters in the console.
+
+# Assistants
+I have crafted a Bootstrapper class to streamline the registration of essential components required for building the WhatsApp client.
+
+# Documentation
+
+Since it's based on whatsapp.web.js, you can use that as a reference to understand the scope, with the caveat that in this version, it relies on managers and events. Additionally, I've created some manager extensions to streamline certain tasks.
+
+
 ## Example usage
 
 Example of how the service can be started
@@ -26,11 +40,11 @@ Example of a configuration file appsettings.json
     "UserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36",
 
     "Puppeteer": {
-      "ExecutablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      "Headless": false
+      "ExecutablePath": "C:\\chromium-browser\\chrome.exe",
+      "Headless": true
     },
     "WebVersionCache": {
-      "ClientId": "3",
+      "ClientId": "1",
       "Type": "local"
     },
     "WebVersion": "2.3000.1012539641"
@@ -302,42 +316,6 @@ public class MessageManagerTests : TestBase
 
 }
 ```
-
-```c#
-var builder = Host.CreateApplicationBuilder();
-builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile(@"appsettings.json", optional: false, reloadOnChange: true);
-
-builder.Services.AddOptions<WhatsappOptions>()
-    .BindConfiguration("Whatsapp")
-    .ValidateOnStart();
-
-builder.Services.AddOptions<DummyOptions>()
-    .BindConfiguration("Dummy")
-    .ValidateOnStart();
-
-builder.Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.Puppeteer);
-builder.Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.WebVersionCache);
-
-builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
-builder.Services.AddSingleton<IRegisterEventService, RegisterEventService>();
-builder.Services.AddSingleton<IAuthenticatorProvider, AuthenticatorProvider>();
-builder.Services.AddSingleton<Client>();
-
-_serviceProvider = builder.Services.BuildServiceProvider();
-
-EventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
-Client = _serviceProvider.GetService<Client>();
-var dummyOptions = _serviceProvider.GetRequiredService<IOptions<DummyOptions>>().Value;
-ContactId1 = new ContactId(dummyOptions.User1.User, dummyOptions.User1.Server);
-ContactId2 = new ContactId(dummyOptions.User2.User, dummyOptions.User2.Server);
-var puppeteerOptions = _serviceProvider.GetRequiredService<PuppeteerOptions>();
-TaskUtils.KillProcessesByName("chrome", puppeteerOptions.ExecutablePath!);
-
-await Client!.Initialize();
-```
-
-
 
 ## Contributing
 
