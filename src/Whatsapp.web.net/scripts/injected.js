@@ -117,166 +117,6 @@
     window.injectToFunction({ module: 'WAWebE2EProtoUtils', function: 'typeAttributeFromProtobuf' }, (func, ...args) => { const [proto] = args; return proto.locationMessage || proto.groupInviteMessage ? 'text' : func(...args); });
 };
 
-function exposeStore2_3() {
-    // eslint-disable-next-line no-undef
-    window.Store = Object.assign({}, window.mR.findModule(m => m.default && m.default.Chat).default);
-    window.Store.AppState = window.mR.findModule('Socket').Socket;
-    window.Store.Conn = window.mR.findModule('Conn').Conn;
-    window.Store.BlockContact = window.mR.findModule('blockContact');
-    window.Store.Call = window.mR.findModule((module) => module.default && module.default.Call).default.Call;
-    window.Store.Cmd = window.mR.findModule('Cmd').Cmd;
-    window.Store.CryptoLib = window.mR.findModule('decryptE2EMedia');
-    window.Store.DownloadManager = window.mR.findModule(941555).downloadManager;
-    //window.Store.DownloadManager = window.mR.findModule('downloadAndDecrypt'); 
-    //window.Store.DownloadManager = window.mR.findModule('downloadAndMaybeDecrypt'); 
-    //TODO: missing
-    //window.Store.GroupMetadata = window.mR.findModule('GroupMetadata');
-    window.Store.GroupMetadata.queryAndUpdate = window.mR.findModule('queryAndUpdateGroupMetadataById');
-    window.Store.Label = window.mR.findModule('LabelCollection').LabelCollection;
-    window.Store.ContactCollection = window.mR.findModule('ContactCollection').ContactCollection;
-    window.Store.MediaPrep = window.mR.findModule('prepRawMedia');
-    window.Store.MediaObject = window.mR.findModule('getOrCreateMediaObject');
-    window.Store.NumberInfo = window.mR.findModule('formattedPhoneNumber');
-    window.Store.MediaTypes = window.mR.findModule('msgToMediaType');
-    window.Store.MediaUpload = window.mR.findModule('uploadMedia');
-    window.Store.MsgKey = window.mR.findModule((module) => module.default && module.default.fromString).default;
-    window.Store.OpaqueData = window.mR.findModule(module => module.default && module.default.createFromData).default;
-    window.Store.QueryProduct = window.mR.findModule('queryProduct');
-    window.Store.QueryOrder = window.mR.findModule('queryOrder');
-    window.Store.SendClear = window.mR.findModule('sendClear');
-    window.Store.SendDelete = window.mR.findModule('sendDelete');
-    window.Store.SendMessage = window.mR.findModule('addAndSendMsgToChat');
-    window.Store.EditMessage = window.mR.findModule('addAndSendMessageEdit');
-    window.Store.SendSeen = window.mR.findModule('sendSeen');
-    window.Store.User = window.mR.findModule('getMaybeMeUser');
-    window.Store.ContactMethods = window.mR.findModule('getUserid');
-    window.Store.BusinessProfileCollection = window.mR.findModule('BusinessProfileCollection').BusinessProfileCollection;
-    window.Store.UploadUtils = window.mR.findModule((module) => (module.default && module.default.encryptAndUpload) ? module.default : null).default;
-    window.Store.UserConstructor = window.mR.findModule((module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null).default;
-    window.Store.Validators = window.mR.findModule('findLinks');
-
-
-    window.Store.VCard = window.mR.findModule('vcardFromContactModel');
-    window.Store.VCard.vcardGetNameFromParsed = window.mR.findModule('vcardGetNameFromParsed').vcardGetNameFromParsed;
-    window.Store.VCard.parseVcard = window.mR.findModule(791648).parseVcard;
-
-    window.Store.WidFactory = window.mR.findModule('createWid');
-    window.Store.ProfilePic = window.mR.findModule('profilePicResync');
-    window.Store.PresenceUtils = window.mR.findModule('sendPresenceAvailable');
-    window.Store.ChatState = window.mR.findModule('sendChatStateComposing');
-    window.Store.findCommonGroups = window.mR.findModule('findCommonGroups').findCommonGroups;
-    window.Store.StatusUtils = window.mR.findModule('setMyStatus');
-    window.Store.ConversationMsgs = window.mR.findModule('loadEarlierMsgs');
-    window.Store.sendReactionToMsg = window.mR.findModule('sendReactionToMsg').sendReactionToMsg;
-    window.Store.createOrUpdateReactionsModule = window.mR.findModule('createOrUpdateReactions');
-    window.Store.EphemeralFields = window.mR.findModule('getEphemeralFields');
-    window.Store.MsgActionChecks = window.mR.findModule('canSenderRevokeMsg');
-    window.Store.QuotedMsg = window.mR.findModule('getQuotedMsgObj');
-    window.Store.LinkPreview = window.mR.findModule('getLinkPreview');
-    window.Store.Socket = window.mR.findModule('deprecatedSendIq');
-    window.Store.SocketWap = window.mR.findModule('wap');
-    window.Store.SearchContext = window.mR.findModule('getSearchContext').getSearchContext;
-    window.Store.DrawerManager = window.mR.findModule('DrawerManager').DrawerManager;
-    window.Store.LidUtils = window.mR.findModule('getCurrentLid');
-    window.Store.WidToJid = window.mR.findModule('widToUserJid');
-    window.Store.JidToWid = window.mR.findModule('userJidToUserWid');
-    window.Store.getMsgInfo = (window.mR.findModule('sendQueryMsgInfo') || {}).sendQueryMsgInfo || window.mR.findModule('queryMsgInfo').queryMsgInfo;
-    window.Store.pinUnpinMsg = window.mR.findModule('sendPinInChatMsg').sendPinInChatMsg;
-
-    /* eslint-disable no-undef, no-cond-assign */
-    window.Store.QueryExist = ((m = window.mR.findModule('queryExists')) ? m.queryExists : window.mR.findModule('queryExist').queryWidExists);
-    window.Store.ReplyUtils = (m = window.mR.findModule('canReplyMsg')).length > 0 && m[0];
-    /* eslint-enable no-undef, no-cond-assign */
-
-    window.Store.Settings = {
-        ...window.mR.findModule('ChatlistPanelState')[0],
-        setPushname: window.mR.findModule((m) => m.setPushname && !m.ChatlistPanelState).setPushname
-    };
-    window.Store.StickerTools = {
-        ...window.mR.findModule('toWebpSticker'),
-        ...window.mR.findModule('addWebpMetadata')
-    };
-    window.Store.GroupUtils = {
-        ...window.mR.findModule('createGroup')[0],
-        ...window.mR.findModule('setGroupDescription')[0],
-        ...window.mR.findModule('sendExitGroup')[0],
-        ...window.mR.findModule('sendSetPicture')[0]
-    };
-    window.Store.GroupParticipants = {
-        ...window.mR.findModule('promoteParticipants')[0],
-        ...window.mR.findModule('sendAddParticipantsRPC')[0]
-    };
-    window.Store.GroupInvite = {
-        ...window.mR.findModule('resetGroupInviteCode')[0],
-        ...window.mR.findModule('queryGroupInvite')[0]
-    };
-    window.Store.GroupInviteV4 = {
-        ...window.mR.findModule('queryGroupInviteV4')[0],
-        ...window.mR.findModule('sendGroupInviteMessage')[0]
-    };
-    window.Store.MembershipRequestUtils = {
-        ...window.mR.findModule('getMembershipApprovalRequests')[0],
-        ...window.mR.findModule('sendMembershipRequestsActionRPC')[0]
-    };
-
-    if (!window.Store.Chat._find) {
-        window.Store.Chat._find = e => {
-            const target = window.Store.Chat.get(e);
-            return target ? Promise.resolve(target) : Promise.resolve({
-                id: e
-            });
-        };
-    }
-
-    // eslint-disable-next-line no-undef
-    if ((m = window.mR.findModule('ChatCollection')[0]) && m.ChatCollection && typeof m.ChatCollection.findImpl === 'undefined' && typeof m.ChatCollection._find !== 'undefined') m.ChatCollection.findImpl = m.ChatCollection._find;
-
-    const _isMDBackend = window.mR.findModule('isMDBackend');
-    if (_isMDBackend && _isMDBackend[0] && _isMDBackend[0].isMDBackend) {
-        window.Store.MDBackend = _isMDBackend[0].isMDBackend();
-    } else {
-        window.Store.MDBackend = true;
-    }
-
-    const _features = window.mR.findModule('FEATURE_CHANGE_EVENT');
-    if (_features) {
-        window.Store.Features = _features.LegacyPhoneFeatures;
-    }
-
-    /**
-     * Target options object description
-     * @typedef {Object} TargetOptions
-     * @property {string|number} module The name or a key of the target module to search
-     * @property {number} index The index value of the target module
-     * @property {string} function The function name to get from a module
-     */
-
-    /**
-     * Function to modify functions
-     * @param {TargetOptions} target Options specifying the target function to search for modifying
-     * @param {Function} callback Modified function
-     */
-    window.injectToFunction = (target, callback) => {
-        const module = typeof target.module === 'string'
-            ? window.mR.findModule(target.module)
-            : window.mR.modules[target.module];
-        const originalFunction = module[target.index][target.function];
-        const modifiedFunction = (...args) => callback(originalFunction, ...args);
-        module[target.index][target.function] = modifiedFunction;
-    };
-
-    //TODO: review
-    //window.injectToFunction({ module: 'mediaTypeFromProtobuf', index: 0, function: 'mediaTypeFromProtobuf' }, (func, ...args) => {
-    //    const [proto] = args;
-    //    return proto.locationMessage ? null : func(...args);
-    //});
-
-    //window.injectToFunction({ module: 'typeAttributeFromProtobuf', index: 0, function: 'typeAttributeFromProtobuf' }, (func, ...args) => {
-    //    const [proto] = args;
-    //    return proto.locationMessage || proto.groupInviteMessage ? 'text' : func(...args);
-    //});
-};
-
 function loadUtils() {
     window.WWebJS = {};
 
@@ -1576,16 +1416,16 @@ async function registerModuleRaid() {
             //    });
             //});
 
-            //console.log(`Objecto: ${JSON.stringify(object)}`);
+            //console.log(`Object: ${JSON.stringify(object)}`);
 
-            //console.log(`Encontrado: '${query}' -> funciones: '${results.length}' `);
+            //console.log(`Found: '${query}' -> functions: '${results.length}' `);
 
             return this.getModule_new(results, query);
         }
 
         getModule(modules, query) {
             if (modules.length === 0) {
-                //console.log(`Query: '${query}' no encontrado.`)
+                //console.log(`Query: '${query}' not found.`)
                 return null;
             }
             for (const module of modules) {
@@ -1597,7 +1437,7 @@ async function registerModuleRaid() {
             }
 
             if (modules.length !== 1) {
-                //console.log(`Query: '${query}' se eligio el primero de ${modules.length}`)
+                //console.log(`Query: '${query}' the first was chosen ${modules.length}`)
             }
             return modules[0];
         }
@@ -1606,7 +1446,7 @@ async function registerModuleRaid() {
             let foundModules = [];
 
             if (modules.length === 0) {
-                //console.log(`Query: '${query}' no encontrado.`);
+                //console.log(`Query: '${query}' not found.`);
                 return null;
             }
 
@@ -1623,7 +1463,7 @@ async function registerModuleRaid() {
             if (foundModules.length == 0) {
                 return modules[0];
             } else if (foundModules.length > 1) {
-                // console.log(`Query: '${query}' encontrado en ${foundModules.length} módulos.`);
+                // console.log(`Query: '${query}' found in ${foundModules.length} modules.`);
             }
 
             return foundModules[0];
@@ -1631,7 +1471,7 @@ async function registerModuleRaid() {
 
 
 
-        // Método para buscar constructores
+        // Method to search for constructors
         findConstructor(query) {
             const results = [];
             const constructors = Object.keys(this.constructors);

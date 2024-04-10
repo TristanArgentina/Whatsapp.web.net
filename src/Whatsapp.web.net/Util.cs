@@ -33,22 +33,6 @@ public class Util
         return DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
     }
 
-    public static Dictionary<string, object> MergeDefault(Dictionary<string, object> def, Dictionary<string, object> given)
-    {
-        if (given == null) return def;
-        foreach (var kvp in def)
-        {
-            if (!given.ContainsKey(kvp.Key) || given[kvp.Key] == null)
-            {
-                given[kvp.Key] = kvp.Value;
-            }
-            else if (given[kvp.Key] is Dictionary<string, object>)
-            {
-                given[kvp.Key] = MergeDefault((Dictionary<string, object>)kvp.Value, (Dictionary<string, object>)given[kvp.Key]);
-            }
-        }
-        return given;
-    }
 
     public static string GetMimeType(string filename)
     {

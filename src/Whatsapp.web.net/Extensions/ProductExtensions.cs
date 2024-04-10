@@ -1,6 +1,6 @@
 ﻿using Whatsapp.web.net.Domains;
 
-namespace Whatsapp.web.net;
+namespace Whatsapp.web.net.Extensions;
 
 public static class ProductExtensions
 {

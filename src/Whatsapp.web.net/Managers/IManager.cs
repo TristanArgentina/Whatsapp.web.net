@@ -1,6 +1,3 @@
 ﻿namespace Whatsapp.web.net.Managers;
 
-public interface IManager
-{
-
-}
+public interface IManager;

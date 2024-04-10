@@ -16,7 +16,8 @@ public class WhatsappOptions
     public string WebVersion { get; set; } 
 
     /// <summary>
-    /// Determines how to retrieve the WhatsApp Web version. Defaults to a local cache (LocalWebCache) that falls back to latest if the requested version is not found.
+    /// Determines how to retrieve the WhatsApp Web version.
+    /// Defaults to a local cache (LocalWebCache) that falls back to latest if the requested version is not found.
     /// </summary>
     public WebVersionCache WebVersionCache { get; set; } = new();
 
