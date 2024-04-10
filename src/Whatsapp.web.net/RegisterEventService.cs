@@ -91,7 +91,7 @@ public class RegisterEventService : IRegisterEventService
         return (msg, newBody, prevBody) =>
         {
 
-            if (msg.type == "revoked")
+            if (msg.type == MessageTypes.REVOKED)
             {
                 return false;
             }
@@ -212,7 +212,7 @@ public class RegisterEventService : IRegisterEventService
 
             // Determine if the message is related to a participant or a contact changing their phone number
             bool isParticipant = msg.type == MessageTypes.GP2 && msg.subtype == "modify";
-            bool isContact = msg.type == "notification_template" && msg.subtype == "change_number";
+            bool isContact = msg.type == MessageTypes.NOTIFICATION_TEMPLATE && msg.subtype == "change_number";
 
             if (!isParticipant && !isContact) return false;
            

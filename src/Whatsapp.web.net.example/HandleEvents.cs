@@ -10,7 +10,7 @@ public class HandleEvents
     public Client Client { get; set; }
     private readonly IEventDispatcher? _eventDispatcher;
 
-    public HandleEvents( IEventDispatcher? eventDispatcher)
+    public HandleEvents(IEventDispatcher? eventDispatcher)
     {
         _eventDispatcher = eventDispatcher;
     }
@@ -433,7 +433,7 @@ public class HandleEvents
                         new MessageOptions { Caption = "Here's your requested media." });
                 }
 
-                if (quotedMsg.HasMedia && quotedMsg.Type == "audio")
+                if (quotedMsg.HasMedia && quotedMsg.Type == MessageTypes.AUDIO)
                 {
                     var audio = await quotedMsg.DownloadMedia(Client);
                     await Client.Message.Send(msg.From, audio, new MessageOptions { SendAudioAsVoice = true });
@@ -452,10 +452,10 @@ public class HandleEvents
             {
                 await msg.Reply(Client, new Location(37.422, -122.084));
                 await msg.Reply(Client, new Location(37.422, -122.084, new LocationOptions("Googleplex")));
-                await msg.Reply(Client, new Location(37.422, -122.084, 
+                await msg.Reply(Client, new Location(37.422, -122.084,
                     new LocationOptions(null, "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA")));
-                await msg.Reply(Client, new Location(37.422, -122.084, 
-                    new LocationOptions("Googleplex","1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA")));
+                await msg.Reply(Client, new Location(37.422, -122.084,
+                    new LocationOptions("Googleplex", "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA")));
             }
             else if (msg.Location != null)
             {

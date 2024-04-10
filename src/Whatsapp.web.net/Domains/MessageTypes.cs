@@ -2,13 +2,14 @@
 
 public static class MessageTypes
 {
-    public const string TEXT = "chat";
-    public const string AUDIO = "audio";
-    public const string VOICE = "ptt";
     public const string IMAGE = "image";
     public const string VIDEO = "video";
+    public const string AUDIO = "audio";
     public const string DOCUMENT = "document";
     public const string STICKER = "sticker";
+
+    public const string TEXT = "chat";
+    public const string VOICE = "ptt";
     public const string LOCATION = "location";
     public const string CONTACT_CARD = "vcard";
     public const string CONTACT_CARD_MULTI = "multi_vcard";
