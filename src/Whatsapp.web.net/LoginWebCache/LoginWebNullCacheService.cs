@@ -1,8 +1,8 @@
-﻿namespace Whatsapp.web.net.Authentication;
+﻿namespace Whatsapp.web.net.LoginWebCache;
 
 // No additional functionality needed, inherits everything from BaseAuthStrategy
-public class NoAuth(PuppeteerOptions puppeteerOptions, WebVersionCache webVersionCache)
-    : BaseAuthStrategy(puppeteerOptions, webVersionCache)
+public class LoginWebNullCacheService(PuppeteerOptions puppeteerOptions, LoginWebCacheOptions loginWebCacheOptions)
+    : LoginWebCacheBaseService(puppeteerOptions, loginWebCacheOptions)
 {
     protected override string CalculateUserDataDir()
     {

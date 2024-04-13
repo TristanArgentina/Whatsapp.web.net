@@ -3,8 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Whatsapp.web.net.Authentication;
 using Whatsapp.web.net.EventArgs;
+using Whatsapp.web.net.LoginWebCache;
 
 namespace Whatsapp.web.net;
 
@@ -84,11 +84,11 @@ public class Bootstrapper
             .ValidateOnStart();
 
         Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.Puppeteer);
-        Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.WebVersionCache);
+        Services.AddSingleton(provider => provider.GetRequiredService<IOptions<WhatsappOptions>>().Value.LoginWebCache);
 
         Services.AddSingleton<IEventDispatcher, EventDispatcher>();
         Services.AddSingleton<IRegisterEventService, RegisterEventService>();
-        Services.AddSingleton<IAuthenticatorProvider, AuthenticatorProvider>();
+        Services.AddSingleton<ILoginWebCacheProvider, LoginWebCacheProvider>();
         Services.AddSingleton<Client>();
 
         ServiceProvider = Services.BuildServiceProvider();

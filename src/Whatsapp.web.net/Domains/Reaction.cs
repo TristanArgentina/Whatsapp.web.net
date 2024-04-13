@@ -61,6 +61,6 @@ public class Reaction
         Text = data.reactionText;
         Timestamp = Util.ConvertToDate(data.timestamp);
         Orphan = data.orphan;
-        Read = data.read;
+        Read = data.read ?? false;
     }
 }

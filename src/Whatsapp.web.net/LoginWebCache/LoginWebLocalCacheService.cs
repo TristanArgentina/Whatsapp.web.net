@@ -1,17 +1,13 @@
-﻿namespace Whatsapp.web.net.Authentication;
+﻿namespace Whatsapp.web.net.LoginWebCache;
 
-public class LocalAuth : BaseAuthStrategy
+public class LoginWebLocalCacheService(PuppeteerOptions puppeteerOptions, LoginWebCacheOptions loginWebCacheOptions)
+    : LoginWebCacheBaseService(puppeteerOptions, loginWebCacheOptions)
 {
     protected override string PrefixFileName => "session";
 
-    public LocalAuth(PuppeteerOptions puppeteerOptions, WebVersionCache webVersionCache)
-        : base(puppeteerOptions, webVersionCache)
-    {
-    }
-
     protected override ILoginWebCache CreateLoginWebCache()
     {
-        return new LoginWebLocalCache(UserDataDir, WebVersionCache.Strict);
+        return new LoginWebLocalCache(UserDataDir, LoginWebCacheOptions.Strict);
     }
 
     public override Task Logout()

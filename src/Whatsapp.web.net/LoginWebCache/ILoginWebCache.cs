@@ -1,4 +1,4 @@
-﻿namespace Whatsapp.web.net.Authentication;
+﻿namespace Whatsapp.web.net.LoginWebCache;
 
 public interface ILoginWebCache
 {

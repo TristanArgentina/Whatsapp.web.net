@@ -1,10 +1,10 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Whatsapp.web.net.Authentication;
+namespace Whatsapp.web.net.LoginWebCache;
 
-public abstract class BaseAuthStrategy : IAuthenticator
+public abstract class LoginWebCacheBaseService : ILoginWebCacheService
 {
-    protected readonly WebVersionCache WebVersionCache;
+    protected readonly LoginWebCacheOptions LoginWebCacheOptions;
 
     private ILoginWebCache? _loginWebCache;
 
@@ -14,21 +14,21 @@ public abstract class BaseAuthStrategy : IAuthenticator
 
     protected PuppeteerOptions PuppeteerOptions;
 
-    protected BaseAuthStrategy(PuppeteerOptions puppeteerOptions, WebVersionCache webVersionCache)
+    protected LoginWebCacheBaseService(PuppeteerOptions puppeteerOptions, LoginWebCacheOptions loginWebCacheOptions)
     {
-        if (!IsValidClientId(webVersionCache.ClientId))
+        if (!IsValidClientId(loginWebCacheOptions.ClientId))
             throw new ArgumentException(
                 "Invalid clientId. Only alphanumeric characters, underscores, and hyphens are allowed.");
 
         PuppeteerOptions = puppeteerOptions;
-        WebVersionCache = webVersionCache;
+        LoginWebCacheOptions = loginWebCacheOptions;
     }
 
     protected virtual string PrefixFileName => string.Empty;
 
     protected string SessionName => _serviceName ??= CalculateServiceName();
     
-    public ILoginWebCache LoginWebCache => _loginWebCache ??= CreateLoginWebCache();
+    public ILoginWebCache Get() => _loginWebCache ??= CreateLoginWebCache();
 
     public string UserDataDir => _userDataDir ??= CalculateUserDataDir();
 
@@ -65,14 +65,14 @@ public abstract class BaseAuthStrategy : IAuthenticator
     protected virtual string CalculateUserDataDir()
     {
         var dataPath = GetDataPath();
-        var userDataDir = Path.Combine(dataPath, WebVersionCache.RelativeLocalPath ?? "", SessionName);
+        var userDataDir = Path.Combine(dataPath, LoginWebCacheOptions.RelativeLocalPath ?? "", SessionName);
         if (!Directory.Exists(userDataDir)) Directory.CreateDirectory(userDataDir);
         return userDataDir;
     }
 
     private string CalculateServiceName()
     {
-        var clientId = WebVersionCache.ClientId;
+        var clientId = LoginWebCacheOptions.ClientId;
         return string.IsNullOrEmpty(clientId) ? PrefixFileName : $"{PrefixFileName}-{clientId}";
     }
 

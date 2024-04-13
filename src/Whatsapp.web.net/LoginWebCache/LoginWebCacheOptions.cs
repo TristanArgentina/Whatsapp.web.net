@@ -1,6 +1,6 @@
-﻿namespace Whatsapp.web.net.Authentication;
+﻿namespace Whatsapp.web.net.LoginWebCache;
 
-public class WebVersionCache
+public class LoginWebCacheOptions
 {
 
     /// <summary>

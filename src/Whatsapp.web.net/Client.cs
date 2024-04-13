@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using PuppeteerSharp;
-using Whatsapp.web.net.Authentication;
 using Whatsapp.web.net.Domains;
+using Whatsapp.web.net.LoginWebCache;
 using Whatsapp.web.net.Managers;
 using Whatsapp.web.net.scripts;
 using ErrorEventArgs = PuppeteerSharp.ErrorEventArgs;
@@ -14,7 +14,7 @@ public class Client(
     IEventDispatcher eventDispatcher,
     IRegisterEventService registerEventService,
     IOptions<WhatsappOptions> options,
-    IAuthenticatorProvider authenticatorProvider)
+    ILoginWebCacheProvider loginWebCacheProvider)
     : IDisposable, IAsyncDisposable
 {
     /// <summary>
@@ -61,7 +61,7 @@ public class Client(
     private readonly IJavaScriptParser _parserInjected = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.injected.js");
     private readonly IJavaScriptParser _parserFunctions = JavaScriptParserFactory.Create("Whatsapp.web.net.scripts.functions.js");
     private readonly WhatsappOptions _options = options.Value;
-    private readonly IAuthenticator _authStrategy = authenticatorProvider.GetAuthenticator();
+    private readonly ILoginWebCacheService _loginWebCacheService = loginWebCacheProvider.Get();
 
     private IBrowser? _pupBrowser;
     private IPage? _pupPage;
@@ -85,7 +85,7 @@ public class Client(
         _pupPage = result.PupPage;
 
         if (_pupPage is null) throw new Exception("The page did not initialize");
-        await _authStrategy.AfterBrowserInitialized();
+        await _loginWebCacheService.AfterBrowserInitialized();
         await InitWebVersionCacheAsync();
         //TODO: missing
         //await PupPage.EvaluateExpressionOnNewDocumentAsync(_parserFunctions.GetMethod("modificarErrorStack"));
@@ -217,7 +217,8 @@ public class Client(
 
         var jsHandle = _pupPage.EvaluateFunctionHandleAsync(_parserFunctions.GetMethod("getWWebVersion")).Result;
         var version = jsHandle.JsonValueAsync<string>().Result;
-        await _authStrategy.LoginWebCache.Persist(_currentIndexHtml, version);
+        var loginWebCache = _loginWebCacheService.Get();
+        await loginWebCache.Persist(_currentIndexHtml, version);
 
 
 
@@ -264,7 +265,7 @@ public class Client(
         IBrowser? pupBrowser;
         IPage? pupPage;
 
-        await _authStrategy.BeforeBrowserInitialized();
+        await _loginWebCacheService.BeforeBrowserInitialized();
 
         if (_options.Puppeteer is { BrowserWSEndpoint: not null })
         {
@@ -285,7 +286,7 @@ public class Client(
             {
                 Args = browserArgs.ToArray(),
                 Headless = _options.Puppeteer.Headless,
-                UserDataDir = _authStrategy.UserDataDir,
+                UserDataDir = _loginWebCacheService.UserDataDir,
                 DefaultViewport = _options.Puppeteer.DefaultViewport,
                 ExecutablePath = _options.Puppeteer.ExecutablePath
             };
@@ -319,7 +320,8 @@ public class Client(
         if (_pupPage is null) throw new Exception("The page did not initialize");
 
         var requestedVersion = _options.WebVersion;
-        var versionContent = await _authStrategy.LoginWebCache.Resolve(requestedVersion);
+        var loginWebCache = _loginWebCacheService.Get();
+        var versionContent = await loginWebCache.Resolve(requestedVersion);
 
         if (versionContent != null)
         {
@@ -341,7 +343,7 @@ public class Client(
                 }
             };
         }
-        if (_options.WebVersionCache.Type == "local")
+        if (_options.LoginWebCache.Type == "local")
         {
             _pupPage.Response += async (_, e) =>
             {
@@ -366,7 +368,7 @@ public class Client(
         {
             await _pupBrowser.CloseAsync();
         }
-        await _authStrategy.Destroy();
+        await _loginWebCacheService.Destroy();
     }
 
     public void Dispose()

@@ -18,10 +18,11 @@ public class TestBase
     public async Task Setup()
     {
         var bootstrapper = new Bootstrapper();
-
+        
         bootstrapper.Services.AddOptions<DummyOptions>()
             .BindConfiguration("Dummy")
             .ValidateOnStart();
+
         bootstrapper.Start();
         Client = bootstrapper.Client;
         EventDispatcher = bootstrapper.EventDispatcher;

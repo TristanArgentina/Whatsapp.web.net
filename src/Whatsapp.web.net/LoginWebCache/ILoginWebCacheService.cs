@@ -1,6 +1,6 @@
-﻿namespace Whatsapp.web.net.Authentication;
+﻿namespace Whatsapp.web.net.LoginWebCache;
 
-public interface IAuthenticator
+public interface ILoginWebCacheService
 {
     string? UserDataDir { get; }
 
@@ -16,5 +16,5 @@ public interface IAuthenticator
     
     Task Logout();
 
-    ILoginWebCache LoginWebCache { get; }
+    ILoginWebCache Get();
 }

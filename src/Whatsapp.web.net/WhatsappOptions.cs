@@ -1,5 +1,5 @@
 ﻿using PuppeteerSharp;
-using Whatsapp.web.net.Authentication;
+using Whatsapp.web.net.LoginWebCache;
 
 namespace Whatsapp.web.net;
 
@@ -19,7 +19,7 @@ public class WhatsappOptions
     /// Determines how to retrieve the WhatsApp Web version.
     /// Defaults to a local cache (LocalWebCache) that falls back to latest if the requested version is not found.
     /// </summary>
-    public WebVersionCache WebVersionCache { get; set; } = new();
+    public LoginWebCacheOptions LoginWebCache { get; set; } = new();
 
     /// <summary>
     /// Timeout for authentication selector in puppeteer

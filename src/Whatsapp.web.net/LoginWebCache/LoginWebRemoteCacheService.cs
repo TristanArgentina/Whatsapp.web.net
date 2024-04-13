@@ -1,9 +1,9 @@
 ﻿using System.IO.Compression;
 using Whatsapp.web.net.EventArgs;
 
-namespace Whatsapp.web.net.Authentication;
+namespace Whatsapp.web.net.LoginWebCache;
 
-public class RemoteAuth : BaseAuthStrategy
+public class LoginWebRemoteCacheService : LoginWebCacheBaseService
 {
     protected override string PrefixFileName => "RemoteAuth";
 
@@ -12,34 +12,34 @@ public class RemoteAuth : BaseAuthStrategy
     private readonly IRemoteStore? _store;
     private readonly int _backupSyncIntervalMs;
     private readonly string _tempDir;
-    private Timer _backupSync;
-    private readonly string[] requiredDirs = ["Default", "IndexedDB", "Local Storage"];
+    private Timer? _backupSync;
+    private readonly string[] _requiredDirs = ["Default", "IndexedDB", "Local Storage"];
 
-    public RemoteAuth(IRemoteStore? store,
-        PuppeteerOptions puppeteerOptions, WebVersionCache webVersionCache) : base(puppeteerOptions, webVersionCache)
+    public LoginWebRemoteCacheService(IRemoteStore? store,
+        PuppeteerOptions puppeteerOptions, LoginWebCacheOptions loginWebCacheOptions) : base(puppeteerOptions, loginWebCacheOptions)
     {
-        if (string.IsNullOrEmpty(webVersionCache.RemotePath))
+        if (string.IsNullOrEmpty(loginWebCacheOptions.RemotePath))
         {
             throw new ArgumentException("webVersionCache.remotePath is required when using the remote cache");
         }
-        if (!IsValidBackupSyncInterval(webVersionCache.BackupSyncIntervalMs))
+        if (!IsValidBackupSyncInterval(loginWebCacheOptions.BackupSyncIntervalMs))
         {
             throw new ArgumentException("Invalid backupSyncIntervalMs. Accepts values starting from 60000ms (1 minute).");
         }
 
         _store = store ?? throw new ArgumentNullException("Remote database store is required.");
-        _backupSyncIntervalMs = webVersionCache.BackupSyncIntervalMs;
+        _backupSyncIntervalMs = loginWebCacheOptions.BackupSyncIntervalMs;
         ;
         var dataPath = GetDataPath();
-        _tempDir = !string.IsNullOrEmpty(webVersionCache.ClientId)
-            ? $"{dataPath}/wwebnet_temp_session_{webVersionCache.ClientId}"
+        _tempDir = !string.IsNullOrEmpty(loginWebCacheOptions.ClientId)
+            ? $"{dataPath}/wwebnet_temp_session_{loginWebCacheOptions.ClientId}"
             : $"{dataPath}/wwebnet_temp_session";
     }
 
 
     protected override ILoginWebCache CreateLoginWebCache()
     {
-        return new LoginWebRemoteCache(WebVersionCache.RemotePath, WebVersionCache.Strict);
+        return new LoginWebRemoteCache(LoginWebCacheOptions.RemotePath, LoginWebCacheOptions.Strict);
     }
 
     private bool IsValidBackupSyncInterval(int backupSyncIntervalMs)
@@ -175,7 +175,7 @@ public class RemoteAuth : BaseAuthStrategy
         {
             foreach (var element in Directory.EnumerateFileSystemEntries(dir))
             {
-                if (!requiredDirs.Contains(element))
+                if (!_requiredDirs.Contains(element))
                 {
                     if (Directory.Exists(element))
                     {
