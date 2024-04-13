@@ -60,7 +60,7 @@ public class Call
         if (data is null) return;
         Id = data.id;
         From = data.peerJid;
-        Timestamp = DateTimeOffset.FromUnixTimeSeconds((long)data.offerTime).UtcDateTime;
+        Timestamp = Util.ConvertToDate(data.offerTime);
         IsVideo = data.isVideo;
         IsGroup = data.isGroup;
         FromMe = data.outgoing;

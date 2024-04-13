@@ -122,8 +122,11 @@ public class MessageManagerTests : TestBase
         var messageOptions = new MessageOptions
         {
             SendMediaAsSticker = true,
-            StickerAuthor = "Author Test",
-            StickerName = "Robot"
+            StickerMetadata = new StickerMetadata
+            {
+                Author = "Author Test",
+                Name = "Robot"
+            }
         };
         var msg = Client!.Message.Send(ContactId1, expectedMedia, messageOptions).Result;
         Assert.That(message is not null);

@@ -10,7 +10,7 @@ public class Payment
 
     public object PaymentMessageReceiverJid { get; private set; }
 
-    public long PaymentTransactionTimestamp { get; private set; }
+    public DateTime PaymentTransactionTimestamp { get; private set; }
 
     /// <summary>
     ///    * Possible Status
@@ -48,7 +48,7 @@ public class Payment
         PaymentCurrency = data.paymentCurrency;
         PaymentAmount1000 = data.paymentAmount1000;
         PaymentMessageReceiverJid = data.paymentMessageReceiverJid;
-        PaymentTransactionTimestamp = data.paymentTransactionTimestamp;
+        PaymentTransactionTimestamp = Util.ConvertToDate(data.paymentTransactionTimestamp);
         PaymentStatus = data.paymentStatus;
         PaymentTxnStatus = data.paymentTxnStatus;
         PaymentNoteMsg = data.paymentNoteMsg;

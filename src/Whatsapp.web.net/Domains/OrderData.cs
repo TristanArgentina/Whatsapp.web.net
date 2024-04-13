@@ -6,5 +6,5 @@ public class OrderData
     public string Subtotal { get; private set; }
     public string Total { get; private set; }
     public string Currency { get; private set; }
-    public long CreatedAt { get; private set; }
+    public DateTime CreatedAt { get; private set; }
 }

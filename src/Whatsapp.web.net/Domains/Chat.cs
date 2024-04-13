@@ -55,7 +55,7 @@ public abstract class Chat
     /// <summary>
     /// Unix timestamp for when the mute expires
     /// </summary>
-    public long MuteExpiration { get; private set; }
+    public DateTime MuteExpiration { get; private set; }
 
     /// <summary>
     /// Last message fo chat
@@ -76,7 +76,7 @@ public abstract class Chat
         Archived = data.archive is null ? false : bool.Parse(data.archive.ToString());
         Pinned = data.pin != 0;
         IsMuted = data.muteExpiration != 0;
-        MuteExpiration = data.muteExpiration;
+        MuteExpiration = Util.ConvertToDate(data.muteExpiration);
         LastMessage = Message.Create(data.lastMessage);
     }
 

@@ -18,5 +18,6 @@ public class DeliveryInfo
     }
 
     public string Id { get; set; }
+
     public DateTime? T { get; set; }
 }

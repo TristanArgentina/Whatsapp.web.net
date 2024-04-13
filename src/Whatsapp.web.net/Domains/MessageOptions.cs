@@ -70,18 +70,6 @@ public class MessageOptions
 
     public object? Extra { get; set; }
 
-    /// <summary>
-    /// Sets the name of the sticker, (if sendMediaAsSticker is true).
-    /// </summary>
-    public string? StickerName { get; set; }
 
-    /// <summary>
-    /// Sets the author of the sticker, (if sendMediaAsSticker is true).
-    /// </summary>
-    public string? StickerAuthor { get; set; }
-
-    /// <summary>
-    /// Sets the categories of the sticker, (if sendMediaAsSticker is true). Provide emoji char array, can be null.
-    /// </summary>
-    public List<string>? StickerCategories { get; set; }
+    public StickerMetadata StickerMetadata { get; set; } = new();
 }

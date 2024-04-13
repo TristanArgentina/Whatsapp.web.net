@@ -51,7 +51,7 @@ public class GroupNotification
         Id = new MessageId(data.id);
         Body = data.body ?? "";
         Type = data.subtype;
-        Timestamp = DateTimeOffset.FromUnixTimeSeconds((long)data.t).UtcDateTime;
+        Timestamp = Util.ConvertToDate(data.t);
         ChatId = UserId.Create(data.id.remote);
         Author = UserId.Create(data.author);
 

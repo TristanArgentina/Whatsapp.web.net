@@ -25,7 +25,7 @@ public class Order
     /// <summary>
     /// Order Created At
     /// </summary>
-    public long CreatedAt { get; private set; }
+    public DateTime CreatedAt { get; private set; }
 
     public Order(dynamic? data)
     {
@@ -51,6 +51,6 @@ public class Order
         Subtotal = data.subtotal;
         Total = data.total;
         Currency = data.currency;
-        CreatedAt = data.createdAt;
+        CreatedAt = Util.ConvertToDate(data.createdAt);
     }
 }

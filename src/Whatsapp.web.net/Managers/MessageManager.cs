@@ -55,9 +55,12 @@ public class MessageManager : IMessageManager
                     messageMedia,
                     new StickerMetadata
                     {
-                        Name = options.StickerName,
-                        Author = options.StickerAuthor,
-                        Categories = options.StickerCategories is not null && options.StickerCategories.Any() ? options.StickerCategories.ToArray() : null
+                        Name = options.StickerMetadata.Name,
+                        Author = options.StickerMetadata.Author,
+                        Categories = options.StickerMetadata.Categories is not null
+                                     && options.StickerMetadata.Categories.Any()
+                            ? options.StickerMetadata.Categories.ToArray()
+                            : null
                     },
                     _pupPage
                 );
@@ -234,20 +237,13 @@ public class MessageManager : IMessageManager
     {
         if (!msgId.FromMe) return null;
 
-        //TODO: review
-        //if (options?.Mentions != null)
-        //{
-        //    options.Mentions = options.Mentions.Select(m => m is Contact c ? c.Id : m).ToList();
-        //}
-
         var internalOptions = new
         {
             linkPreview = options?.LinkPreview == false ? (bool?)null : true,
             mentionedJidList = options?.Mentions ?? [],
-            groupMentions = options?.GroupMentions,
+            groupMentions = options?.GroupMentions ?? [],
             extraOptions = options?.Extra
         };
-
 
         var data = await _pupPage.EvaluateFunctionAsync<dynamic>(_parserFunctions.GetMethod("editMessage"), msgId._serialized, content, internalOptions);
 
