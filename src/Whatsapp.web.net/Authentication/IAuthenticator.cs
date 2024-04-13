@@ -2,14 +2,12 @@
 
 public interface IAuthenticator
 {
+    string? UserDataDir { get; }
+
     Task BeforeBrowserInitialized();
     
     Task AfterBrowserInitialized();
-    
-    Task<(bool Failed, bool Restart, object FailureEventPayload)> OnAuthenticationNeeded();
-    
-    Task<object> GetAuthEventPayload();
-    
+
     Task AfterAuthReady();
     
     Task Disconnect();
@@ -17,7 +15,6 @@ public interface IAuthenticator
     Task Destroy();
     
     Task Logout();
-    string? UserDataDir { get; }
 
     ILoginWebCache LoginWebCache { get; }
 }

@@ -161,20 +161,13 @@ public class Client(
         // Check if an error occurred on the first found selector
         if (needAuthentication.IsFaulted)
         {
-            // Scan-qrcode selector was found. Needs authentication
-            var result = await _authStrategy.OnAuthenticationNeeded();
-            if (result.Failed)
-            {
-                // Handle authentication failure
-                // Emits authentication failure event
-                eventDispatcher.EmitAuthenticationFailure(result.FailureEventPayload);
 
-                await Destroy();
-                if (!result.Restart) return needAuthentication;
+            // Handle authentication failure
+            // Emits authentication failure event
+            eventDispatcher.EmitAuthenticationFailure(needAuthentication.Exception);
 
-                // Session restore failed so try again without session to force new authentication
-                return Initialize();
-            }
+            // Session restore failed so try again without session to force new authentication
+            return Initialize();
         }
 
         // if (needAuthentication.Result.RemoteObject.ClassName == "HTMLCanvasElement") return Task.CompletedTask;
@@ -224,11 +217,7 @@ public class Client(
 
         var jsHandle = _pupPage.EvaluateFunctionHandleAsync(_parserFunctions.GetMethod("getWWebVersion")).Result;
         var version = jsHandle.JsonValueAsync<string>().Result;
-
-        if (_options.WebVersionCache.Type == "local" && !string.IsNullOrEmpty(_currentIndexHtml))
-        {
-            await _authStrategy.LoginWebCache.Persist(_currentIndexHtml, version);
-        }
+        await _authStrategy.LoginWebCache.Persist(_currentIndexHtml, version);
 
 
 
@@ -264,11 +253,8 @@ public class Client(
 
         ClientInfo = new ClientInfo(clientInfo);
 
-        // Get authentication event payload
-        var authEventPayload = await _authStrategy.GetAuthEventPayload();
-
         // Emit authenticated event
-        eventDispatcher.EmitAuthenticated(ClientInfo, authEventPayload);
+        eventDispatcher.EmitAuthenticated(ClientInfo);
 
         return Task.CompletedTask;
     }

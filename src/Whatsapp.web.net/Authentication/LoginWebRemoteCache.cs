@@ -1,11 +1,11 @@
 ﻿namespace Whatsapp.web.net.Authentication;
 
-public class RemoteLoginWebCache : LoginWebCache
+public class LoginWebRemoteCache : ILoginWebCache
 {
     private readonly string _remotePath;
     private readonly bool _strict;
 
-    public RemoteLoginWebCache(string remotePath, bool strict)
+    public LoginWebRemoteCache(string remotePath, bool strict)
     {
         if (string.IsNullOrEmpty(remotePath))
         {
@@ -16,7 +16,7 @@ public class RemoteLoginWebCache : LoginWebCache
         _strict = strict;
     }
 
-    public override async Task<string?> Resolve(string version)
+    public async Task<string?> Resolve(string version)
     {
         var remotePath = _remotePath.Replace("{version}", version);
 
@@ -42,7 +42,7 @@ public class RemoteLoginWebCache : LoginWebCache
         return null;
     }
 
-    public override Task Persist(string versionContent, string version)
+    public Task Persist(string versionContent, string version)
     {
         // Nothing to do here
         return Task.CompletedTask;

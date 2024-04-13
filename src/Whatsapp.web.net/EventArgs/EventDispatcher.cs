@@ -40,11 +40,11 @@ public class EventDispatcher : IEventDispatcher
 
 
     public event EventHandler<RevokedMeEventArg>? RevokedMeEvent;
-    public void EmitAuthenticated(ClientInfo info, object? @object = null)
+    public void EmitAuthenticated(ClientInfo info)
     {
         Task.Run(() =>
         {
-            var eventArg = new AuthenticatedEventArg(info, @object);
+            var eventArg = new AuthenticatedEventArg(info);
             DispatchEventGeneric?.Invoke(this, eventArg);
             AuthenticatedEvent?.Invoke(this, eventArg);
         });

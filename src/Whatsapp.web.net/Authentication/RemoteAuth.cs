@@ -39,7 +39,7 @@ public class RemoteAuth : BaseAuthStrategy
 
     protected override ILoginWebCache CreateLoginWebCache()
     {
-        return new RemoteLoginWebCache(WebVersionCache.RemotePath, WebVersionCache.Strict);
+        return new LoginWebRemoteCache(WebVersionCache.RemotePath, WebVersionCache.Strict);
     }
 
     private bool IsValidBackupSyncInterval(int backupSyncIntervalMs)

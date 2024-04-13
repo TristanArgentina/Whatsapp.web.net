@@ -2,15 +2,8 @@
 
 namespace Whatsapp.web.net.EventArgs;
 
-public class AuthenticatedEventArg : DispatcherEventArg
+public class AuthenticatedEventArg(ClientInfo info) 
+    : DispatcherEventArg(DispatcherEventsType.AUTHENTICATED)
 {
-    public ClientInfo Info { get; }
-    public object? Payload { get; }
-
-    public AuthenticatedEventArg(ClientInfo info, object? payload) 
-        : base(DispatcherEventsType.AUTHENTICATED)
-    {
-        Info = info;
-        Payload = payload;
-    }
+    public ClientInfo Info { get; } = info;
 }

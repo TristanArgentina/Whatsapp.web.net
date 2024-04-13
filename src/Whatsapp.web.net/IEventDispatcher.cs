@@ -34,7 +34,7 @@ public interface IEventDispatcher
     event EventHandler<RevokedMeEventArg>? RevokedMeEvent;
     event EventHandler<ReadyEventArgs>? ReadyEvent;
 
-    void EmitAuthenticated(ClientInfo info, object? @object = null);
+    void EmitAuthenticated(ClientInfo info);
 
     void EmitLoadingScreen(int percent, string message);
 

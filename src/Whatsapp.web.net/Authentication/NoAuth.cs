@@ -1,16 +1,9 @@
 ﻿namespace Whatsapp.web.net.Authentication;
 
-public class NoAuth : BaseAuthStrategy
+// No additional functionality needed, inherits everything from BaseAuthStrategy
+public class NoAuth(PuppeteerOptions puppeteerOptions, WebVersionCache webVersionCache)
+    : BaseAuthStrategy(puppeteerOptions, webVersionCache)
 {
-    protected override string PrefixFileName => throw new NotImplementedException();
-
-    // No additional functionality needed, inherits everything from BaseAuthStrategy
-    public NoAuth(PuppeteerOptions puppeteerOptions, WebVersionCache webVersionCache)
-        : base(puppeteerOptions, webVersionCache)
-    {
-        LoginWebCache = new LoginWebCache();
-    }
-
     protected override string CalculateUserDataDir()
     {
         return GetDataPath();
@@ -18,6 +11,6 @@ public class NoAuth : BaseAuthStrategy
 
     protected override ILoginWebCache CreateLoginWebCache()
     {
-        return new LoginWebCache();
+        return new LoginWebNullCache();
     }
 }

@@ -11,7 +11,7 @@ public class LocalAuth : BaseAuthStrategy
 
     protected override ILoginWebCache CreateLoginWebCache()
     {
-        return new LocalLoginWebCache(UserDataDir, WebVersionCache.Strict);
+        return new LoginWebLocalCache(UserDataDir, WebVersionCache.Strict);
     }
 
     public override Task Logout()
