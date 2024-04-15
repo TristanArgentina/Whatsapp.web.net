@@ -31,8 +31,7 @@ public class MessageManagerTests : TestBase
         Assert.That(msg.Id!.FromMe);
         Assert.That(msg.Body == expectedContent);
     }
-
-
+    
     [Test]
     public void SendImageFromFilePathTest()
     {
@@ -139,8 +138,7 @@ public class MessageManagerTests : TestBase
         var resultMedia = Client.Message.DownloadMedia(msg.Id, message.HasMedia).Result;
         Assert.That(resultMedia is not null);
     }
-
-
+    
     [Test]
     public void SendLocationTest()
     {

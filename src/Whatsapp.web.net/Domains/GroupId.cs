@@ -15,7 +15,7 @@ public class GroupId : UserId
         var userSplit = User.Split('-');
         if (userSplit.Length !=  2) return;
         FromId = userSplit[0];
-        SetId(userSplit[1]);
+        SetId($"{userSplit[1]}@{Server}");
     }
 
     private GroupId()
@@ -24,9 +24,9 @@ public class GroupId : UserId
 
     public new static GroupId Create(dynamic data)
     {
-        var contactId = new GroupId();
-        contactId.Patch(data);
-        contactId.SetId();
-        return contactId;
+        var groupId = new GroupId();
+        groupId.Patch(data);
+        groupId.SetId();
+        return groupId;
     }
 }
