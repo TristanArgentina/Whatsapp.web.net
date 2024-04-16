@@ -10,6 +10,7 @@ public interface IEventDispatcher
     event EventHandler<RevokedEveryoneEventArg>? RevokedEveryoneEvent;
     event EventHandler<ContactChangedEventArg>? ContactChangedEvent;
     event EventHandler<MessageACKEventArg>? MessageACKEvent;
+    event EventHandler<MessageChangeEventArgs>? MessageChangeEvent;
     event EventHandler<UnreadCountEventArg>? UnreadCountEvent;
     event EventHandler<MediaUploadedEventArg>? MediaUploadedEvent;
     event EventHandler<StateChangedEventArg>? StateChangedEvent;
@@ -89,5 +90,6 @@ public interface IEventDispatcher
     void EmitMessageReceived(Message message);
 
     void EmitReady();
-    event EventHandler<MessageChangeEventArgs>? MessageChangeEvent;
+
+    
 }
