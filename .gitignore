@@ -364,3 +364,4 @@ FodyWeavers.xsd
 src/Whatsapp.web.net.test/App.config
 src/Whatsapp.web.net.example/appsettings.json
 src/Whatsapp.web.net.test/appsettings.json
+src/Whatsapp.web.net.service/wwebnet_cache

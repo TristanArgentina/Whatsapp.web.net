@@ -283,7 +283,7 @@ public class RegisterEventService : IRegisterEventService
                  */
                     _eventDispatcher!.EmitGroupAdminChanged(notification);
                 }
-                else if (msg.subtype == "created_membership_requests")
+                else if (msg.subtype == "membership_approval_request")
                 {
                     /**
                  * Emitted when some user requested to join the group

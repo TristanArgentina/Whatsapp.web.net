@@ -57,6 +57,9 @@
     window.Store.ReplyUtils = window.require('WAWebMsgReply');
     window.Store.Settings = window.require('WAWebUserPrefsGeneral');
 
+    window.Store.ForwardUtils = {
+        ...window.require("WAWebForwardMessagesToChat")
+    };
     window.Store.StickerTools = {
         ...window.require('WAWebImageUtils'),
         ...window.require('WAWebAddWebpMetadata')

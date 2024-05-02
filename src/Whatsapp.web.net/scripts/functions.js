@@ -1,6 +1,5 @@
 ﻿async function modificarErrorStack() {
     const originalError = Error;
-    // eslint-disable-next-line no-global-assign
     Error = function (message) {
         const error = new originalError(message);
         const originalStack = error.stack;
@@ -107,10 +106,10 @@ function compareWwebVersions() {
         return (
             operator == '>' ? lOperand > rOperand :
                 operator == '>=' ? lOperand >= rOperand :
-                    operator == '<' ? lOperand < rOperand :
-                        operator == '<=' ? lOperand <= rOperand :
-                            operator == '=' ? lOperand == rOperand :
-                                false
+                operator == '<' ? lOperand < rOperand :
+                operator == '<=' ? lOperand <= rOperand :
+                operator == '=' ? lOperand == rOperand :
+                false
         );
     };
 }
@@ -378,8 +377,8 @@ function promoteParticipants(chatId, participantIds) {
     const chatWid = window.Store.WidFactory.createWid(chatId);
 
     return Promise.all([
-        window.Store.Chat.find(chatWid),
-        Promise.resolve(participantIds.map(p => ({ id: p })))])
+            window.Store.Chat.find(chatWid),
+            Promise.resolve(participantIds.map(p => ({ id: p })))])
         .then(([chat, participants]) => {
             const validParticipants = participants.filter(p => chat.groupMetadata.participants.has(p.id));
             return window.Store.GroupParticipants.promoteParticipants(chat, validParticipants)
@@ -503,7 +502,7 @@ async function reactToMessage(msgId, reaction) {
 async function forwardToMessage(msgId, chatId) {
     const msg = window.Store.Msg.get(msgId);
     const chat = window.Store.Chat.get(chatId);
-    chat.forwardMessages([msg]);
+    return window.Store.ForwardUtils.forwardMessagesToChats([msg], [chat], false);
 }
 
 function getMessageMedia(msgId) {
@@ -984,3 +983,4 @@ function getBlockedContacts() {
     let chatIds = window.Store.Blocklist.getModelsArray().map(a => a.id._serialized);
     return Promise.all(chatIds.map(id => window.WWebJS.getContact(id)));
 }
+
